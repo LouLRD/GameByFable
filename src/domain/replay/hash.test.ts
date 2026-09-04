@@ -3,9 +3,18 @@ import { fnv1a, hashHex, mulberry32, seededId, semanticHash, stableStringify } f
 
 describe('hachage déterministe', () => {
   it('sérialisation stable indépendante de l’ordre des clés, Set et Map compris', () => {
-    expect(stableStringify({ b: 1, a: [2, { d: 1, c: 2 }] })).toBe(stableStringify({ a: [2, { c: 2, d: 1 }], b: 1 }));
+    expect(stableStringify({ b: 1, a: [2, { d: 1, c: 2 }] })).toBe(
+      stableStringify({ a: [2, { c: 2, d: 1 }], b: 1 }),
+    );
     expect(stableStringify(new Set(['b', 'a']))).toBe('["a","b"]');
-    expect(stableStringify(new Map([['b', 1], ['a', 2]]))).toBe('[["a",2],["b",1]]');
+    expect(
+      stableStringify(
+        new Map([
+          ['b', 1],
+          ['a', 2],
+        ]),
+      ),
+    ).toBe('[["a",2],["b",1]]');
     expect(stableStringify(undefined)).toBe('undefined');
   });
 

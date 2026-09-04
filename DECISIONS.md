@@ -28,6 +28,15 @@ Ordre de priorité appliqué en cas de tension : prompt de mission > spécificat
 16. **Sondage.** Présenter une hypothèse ou une pièce à un protagoniste (« Sonder ») ne coûte rien et ne révèle rien de secret : la réaction n'utilise que les rejets déclarés, les certitudes déjà connues du joueur et les faits propres établis. Une approche directe et accusatrice coûte un point de confiance.
 17. **Épilogue.** Les trajectoires réelles sont montrées après scellement ; les faits `canonical-only` non révélés restent caviardés (« fait non élucidé — lié à … »). L'hypothèse canonique d'un emplacement n'est nommée que si elle est connue du joueur ; sinon « resté dans l'ombre ». C'est ce qui satisfait l'invariant 15.
 
+## Interface
+
+22. **Mobile ≤ 1023 px** : pile de quatre espaces (Plan, Temps, Dossier, Version) et barre persistante ; les commandes du bandeau (sauvegardes, options, aide, nouvelle partie, son) passent sous un bouton « Menu ». L'espace Version porte deux onglets internes : Version et Contradictions.
+23. **Poignées de redimensionnement** exposées comme curseurs (`role="slider"`, flèches ← → ±16 px) plutôt que comme séparateurs, seul rôle à valeur accepté focusable par l'outillage a11y du projet.
+24. **Confrontation à cible « hypothèse »** : le GDD autorise une hypothèse comme cible ; faute de données de confrontation dédiées, cette cible déclenche un *sondage* (réaction publique, sans pression, sans déblocage), l'approche directe coûtant un point de confiance si l'hypothèse désigne la personne.
+25. **Son** : nappe synthétisée (frigo, néon) et cinq cues (tintement de caisse à la pose d'une hypothèse, craquement quand une contradiction bloquante apparaît, révélation après confrontation, sceau au scellement, rideau) ; opt-in par bouton uniquement ; sous-titres descriptifs toujours publiés.
+26. **Aide progressive** : après trois actions refusées (`hintAfterImpasses`), une « Piste » cite la première contradiction bloquante et les pièces qu'elle suggère, jamais la solution ; désactivable dans Options.
+27. **Libellés des déclarations dans la liste du dossier** : la liste montre la lecture structurée (proposition), la fiche montre la citation intégrale ; les deux portent le degré « rapporté ».
+
 ## Technique
 
 18. **Journal d'actions.** Les actions journalisées sont : placer/retirer une hypothèse, joindre/retirer une pièce, confronter, sonder, demander/quitter la table ronde, sceller, fermer une bulle d'onboarding. Le curseur temporel, la sélection et l'espace actif sont de l'état d'interface, sauvegardés à côté du journal, hors réduction.

@@ -326,23 +326,38 @@
   .callout-stack[data-anchor='casefile'] {
     left: var(--space-3);
     bottom: var(--space-3);
-    width: min(360px, calc(clamp(var(--casefile-min), var(--casefile-width), var(--casefile-max)) - 2 * var(--space-3)));
+    width: min(
+      360px,
+      calc(
+        clamp(var(--casefile-min), var(--casefile-width), var(--casefile-max)) - 2 * var(--space-3)
+      )
+    );
   }
 
   .callout-stack[data-anchor='map'] {
-    left: calc(clamp(var(--casefile-min), var(--casefile-width), var(--casefile-max)) + var(--space-4));
+    left: calc(
+      clamp(var(--casefile-min), var(--casefile-width), var(--casefile-max)) + var(--space-4)
+    );
     top: calc(var(--topbar-height) + var(--space-4));
   }
 
   .callout-stack[data-anchor='timeline'] {
-    left: calc(clamp(var(--casefile-min), var(--casefile-width), var(--casefile-max)) + var(--space-4));
+    left: calc(
+      clamp(var(--casefile-min), var(--casefile-width), var(--casefile-max)) + var(--space-4)
+    );
     bottom: calc(var(--timeline-height) + var(--space-3));
   }
 
   .callout-stack[data-anchor='inspector'] {
     right: var(--space-3);
     bottom: var(--space-3);
-    width: min(360px, calc(clamp(var(--inspector-min), var(--inspector-width), var(--inspector-max)) - 2 * var(--space-3)));
+    width: min(
+      360px,
+      calc(
+        clamp(var(--inspector-min), var(--inspector-width), var(--inspector-max)) - 2 *
+          var(--space-3)
+      )
+    );
   }
 
   .workbench[data-focus] .callout-stack {
@@ -360,6 +375,23 @@
     bottom: calc(var(--space-bar-height) + var(--space-2));
     left: var(--space-2);
     width: auto;
+  }
+}
+
+/* Un repère ancré réserve de la place au bas de l'espace visé : il ne recouvre jamais une commande. */
+@media (min-width: 1024px) {
+  .workbench[data-callout='casefile'] .space[data-space='casefile'] .space-body,
+  .workbench[data-callout='inspector'] .space[data-space='inspector'] .space-body,
+  .workbench[data-callout='timeline'] .space[data-space='timeline'] .space-body {
+    padding-bottom: 240px;
+  }
+  .workbench[data-callout='map'] .space[data-space='map'] .space-body {
+    padding-top: 200px;
+  }
+}
+@media (max-width: 1023px) {
+  .workbench[data-callout] .space[data-active='true'] .space-body {
+    padding-bottom: 260px;
   }
 }
 

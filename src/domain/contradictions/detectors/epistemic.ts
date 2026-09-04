@@ -10,7 +10,9 @@ import { characterName, makeContradiction, relatedEvidence } from '../common';
 
 const RULE = 'r_knowledge_provenance';
 
-export const epistemicDetector: ContradictionDetector & { detect(ctx: EvaluationContext): Contradiction[] } = {
+export const epistemicDetector: ContradictionDetector & {
+  detect(ctx: EvaluationContext): Contradiction[];
+} = {
   id: 'epistemic',
   detect(ctx: EvaluationContext): Contradiction[] {
     const out: Contradiction[] = [];
@@ -24,12 +26,20 @@ export const epistemicDetector: ContradictionDetector & { detect(ctx: Evaluation
         makeContradiction({
           kind: 'epistemic',
           severity: path.status === 'none' ? 'notice' : 'notice',
-          title: path.status === 'none' ? `Provenance non établie : ${name}` : `Provenance partielle : ${name}`,
+          title:
+            path.status === 'none'
+              ? `Provenance non établie : ${name}`
+              : `Provenance partielle : ${name}`,
           ruleId: RULE,
           involvedIds: [s.id, s.speakerId],
           explanation: [
             { type: 'statement', statementId: s.id, speakerId: s.speakerId },
-            { type: 'knowledge-gap', characterId: s.speakerId, missingTags: path.missingTags, availableTags: path.availableTags },
+            {
+              type: 'knowledge-gap',
+              characterId: s.speakerId,
+              missingTags: path.missingTags,
+              availableTags: path.availableTags,
+            },
             {
               type: 'conclusion',
               text:

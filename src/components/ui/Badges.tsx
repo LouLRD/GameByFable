@@ -17,7 +17,10 @@ export function DegreeBadge({ degree }: { degree: Degree | 'unknown' }): React.J
 
 export function StatusBadge({ status }: { status: ClaimStatus | 'empty' }): React.JSX.Element {
   return (
-    <span className={`badge status-${status === 'empty' ? 'unknown' : status}`} data-status={status}>
+    <span
+      className={`badge status-${status === 'empty' ? 'unknown' : status}`}
+      data-status={status}
+    >
       <span className="status-label">{STATUS_LABELS[status]}</span>
     </span>
   );

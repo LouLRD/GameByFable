@@ -40,7 +40,9 @@ export interface PositionModel {
 /** Intervalles de fonctionnement de la caméra = fenêtre − coupure publique. */
 export function cameraOnIntervals(scenario: LoadedScenario): Interval[] {
   const duration = scenario.data.scenario.timeline.durationSeconds;
-  const gapMarker = scenario.index.evidenceMarkers.get(scenario.data.extension.cameraCoverage.gapEvidenceId);
+  const gapMarker = scenario.index.evidenceMarkers.get(
+    scenario.data.extension.cameraCoverage.gapEvidenceId,
+  );
   const gap = gapMarker?.interval;
   if (!gap) return [interval(0, duration)];
   const out: Interval[] = [];
@@ -81,7 +83,10 @@ function subtract(base: Interval, cuts: Interval[]): Interval[] {
  * et passages ponctuels en transit dans une zone couverte (itinéraire canonique le plus court).
  * Dérivation mécanique : la caméra ne « sait » rien d'autre que ce qu'elle filme.
  */
-export function deriveCameraSegments(scenario: LoadedScenario): { segments: PositionSegment[]; absences: Map<CharacterId, Interval[]> } {
+export function deriveCameraSegments(scenario: LoadedScenario): {
+  segments: PositionSegment[];
+  absences: Map<CharacterId, Interval[]>;
+} {
   const covered = new Set(scenario.data.extension.cameraCoverage.zoneIds);
   const cameraOn = cameraOnIntervals(scenario);
   const cameraEvidenceId = scenario.data.extension.cameraCoverage.gapEvidenceId;
@@ -157,7 +162,12 @@ export function presencesFromSemantics(
   statementId: StatementId,
   speakerId: CharacterId,
 ): PositionSegment[] {
-  const mk = (characterId: CharacterId, zoneId: ZoneId, iv: Interval, continuous = false): PositionSegment => ({
+  const mk = (
+    characterId: CharacterId,
+    zoneId: ZoneId,
+    iv: Interval,
+    continuous = false,
+  ): PositionSegment => ({
     characterId,
     zoneId,
     interval: iv,
@@ -173,13 +183,18 @@ export function presencesFromSemantics(
     case 'continuous-presence':
       return [mk(sem.characterId, sem.zoneId, sem.interval, true)];
     case 'event':
-      return sem.actorId && sem.zoneId && sem.interval && sem.requiresPresence ? [mk(sem.actorId, sem.zoneId, sem.interval)] : [];
+      return sem.actorId && sem.zoneId && sem.interval && sem.requiresPresence
+        ? [mk(sem.actorId, sem.zoneId, sem.interval)]
+        : [];
     case 'sound':
-      return sem.actorId && sem.zoneId && sem.interval ? [mk(sem.actorId, sem.zoneId, sem.interval)] : [];
+      return sem.actorId && sem.zoneId && sem.interval
+        ? [mk(sem.actorId, sem.zoneId, sem.interval)]
+        : [];
     case 'perceived': {
       const out: PositionSegment[] = [];
       if (sem.observerZoneId) out.push(mk(sem.observerId, sem.observerZoneId, sem.target.interval));
-      if (sem.target.characterId && sem.target.characterId !== speakerId) out.push(mk(sem.target.characterId, sem.target.zoneId, sem.target.interval));
+      if (sem.target.characterId && sem.target.characterId !== speakerId)
+        out.push(mk(sem.target.characterId, sem.target.zoneId, sem.target.interval));
       return out;
     }
     case 'absence':
@@ -190,7 +205,10 @@ export function presencesFromSemantics(
 }
 
 /** Présence impliquée par une claim paramétrée (acteur + zone + intervalle). */
-export function presenceFromClaim(claim: PlayerClaim, requiresPresence: boolean): PositionSegment | null {
+export function presenceFromClaim(
+  claim: PlayerClaim,
+  requiresPresence: boolean,
+): PositionSegment | null {
   if (!requiresPresence || !claim.actorId || !claim.zoneId || !claim.interval) return null;
   return {
     characterId: claim.actorId,
@@ -273,7 +291,9 @@ export function canOccupy(
   world: WorldState,
   ignoreSourceIds: readonly string[] = [],
 ): OccupancyResult {
-  const all = (model.byCharacter.get(characterId) ?? []).filter((s) => !s.sourceIds.some((id) => ignoreSourceIds.includes(id)));
+  const all = (model.byCharacter.get(characterId) ?? []).filter(
+    (s) => !s.sourceIds.some((id) => ignoreSourceIds.includes(id)),
+  );
   const established = all.filter((s) => s.status === 'established');
   const reported = all.filter((s) => s.status === 'reported');
   const conflicts: OccupancyConflict[] = [];
@@ -292,15 +312,27 @@ export function canOccupy(
       at: Math.max(s.interval.start, iv.start),
       zoneIds: [s.zoneId, zoneId],
       steps: [
-        { type: 'position', characterId, zoneId: s.zoneId, interval: s.interval, source: s.source === 'camera' ? 'camera' : s.source === 'fact' ? 'fact' : 'evidence' },
-        { type: 'overlap', characterId, a: { zoneId: s.zoneId, interval: s.interval }, b: { zoneId, interval: iv } },
+        {
+          type: 'position',
+          characterId,
+          zoneId: s.zoneId,
+          interval: s.interval,
+          source: s.source === 'camera' ? 'camera' : s.source === 'fact' ? 'fact' : 'evidence',
+        },
+        {
+          type: 'overlap',
+          characterId,
+          a: { zoneId: s.zoneId, interval: s.interval },
+          b: { zoneId, interval: iv },
+        },
       ],
     });
   }
   // 2. Absence des zones couvertes pendant que la caméra tourne
   if (model.coveredZones.has(zoneId)) {
     for (const abs of model.absences.get(characterId) ?? []) {
-      if (!intervalsOverlap(abs, iv) && !(iv.start === iv.end && overlapsPoint(abs, iv.start))) continue;
+      if (!intervalsOverlap(abs, iv) && !(iv.start === iv.end && overlapsPoint(abs, iv.start)))
+        continue;
       const overlapLength = Math.min(abs.end, iv.end) - Math.max(abs.start, iv.start);
       if (iv.start !== iv.end && overlapLength <= CAMERA_EDGE_TOLERANCE_SECONDS) continue;
       conflicts.push({
@@ -316,8 +348,16 @@ export function canOccupy(
   }
   // 3. Accessibilité depuis l'ancre établie précédente
   const before = established
-    .filter((s) => s.zoneId !== zoneId && (s.transit ? s.interval.start <= iv.start : s.interval.end <= iv.start))
-    .sort((a, b) => (a.transit ? a.interval.start : a.interval.end) - (b.transit ? b.interval.start : b.interval.end))
+    .filter(
+      (s) =>
+        s.zoneId !== zoneId &&
+        (s.transit ? s.interval.start <= iv.start : s.interval.end <= iv.start),
+    )
+    .sort(
+      (a, b) =>
+        (a.transit ? a.interval.start : a.interval.end) -
+        (b.transit ? b.interval.start : b.interval.end),
+    )
     .at(-1);
   if (before && conflicts.every((c) => c.kind !== 'overlap')) {
     const tA = before.transit ? before.interval.start : before.interval.end;
@@ -330,9 +370,35 @@ export function canOccupy(
         at: tA,
         zoneIds: [before.zoneId, zoneId],
         steps: [
-          { type: 'position', characterId, zoneId: before.zoneId, interval: before.interval, source: before.source === 'camera' ? 'camera' : before.source === 'fact' ? 'fact' : 'evidence' },
-          { type: 'travel', characterId, from: before.zoneId, to: zoneId, departure: sec(tA), seconds: travel, via: route?.via ?? [], obstructed: route?.obstructed ?? false },
-          { type: 'arrival-too-late', characterId, zoneId, earliest: sec(tA + travel), required: iv.start },
+          {
+            type: 'position',
+            characterId,
+            zoneId: before.zoneId,
+            interval: before.interval,
+            source:
+              before.source === 'camera'
+                ? 'camera'
+                : before.source === 'fact'
+                  ? 'fact'
+                  : 'evidence',
+          },
+          {
+            type: 'travel',
+            characterId,
+            from: before.zoneId,
+            to: zoneId,
+            departure: sec(tA),
+            seconds: travel,
+            via: route?.via ?? [],
+            obstructed: route?.obstructed ?? false,
+          },
+          {
+            type: 'arrival-too-late',
+            characterId,
+            zoneId,
+            earliest: sec(tA + travel),
+            required: iv.start,
+          },
         ],
       });
     }
@@ -351,14 +417,37 @@ export function canOccupy(
         at: iv.end,
         zoneIds: [zoneId, after.zoneId],
         steps: [
-          { type: 'position', characterId, zoneId: after.zoneId, interval: after.interval, source: after.source === 'camera' ? 'camera' : after.source === 'fact' ? 'fact' : 'evidence' },
-          { type: 'travel', characterId, from: zoneId, to: after.zoneId, departure: iv.end, seconds: travel, via: route?.via ?? [], obstructed: route?.obstructed ?? false },
-          { type: 'departure-too-late', characterId, zoneId, latest: sec(after.interval.start - travel), required: iv.end },
+          {
+            type: 'position',
+            characterId,
+            zoneId: after.zoneId,
+            interval: after.interval,
+            source:
+              after.source === 'camera' ? 'camera' : after.source === 'fact' ? 'fact' : 'evidence',
+          },
+          {
+            type: 'travel',
+            characterId,
+            from: zoneId,
+            to: after.zoneId,
+            departure: iv.end,
+            seconds: travel,
+            via: route?.via ?? [],
+            obstructed: route?.obstructed ?? false,
+          },
+          {
+            type: 'departure-too-late',
+            characterId,
+            zoneId,
+            latest: sec(after.interval.start - travel),
+            required: iv.end,
+          },
         ],
       });
     }
   }
-  if (conflicts.length > 0) return { status: 'impossible', conflicts, supportingSegments: supporting };
+  if (conflicts.length > 0)
+    return { status: 'impossible', conflicts, supportingSegments: supporting };
 
   // 5. Déclarations debout plaçant la personne ailleurs
   for (const s of reported) {
@@ -372,13 +461,27 @@ export function canOccupy(
       zoneIds: [s.zoneId, zoneId],
       steps: [
         { type: 'statement', statementId, speakerId: characterId },
-        { type: 'position', characterId, zoneId: s.zoneId, interval: s.interval, source: 'statement' },
-        { type: 'overlap', characterId, a: { zoneId: s.zoneId, interval: s.interval }, b: { zoneId, interval: iv } },
+        {
+          type: 'position',
+          characterId,
+          zoneId: s.zoneId,
+          interval: s.interval,
+          source: 'statement',
+        },
+        {
+          type: 'overlap',
+          characterId,
+          a: { zoneId: s.zoneId, interval: s.interval },
+          b: { zoneId, interval: iv },
+        },
       ],
     });
   }
-  if (conflicts.length > 0) return { status: 'reported-elsewhere', conflicts, supportingSegments: supporting };
-  if (supporting.some((s) => !s.transit && s.interval.start <= iv.start && iv.end <= s.interval.end)) {
+  if (conflicts.length > 0)
+    return { status: 'reported-elsewhere', conflicts, supportingSegments: supporting };
+  if (
+    supporting.some((s) => !s.transit && s.interval.start <= iv.start && iv.end <= s.interval.end)
+  ) {
     return { status: 'established', conflicts: [], supportingSegments: supporting };
   }
   return { status: 'possible', conflicts: [], supportingSegments: supporting };
@@ -400,10 +503,23 @@ export function checkPairCompatibility(
       segment: first,
       at: Math.max(first.interval.start, second.interval.start),
       zoneIds: [first.zoneId, second.zoneId],
-      steps: [{ type: 'overlap', characterId: a.characterId, a: { zoneId: first.zoneId, interval: first.interval }, b: { zoneId: second.zoneId, interval: second.interval } }],
+      steps: [
+        {
+          type: 'overlap',
+          characterId: a.characterId,
+          a: { zoneId: first.zoneId, interval: first.interval },
+          b: { zoneId: second.zoneId, interval: second.interval },
+        },
+      ],
     };
   }
-  const travel = shortestTravelTime(first.zoneId, second.zoneId, first.interval.end, scenario, world);
+  const travel = shortestTravelTime(
+    first.zoneId,
+    second.zoneId,
+    first.interval.end,
+    scenario,
+    world,
+  );
   if (first.interval.end + travel > second.interval.start + TRAVEL_TOLERANCE_SECONDS) {
     const route = traceRoute(first.zoneId, second.zoneId, first.interval.end, scenario, world);
     return {
@@ -412,8 +528,23 @@ export function checkPairCompatibility(
       at: first.interval.end,
       zoneIds: [first.zoneId, second.zoneId],
       steps: [
-        { type: 'travel', characterId: a.characterId, from: first.zoneId, to: second.zoneId, departure: first.interval.end, seconds: travel, via: route?.via ?? [], obstructed: route?.obstructed ?? false },
-        { type: 'arrival-too-late', characterId: a.characterId, zoneId: second.zoneId, earliest: sec(first.interval.end + travel), required: second.interval.start },
+        {
+          type: 'travel',
+          characterId: a.characterId,
+          from: first.zoneId,
+          to: second.zoneId,
+          departure: first.interval.end,
+          seconds: travel,
+          via: route?.via ?? [],
+          obstructed: route?.obstructed ?? false,
+        },
+        {
+          type: 'arrival-too-late',
+          characterId: a.characterId,
+          zoneId: second.zoneId,
+          earliest: sec(first.interval.end + travel),
+          required: second.interval.start,
+        },
       ],
     };
   }
@@ -421,7 +552,11 @@ export function checkPairCompatibility(
 }
 
 /** Zone occupée à l'instant t (meilleur statut disponible), pour l'affichage. */
-export function positionAt(model: PositionModel, characterId: CharacterId, t: number): PositionSegment | null {
+export function positionAt(
+  model: PositionModel,
+  characterId: CharacterId,
+  t: number,
+): PositionSegment | null {
   const list = model.byCharacter.get(characterId) ?? [];
   const rank: Record<PositionStatus, number> = { established: 0, proposed: 1, reported: 2 };
   let best: PositionSegment | null = null;

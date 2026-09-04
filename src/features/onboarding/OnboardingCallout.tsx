@@ -28,7 +28,10 @@ export function OnboardingCallout({ step, isDesktop }: OnboardingCalloutProps): 
   const spaceLabel = SPACE_LABELS[space];
 
   useEffect(() => {
-    const id = window.setTimeout(() => useGameStore.getState().announce(`Repère : ${step.text}`), ONBOARDING_ANNOUNCE_DELAY_MS);
+    const id = window.setTimeout(
+      () => useGameStore.getState().announce(`Repère : ${step.text}`),
+      ONBOARDING_ANNOUNCE_DELAY_MS,
+    );
     return () => window.clearTimeout(id);
   }, [step.id, step.text]);
 
@@ -48,8 +51,11 @@ export function OnboardingCallout({ step, isDesktop }: OnboardingCalloutProps): 
   const skipAll = () => {
     const store = useGameStore.getState();
     const dismissed = new Set<string>(store.game?.dismissedOnboardingIds ?? []);
-    const remaining = (store.scenario?.data.onboarding ?? []).map((o) => o.id).filter((id) => !dismissed.has(id));
-    if (dismiss(remaining)) useGameStore.getState().announce('Repères désactivés pour cette partie.');
+    const remaining = (store.scenario?.data.onboarding ?? [])
+      .map((o) => o.id)
+      .filter((id) => !dismissed.has(id));
+    if (dismiss(remaining))
+      useGameStore.getState().announce('Repères désactivés pour cette partie.');
   };
 
   const goToSpace = () => {
@@ -61,7 +67,12 @@ export function OnboardingCallout({ step, isDesktop }: OnboardingCalloutProps): 
   };
 
   return (
-    <aside className="callout callout-onboarding anim-slide-up" data-focus-target={step.focus} aria-labelledby={titleId} aria-describedby={textId}>
+    <aside
+      className="callout callout-onboarding anim-slide-up"
+      data-focus-target={step.focus}
+      aria-labelledby={titleId}
+      aria-describedby={textId}
+    >
       <p id={titleId} className="callout-kicker">
         Repère <span className="callout-target">· {spaceLabel}</span>
       </p>
@@ -82,7 +93,12 @@ export function OnboardingCallout({ step, isDesktop }: OnboardingCalloutProps): 
             Aller à l’espace {spaceLabel}
           </button>
         ) : null}
-        <button type="button" className="btn btn-ghost" onClick={skipAll} title="Fermer tous les repères de cette partie">
+        <button
+          type="button"
+          className="btn btn-ghost"
+          onClick={skipAll}
+          title="Fermer tous les repères de cette partie"
+        >
           Tout passer
         </button>
       </div>

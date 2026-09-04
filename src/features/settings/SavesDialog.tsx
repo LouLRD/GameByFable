@@ -43,7 +43,13 @@ const closeDialog = (): void => useGameStore.getState().closeDialog();
 export function SavesDialog(): React.JSX.Element {
   const open = useGameStore((s) => s.dialog === 'saves');
   return (
-    <Dialog open={open} title="Sauvegardes" onClose={closeDialog} width={720} className="saves-dialog">
+    <Dialog
+      open={open}
+      title="Sauvegardes"
+      onClose={closeDialog}
+      width={720}
+      className="saves-dialog"
+    >
       {open ? <SavesBody /> : null}
     </Dialog>
   );
@@ -108,7 +114,10 @@ function SavesBody(): React.JSX.Element {
 
   const doImport = (text: string) => {
     if (!text.trim()) {
-      setMessage({ tone: 'error', text: 'Aucun contenu à importer. La partie en cours est conservée.' });
+      setMessage({
+        tone: 'error',
+        text: 'Aucun contenu à importer. La partie en cours est conservée.',
+      });
       return;
     }
     const store = useGameStore.getState();
@@ -130,7 +139,10 @@ function SavesBody(): React.JSX.Element {
     try {
       doImport(await readFileText(file));
     } catch {
-      setMessage({ tone: 'error', text: 'Le fichier n’a pas pu être lu. La partie en cours est conservée.' });
+      setMessage({
+        tone: 'error',
+        text: 'Le fichier n’a pas pu être lu. La partie en cours est conservée.',
+      });
     } finally {
       input.value = '';
     }
@@ -140,8 +152,9 @@ function SavesBody(): React.JSX.Element {
     <div className="saves">
       {!storageAvailable ? (
         <p className="saves-warning" role="note">
-          Le stockage local est indisponible dans ce navigateur : les emplacements ci-dessous ne survivront pas au
-          rechargement de la page. Utilisez l’export pour conserver votre progression.
+          Le stockage local est indisponible dans ce navigateur : les emplacements ci-dessous ne
+          survivront pas au rechargement de la page. Utilisez l’export pour conserver votre
+          progression.
         </p>
       ) : null}
 
@@ -151,7 +164,12 @@ function SavesBody(): React.JSX.Element {
             {message.text}
           </p>
         ) : null}
-        <p className="saves-message" data-tone={message?.tone ?? 'info'} role="status" aria-live="polite">
+        <p
+          className="saves-message"
+          data-tone={message?.tone ?? 'info'}
+          role="status"
+          aria-live="polite"
+        >
           {message && message.tone !== 'error' ? message.text : ''}
         </p>
       </div>
@@ -170,7 +188,8 @@ function SavesBody(): React.JSX.Element {
           onChange={(e) => setLabel(e.target.value)}
         />
         <p className="field-hint" id={autoHintId}>
-          Utilisé par « Sauvegarder ici ». L’emplacement automatique est écrit par le jeu après chaque action.
+          Utilisé par « Sauvegarder ici ». L’emplacement automatique est écrit par le jeu après
+          chaque action.
         </p>
       </div>
 
@@ -187,12 +206,15 @@ function SavesBody(): React.JSX.Element {
               </div>
               {slot.empty ? (
                 <p className="muted slot-meta" id={emptyHintId}>
-                  {slot.rejection ? `Contenu illisible (${slot.rejection}), conservé tel quel.` : 'Vide.'}
+                  {slot.rejection
+                    ? `Contenu illisible (${slot.rejection}), conservé tel quel.`
+                    : 'Vide.'}
                 </p>
               ) : (
                 <p className="slot-meta">
-                  <span className="slot-label">{slot.label}</span> · <time dateTime={slot.savedAt}>{formatSavedAt(slot.savedAt)}</time>{' '}
-                  · {slot.actionCount} {slot.actionCount > 1 ? 'actions' : 'action'}
+                  <span className="slot-label">{slot.label}</span> ·{' '}
+                  <time dateTime={slot.savedAt}>{formatSavedAt(slot.savedAt)}</time> ·{' '}
+                  {slot.actionCount} {slot.actionCount > 1 ? 'actions' : 'action'}
                 </p>
               )}
               <div className="slot-actions">
@@ -201,7 +223,11 @@ function SavesBody(): React.JSX.Element {
                   className="btn"
                   disabled={isAuto}
                   aria-describedby={isAuto ? autoHintId : undefined}
-                  title={isAuto ? 'L’emplacement automatique est écrit par le jeu après chaque action.' : `Enregistrer la partie en cours dans ${name}`}
+                  title={
+                    isAuto
+                      ? 'L’emplacement automatique est écrit par le jeu après chaque action.'
+                      : `Enregistrer la partie en cours dans ${name}`
+                  }
                   onClick={() => save(slot.slotId)}
                 >
                   Sauvegarder ici <span className="visually-hidden">({name})</span>
@@ -212,7 +238,11 @@ function SavesBody(): React.JSX.Element {
                   disabled={slot.empty}
                   aria-describedby={slot.empty ? emptyHintId : undefined}
                   title={slot.empty ? 'Emplacement vide' : `Restaurer ${name}`}
-                  onClick={() => (needsConfirmation ? setPending({ kind: 'load', slot: slot.slotId }) : load(slot.slotId))}
+                  onClick={() =>
+                    needsConfirmation
+                      ? setPending({ kind: 'load', slot: slot.slotId })
+                      : load(slot.slotId)
+                  }
                 >
                   Charger <span className="visually-hidden">({name})</span>
                 </button>
@@ -237,7 +267,9 @@ function SavesBody(): React.JSX.Element {
                   <button
                     type="button"
                     className={pending.kind === 'clear' ? 'btn btn-danger' : 'btn btn-primary'}
-                    onClick={() => (pending.kind === 'load' ? load(slot.slotId) : clear(slot.slotId))}
+                    onClick={() =>
+                      pending.kind === 'load' ? load(slot.slotId) : clear(slot.slotId)
+                    }
                   >
                     {pending.kind === 'load' ? 'Confirmer le chargement' : 'Confirmer l’effacement'}
                   </button>
@@ -259,7 +291,8 @@ function SavesBody(): React.JSX.Element {
             Exporter (JSON)
           </button>
           <p className="field-hint">
-            Télécharge un fichier nommé d’après le scénario et la date. {unsavedSinceExport && actionCount > 0 ? 'Progression non exportée.' : ''}
+            Télécharge un fichier nommé d’après le scénario et la date.{' '}
+            {unsavedSinceExport && actionCount > 0 ? 'Progression non exportée.' : ''}
           </p>
         </div>
         <div className="saves-import">
@@ -267,7 +300,13 @@ function SavesBody(): React.JSX.Element {
             <label htmlFor={fileId} className="field-label">
               Importer un fichier de sauvegarde
             </label>
-            <input id={fileId} className="input" type="file" accept="application/json,.json" onChange={(e) => void onFile(e)} />
+            <input
+              id={fileId}
+              className="input"
+              type="file"
+              accept="application/json,.json"
+              onChange={(e) => void onFile(e)}
+            />
           </div>
           <div className="field">
             <label htmlFor={importTextId} className="field-label">
@@ -287,7 +326,10 @@ function SavesBody(): React.JSX.Element {
             <button type="button" className="btn" onClick={() => doImport(importText)}>
               Importer le texte
             </button>
-            <p className="field-hint">Un fichier invalide, d’un autre scénario ou d’un format plus récent est refusé sans toucher à la partie en cours.</p>
+            <p className="field-hint">
+              Un fichier invalide, d’un autre scénario ou d’un format plus récent est refusé sans
+              toucher à la partie en cours.
+            </p>
           </div>
         </div>
       </section>

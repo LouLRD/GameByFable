@@ -18,7 +18,10 @@ export const factualDetectors: readonly Detector[] = [
   discursiveDetector,
 ];
 
-export function runDetectors(ctx: EvaluationContext, detectors: readonly Detector[] = factualDetectors): Contradiction[] {
+export function runDetectors(
+  ctx: EvaluationContext,
+  detectors: readonly Detector[] = factualDetectors,
+): Contradiction[] {
   const all: Contradiction[] = [];
   for (const d of detectors) all.push(...d.detect(ctx));
   return dedupeContradictions(all);

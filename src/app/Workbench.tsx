@@ -33,7 +33,15 @@ import { OnboardingCallout } from '@/features/onboarding/OnboardingCallout';
 import { focusToSpace } from '@/features/onboarding/focusTarget';
 import { useGameStore, useReducedMotion } from '@/state';
 import type { InspectorTab, SpaceId } from '@/state/types';
-import { RESIZE_STEP, clampSize, layoutBounds, loadSizes, saveSizes, type Bounds, type LayoutSizes } from './layoutSizes';
+import {
+  RESIZE_STEP,
+  clampSize,
+  layoutBounds,
+  loadSizes,
+  saveSizes,
+  type Bounds,
+  type LayoutSizes,
+} from './layoutSizes';
 import { SpaceBar } from './SpaceBar';
 import { TopBar } from './TopBar';
 
@@ -59,7 +67,15 @@ interface ResizerProps {
  * a11y du projet) : flèches droite / haut agrandissent de 16 px, gauche / bas réduisent,
  * Début / Fin vont aux bornes ; le pointeur suit le bord physique.
  */
-function Resizer({ label, controls, orientation, value, bounds, pointerDirection, onChange }: ResizerProps): React.JSX.Element {
+function Resizer({
+  label,
+  controls,
+  orientation,
+  value,
+  bounds,
+  pointerDirection,
+  onChange,
+}: ResizerProps): React.JSX.Element {
   const drag = useRef<{ origin: number; value: number } | null>(null);
   const vertical = orientation === 'vertical';
 
@@ -96,7 +112,8 @@ function Resizer({ label, controls, orientation, value, bounds, pointerDirection
   const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
     drag.current = { origin: vertical ? e.clientX : e.clientY, value };
-    if (typeof e.currentTarget.setPointerCapture === 'function') e.currentTarget.setPointerCapture(e.pointerId);
+    if (typeof e.currentTarget.setPointerCapture === 'function')
+      e.currentTarget.setPointerCapture(e.pointerId);
     e.preventDefault();
   };
   const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
@@ -152,11 +169,29 @@ interface SpaceProps {
   children: ReactNode;
 }
 
-function Space({ id, isDesktop, active, focused, onToggleFocus, tools, resizer, sectionRef, children }: SpaceProps): React.JSX.Element {
+function Space({
+  id,
+  isDesktop,
+  active,
+  focused,
+  onToggleFocus,
+  tools,
+  resizer,
+  sectionRef,
+  children,
+}: SpaceProps): React.JSX.Element {
   const headingId = useId();
   const title = SPACE_LABELS[id];
   return (
-    <section id={`space-${id}`} className="space" data-space={id} data-active={active} aria-labelledby={headingId} tabIndex={-1} ref={sectionRef}>
+    <section
+      id={`space-${id}`}
+      className="space"
+      data-space={id}
+      data-active={active}
+      aria-labelledby={headingId}
+      tabIndex={-1}
+      ref={sectionRef}
+    >
       <header className="space-header">
         <h2 id={headingId} className="space-title">
           {title}
@@ -169,7 +204,11 @@ function Space({ id, isDesktop, active, focused, onToggleFocus, tools, resizer, 
               className="btn btn-ghost space-focus-btn"
               aria-pressed={focused}
               aria-label={`${focused ? 'Réduire' : 'Agrandir'} l’espace ${title}`}
-              title={focused ? 'Revenir aux quatre espaces (Échap)' : `Afficher seulement l’espace ${title}`}
+              title={
+                focused
+                  ? 'Revenir aux quatre espaces (Échap)'
+                  : `Afficher seulement l’espace ${title}`
+              }
               onClick={onToggleFocus}
             >
               {focused ? 'Réduire' : 'Agrandir'}
@@ -196,10 +235,22 @@ interface InspectorTabsProps {
 }
 
 const INSPECTOR_TABS: readonly InspectorTab[] = ['version', 'contradictions'];
-const INSPECTOR_TAB_LABELS: Readonly<Record<InspectorTab, string>> = { version: 'Version', contradictions: 'Contradictions' };
+const INSPECTOR_TAB_LABELS: Readonly<Record<InspectorTab, string>> = {
+  version: 'Version',
+  contradictions: 'Contradictions',
+};
 
-function InspectorTabs({ tab, onChange, contradictionCount, tabIds, panelId }: InspectorTabsProps): React.JSX.Element {
-  const buttons = useRef<Record<InspectorTab, HTMLButtonElement | null>>({ version: null, contradictions: null });
+function InspectorTabs({
+  tab,
+  onChange,
+  contradictionCount,
+  tabIds,
+  panelId,
+}: InspectorTabsProps): React.JSX.Element {
+  const buttons = useRef<Record<InspectorTab, HTMLButtonElement | null>>({
+    version: null,
+    contradictions: null,
+  });
   const onKeyDown = (e: ReactKeyboardEvent<HTMLElement>) => {
     const index = INSPECTOR_TABS.indexOf(tab);
     let next: InspectorTab | undefined;
@@ -285,7 +336,10 @@ export function Workbench({ view }: WorkbenchProps): React.JSX.Element {
   const versionTabId = useId();
   const contradictionsTabId = useId();
   const panelId = useId();
-  const tabIds: Record<InspectorTab, string> = { version: versionTabId, contradictions: contradictionsTabId };
+  const tabIds: Record<InspectorTab, string> = {
+    version: versionTabId,
+    contradictions: contradictionsTabId,
+  };
 
   const resize = (key: keyof LayoutSizes, value: number) => {
     const next: LayoutSizes = { ...sizes, [key]: clampSize(Math.round(value), layoutBounds(key)) };
@@ -297,7 +351,11 @@ export function Workbench({ view }: WorkbenchProps): React.JSX.Element {
     const store = useGameStore.getState();
     const next = focusPanel === panel ? null : panel;
     store.setFocusPanel(next);
-    store.announce(next ? `Espace ${SPACE_LABELS[panel]} agrandi. Échap pour revenir aux quatre espaces.` : 'Les quatre espaces sont visibles.');
+    store.announce(
+      next
+        ? `Espace ${SPACE_LABELS[panel]} agrandi. Échap pour revenir aux quatre espaces.`
+        : 'Les quatre espaces sont visibles.',
+    );
   };
 
   // Retour visuel bref (GDD §12.3) : onde à la pose d'une hypothèse, fissure quand une contradiction
@@ -308,7 +366,8 @@ export function Workbench({ view }: WorkbenchProps): React.JSX.Element {
     const prev = previous.current;
     let klass: 'anim-crack' | 'anim-propagate' | null = null;
     if (blocking > prev.blocking) klass = 'anim-crack';
-    else if (actionNonce !== prev.actionNonce && lastActionType === 'set-claim') klass = 'anim-propagate';
+    else if (actionNonce !== prev.actionNonce && lastActionType === 'set-claim')
+      klass = 'anim-propagate';
     previous.current = { blocking, actionNonce };
     const element = inspectorRef.current;
     if (!klass || reducedMotion || !element) return;
@@ -329,9 +388,18 @@ export function Workbench({ view }: WorkbenchProps): React.JSX.Element {
   const isActive = (space: SpaceId) => isDesktop || activeSpace === space;
   const onboarding = view.onboarding;
   const calloutAnchor: SpaceId = onboarding ? focusToSpace(onboarding.focus) : 'inspector';
+  const hintsEnabled = useGameStore((s) => s.prefs.hintsEnabled);
+  const impasseCount = useGameStore((s) => s.impasseCount);
+  const hintThreshold = useGameStore((s) => s.scenario?.data.extension.hintAfterImpasses ?? 3);
+  const showHint = hintsEnabled && impasseCount >= hintThreshold;
 
   return (
-    <main className="workbench" data-focus={focusPanel ?? undefined} style={style}>
+    <main
+      className="workbench"
+      data-callout={onboarding || showHint ? calloutAnchor : undefined}
+      data-focus={focusPanel ?? undefined}
+      style={style}
+    >
       <a className="skip-link" href="#space-casefile">
         Aller au dossier
       </a>
@@ -361,7 +429,13 @@ export function Workbench({ view }: WorkbenchProps): React.JSX.Element {
         </div>
       </Space>
 
-      <Space id="map" isDesktop={isDesktop} active={isActive('map')} focused={focusPanel === 'map'} onToggleFocus={() => toggleFocus('map')}>
+      <Space
+        id="map"
+        isDesktop={isDesktop}
+        active={isActive('map')}
+        focused={focusPanel === 'map'}
+        onToggleFocus={() => toggleFocus('map')}
+      >
         <div className="space-body">
           <MapPanel />
         </div>
@@ -418,7 +492,12 @@ export function Workbench({ view }: WorkbenchProps): React.JSX.Element {
           />
         }
       >
-        <div className="space-body" role="tabpanel" id={panelId} aria-labelledby={tabIds[inspectorTab]}>
+        <div
+          className="space-body"
+          role="tabpanel"
+          id={panelId}
+          aria-labelledby={tabIds[inspectorTab]}
+        >
           {inspectorTab === 'version' ? <VersionBoard /> : <ContradictionInspector />}
         </div>
       </Space>

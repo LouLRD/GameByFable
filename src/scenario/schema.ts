@@ -299,7 +299,12 @@ export type RawScenario = z.infer<typeof RawScenarioSchema>;
 
 export const PropositionSemanticsSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('presence'), characterId: id, zoneId: id, interval: IntervalSchema }),
-  z.object({ type: z.literal('continuous-presence'), characterId: id, zoneId: id, interval: IntervalSchema }),
+  z.object({
+    type: z.literal('continuous-presence'),
+    characterId: id,
+    zoneId: id,
+    interval: IntervalSchema,
+  }),
   z.object({ type: z.literal('absence'), characterId: id, zoneId: id, interval: IntervalSchema }),
   z.object({
     type: z.literal('event'),
@@ -331,8 +336,17 @@ export const PropositionSemanticsSchema = z.discriminatedUnion('type', [
       soundTags: z.array(z.string()).optional(),
     }),
   }),
-  z.object({ type: z.literal('object-location'), objectTag: z.string(), zoneId: id, interval: IntervalSchema }),
-  z.object({ type: z.literal('assertion'), tags: z.array(z.string()).default([]), subjectId: id.optional() }),
+  z.object({
+    type: z.literal('object-location'),
+    objectTag: z.string(),
+    zoneId: id,
+    interval: IntervalSchema,
+  }),
+  z.object({
+    type: z.literal('assertion'),
+    tags: z.array(z.string()).default([]),
+    subjectId: id.optional(),
+  }),
 ]);
 
 export const PropositionDefSchema = z.object({
@@ -376,8 +390,16 @@ export const ExtensionSchema = z.object({
         accusatory: z.boolean().default(false),
         worldEffect: z
           .discriminatedUnion('type', [
-            z.object({ type: z.literal('event'), tags: z.array(z.string()).min(1), requiresPresence: z.boolean() }),
-            z.object({ type: z.literal('sound'), signatureTags: z.array(z.string()).min(1), intensity: z.number().min(0).max(1) }),
+            z.object({
+              type: z.literal('event'),
+              tags: z.array(z.string()).min(1),
+              requiresPresence: z.boolean(),
+            }),
+            z.object({
+              type: z.literal('sound'),
+              signatureTags: z.array(z.string()).min(1),
+              intensity: z.number().min(0).max(1),
+            }),
             z.object({ type: z.literal('none') }),
           ])
           .optional(),
@@ -400,12 +422,18 @@ export const ExtensionSchema = z.object({
     .array(
       z.object({
         confrontationId: id,
-        responseVariants: z.object({ neutral: z.string().min(1), empathetic: z.string().min(1), direct: z.string().min(1) }),
+        responseVariants: z.object({
+          neutral: z.string().min(1),
+          empathetic: z.string().min(1),
+          direct: z.string().min(1),
+        }),
         guardedVariant: z.string().optional(),
         retractsStatementIds: z.array(id).default([]),
         admitsCostKeys: z.record(z.string(), z.array(z.string())).default({}),
         beliefUpdates: z
-          .array(z.object({ characterId: id, propositionId: id, confidence: z.number().min(0).max(1) }))
+          .array(
+            z.object({ characterId: id, propositionId: id, confidence: z.number().min(0).max(1) }),
+          )
           .default([]),
         annotation: z.string().optional(),
       }),
@@ -430,7 +458,11 @@ export const ExtensionSchema = z.object({
     )
     .default([]),
   endings: z.array(z.object({ endingId: id, hint: z.string().min(1) })).default([]),
-  cameraCoverage: z.object({ zoneIds: z.array(id).min(1), gapEvidenceId: id, label: z.string().min(1) }),
+  cameraCoverage: z.object({
+    zoneIds: z.array(id).min(1),
+    gapEvidenceId: id,
+    label: z.string().min(1),
+  }),
   canonicalHypothesisBySlot: z.record(z.string(), id).default({}),
   roundTableRevelations: z.number().int().min(0).default(2),
   hintAfterImpasses: z.number().int().min(1).default(3),

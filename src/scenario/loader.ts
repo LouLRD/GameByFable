@@ -28,7 +28,10 @@ export type LoadResult =
   | { ok: true; scenario: LoadedScenario; warnings: ScenarioIssue[] }
   | { ok: false; issues: ScenarioIssue[] };
 
-function zodIssues(prefix: string, error: { issues: { path: PropertyKey[]; message: string }[] }): ScenarioIssue[] {
+function zodIssues(
+  prefix: string,
+  error: { issues: { path: PropertyKey[]; message: string }[] },
+): ScenarioIssue[] {
   return error.issues.map((i) => ({
     severity: 'error' as const,
     code: 'schema',
@@ -56,7 +59,8 @@ function buildIndex(data: Scenario): ScenarioIndex {
   }
   const canonicalBySlot = new Map<ClaimSlotId, HypothesisId>();
   for (const f of data.canonicalFacts) {
-    if (f.variableSlotId && f.canonicalHypothesisId) canonicalBySlot.set(f.variableSlotId, f.canonicalHypothesisId);
+    if (f.variableSlotId && f.canonicalHypothesisId)
+      canonicalBySlot.set(f.variableSlotId, f.canonicalHypothesisId);
   }
   for (const [slot, h] of Object.entries(data.extension.canonicalHypothesisBySlot)) {
     if (h) canonicalBySlot.set(slot as ClaimSlotId, h);
@@ -86,7 +90,9 @@ function buildIndex(data: Scenario): ScenarioIndex {
     factPresentations: new Map(data.extension.facts.map((f) => [f.factId, f])),
     hypothesisExtensions: new Map(data.extension.hypotheses.map((h) => [h.hypothesisId, h])),
     statementExtensions: new Map(data.extension.statements.map((s) => [s.statementId, s])),
-    confrontationExtensions: new Map(data.extension.confrontations.map((c) => [c.confrontationId, c])),
+    confrontationExtensions: new Map(
+      data.extension.confrontations.map((c) => [c.confrontationId, c]),
+    ),
     characterExtensions: new Map(data.extension.characters.map((c) => [c.characterId, c])),
     endingExtensions: new Map(data.extension.endings.map((e) => [e.endingId, e])),
     signatureRules: new Map(data.signatureRules.map((r) => [r.characterId, r])),
@@ -150,9 +156,11 @@ export function loadScenario(rawInput: unknown, extensionInput: unknown): LoadRe
 
   const canonicalBySlot = new Map<string, string>();
   for (const f of raw.canonicalFacts) {
-    if (f.variableSlotId && f.canonicalHypothesisId) canonicalBySlot.set(f.variableSlotId, f.canonicalHypothesisId);
+    if (f.variableSlotId && f.canonicalHypothesisId)
+      canonicalBySlot.set(f.variableSlotId, f.canonicalHypothesisId);
   }
-  for (const [slot, h] of Object.entries(ext.canonicalHypothesisBySlot)) canonicalBySlot.set(slot, h);
+  for (const [slot, h] of Object.entries(ext.canonicalHypothesisBySlot))
+    canonicalBySlot.set(slot, h);
   const { truth, issues: truthIssues } = deriveTruth(raw, ext, canonicalBySlot);
   issues.push(...truthIssues);
 

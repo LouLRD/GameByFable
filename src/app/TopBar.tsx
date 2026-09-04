@@ -69,14 +69,25 @@ export function TopBar({ view, isDesktop }: TopBarProps): React.JSX.Element {
           Menu
         </button>
       ) : null}
-      <div id={actionsId} className="topbar-actions" role="group" aria-label="Commandes du dossier" hidden={!isDesktop && !menuOpen}>
+      <div
+        id={actionsId}
+        className="topbar-actions"
+        role="group"
+        aria-label="Commandes du dossier"
+        hidden={!isDesktop && !menuOpen}
+      >
         <button type="button" className="btn btn-ghost" onClick={() => openDialog('saves')}>
           Sauvegardes
         </button>
         <button type="button" className="btn btn-ghost" onClick={() => openDialog('settings')}>
           Options
         </button>
-        <button type="button" className="btn btn-ghost" onClick={() => openDialog('help')} title="Aide (touche ?)">
+        <button
+          type="button"
+          className="btn btn-ghost"
+          onClick={() => openDialog('help')}
+          title="Aide (touche ?)"
+        >
           Aide
         </button>
         <button type="button" className="btn btn-ghost" onClick={() => openDialog('new-game')}>
@@ -91,7 +102,10 @@ export function TopBar({ view, isDesktop }: TopBarProps): React.JSX.Element {
           title={soundHint}
           onClick={() => void toggle()}
         >
-          Son <span className="visually-hidden">{enabled ? '(ambiance activée)' : '(ambiance coupée)'}</span>
+          Son{' '}
+          <span className="visually-hidden">
+            {enabled ? '(ambiance activée)' : '(ambiance coupée)'}
+          </span>
         </button>
         <span id={soundHintId} className="visually-hidden">
           {soundHint}

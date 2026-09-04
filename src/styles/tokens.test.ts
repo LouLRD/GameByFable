@@ -126,7 +126,14 @@ describe('styles/index.css', () => {
     const imports = [...css.index.matchAll(/@import\s+['"]\.\/([\w-]+\.css)['"]\s*;/g)].map(
       (m) => m[1],
     );
-    expect(imports).toEqual(['tokens.css', 'base.css', 'degrees.css', 'motion.css', 'dialog.css', 'layout.css']);
+    expect(imports).toEqual([
+      'tokens.css',
+      'base.css',
+      'degrees.css',
+      'motion.css',
+      'dialog.css',
+      'layout.css',
+    ]);
   });
 });
 

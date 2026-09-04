@@ -50,7 +50,13 @@ export interface Prefs {
   seenIntro: boolean;
 }
 
-const defaultPrefs: Prefs = { reducedMotion: 'system', textSize: 'm', hintsEnabled: true, audioEnabled: false, seenIntro: false };
+const defaultPrefs: Prefs = {
+  reducedMotion: 'system',
+  textSize: 'm',
+  hintsEnabled: true,
+  audioEnabled: false,
+  seenIntro: false,
+};
 
 export interface SessionState {
   scenario: LoadedScenario | null;
@@ -93,7 +99,9 @@ export interface UiState {
 export interface StoreActions {
   bootstrap(): void;
   newGame(seed?: string): void;
-  dispatch(action: PlayerAction): ActionResult<GameState> | { ok: false; error: ActionError; state: null };
+  dispatch(
+    action: PlayerAction,
+  ): ActionResult<GameState> | { ok: false; error: ActionError; state: null };
   listSlots(): SlotSummary[];
   saveToSlot(slot: SlotId, label?: string): { ok: boolean; message: string };
   loadSlot(slot: SlotId): { ok: boolean; message: string };
@@ -168,7 +176,11 @@ export function createGameStore(deps: StoreDeps = {}) {
         scenarioVersion: scenario.data.scenario.version,
         seed,
         actions,
-        ui: { cursor, selectedId: selection?.id ?? null, activeSpace: activeSpace === 'inspector' ? 'version' : activeSpace },
+        ui: {
+          cursor,
+          selectedId: selection?.id ?? null,
+          activeSpace: activeSpace === 'inspector' ? 'version' : activeSpace,
+        },
         label,
         savedAt: now().toISOString(),
         appVersion: APP_VERSION,
@@ -190,9 +202,13 @@ export function createGameStore(deps: StoreDeps = {}) {
         game: state,
         lastError: null,
         restoredFrom: from,
-        cursor: Math.min(Math.max(0, save.ui.cursor), scenario.data.scenario.timeline.durationSeconds),
+        cursor: Math.min(
+          Math.max(0, save.ui.cursor),
+          scenario.data.scenario.timeline.durationSeconds,
+        ),
         selection: null,
-        activeSpace: save.ui.activeSpace === 'version' ? 'inspector' : (save.ui.activeSpace ?? 'casefile'),
+        activeSpace:
+          save.ui.activeSpace === 'version' ? 'inspector' : (save.ui.activeSpace ?? 'casefile'),
         dialog: null,
         unsavedSinceExport: from !== 'import',
         actionNonce: get().actionNonce + 1,
@@ -201,7 +217,10 @@ export function createGameStore(deps: StoreDeps = {}) {
       autosave();
       return {
         ok: true,
-        message: rejected.length > 0 ? `Partie restaurée ; ${rejected.length} action(s) obsolète(s) ignorée(s).` : 'Partie restaurée.',
+        message:
+          rejected.length > 0
+            ? `Partie restaurée ; ${rejected.length} action(s) obsolète(s) ignorée(s).`
+            : 'Partie restaurée.',
       };
     };
 
@@ -228,7 +247,12 @@ export function createGameStore(deps: StoreDeps = {}) {
       playing: false,
       playbackSpeed: 4,
       dialog: null,
-      confrontationDraft: { characterId: null, targetId: null, supportId: null, approach: 'neutral' },
+      confrontationDraft: {
+        characterId: null,
+        targetId: null,
+        supportId: null,
+        approach: 'neutral',
+      },
       claimForm: null,
       liveMessage: '',
       liveNonce: 0,
@@ -245,7 +269,10 @@ export function createGameStore(deps: StoreDeps = {}) {
           return;
         }
         const scenario = result.scenario;
-        repository = new SaveRepository(bounded, { scenarioId: scenario.data.scenario.id, scenarioVersion: scenario.data.scenario.version });
+        repository = new SaveRepository(bounded, {
+          scenarioId: scenario.data.scenario.id,
+          scenarioVersion: scenario.data.scenario.version,
+        });
         set({ scenario, loadIssues: null, cursor: 0 });
         const auto = repository.read('auto');
         if (auto.ok) {
@@ -285,7 +312,12 @@ export function createGameStore(deps: StoreDeps = {}) {
 
       dispatch(action) {
         const { scenario, game } = get();
-        if (!scenario || !game) return { ok: false, error: { code: 'sealed', message: 'Aucune partie en cours.' }, state: null };
+        if (!scenario || !game)
+          return {
+            ok: false,
+            error: { code: 'sealed', message: 'Aucune partie en cours.' },
+            state: null,
+          };
         const result = applyAction(scenario, game, action);
         if (!result.ok) {
           set({ lastError: result.error, impasseCount: get().impasseCount + 1 });
@@ -309,7 +341,8 @@ export function createGameStore(deps: StoreDeps = {}) {
       },
       saveToSlot(slot, label) {
         const save = buildSave(label ?? `Emplacement ${slot.replace('slot-', '')}`);
-        if (!save || !repository) return { ok: false, message: 'Sauvegarde impossible : scénario non chargé.' };
+        if (!save || !repository)
+          return { ok: false, message: 'Sauvegarde impossible : scénario non chargé.' };
         const r = repository.write(slot, save);
         if (!r.ok) return { ok: false, message: r.message };
         return { ok: true, message: 'Partie sauvegardée.' };
@@ -317,7 +350,14 @@ export function createGameStore(deps: StoreDeps = {}) {
       loadSlot(slot) {
         if (!repository) return { ok: false, message: 'Stockage indisponible.' };
         const r = repository.read(slot);
-        if (!r.ok) return { ok: false, message: r.reason === 'empty' ? 'Emplacement vide.' : `Sauvegarde refusée (${r.reason}) : ${r.issues.join(' ; ')}` };
+        if (!r.ok)
+          return {
+            ok: false,
+            message:
+              r.reason === 'empty'
+                ? 'Emplacement vide.'
+                : `Sauvegarde refusée (${r.reason}) : ${r.issues.join(' ; ')}`,
+          };
         return restore(r.save, 'slot');
       },
       clearSlot(slot) {
@@ -336,7 +376,10 @@ export function createGameStore(deps: StoreDeps = {}) {
       importSave(text) {
         const { scenario } = get();
         if (!scenario) return { ok: false, message: 'Scénario non chargé.' };
-        const r = parseImport(text, { scenarioId: scenario.data.scenario.id, scenarioVersion: scenario.data.scenario.version });
+        const r = parseImport(text, {
+          scenarioId: scenario.data.scenario.id,
+          scenarioVersion: scenario.data.scenario.version,
+        });
         if (!r.ok) {
           const reasons: Record<string, string> = {
             'invalid-schema': 'fichier illisible ou incomplet',
@@ -345,10 +388,18 @@ export function createGameStore(deps: StoreDeps = {}) {
             'scenario-version-newer': 'version de scénario plus récente',
             'unknown-kind': 'ce fichier n’est pas une sauvegarde du jeu',
           };
-          return { ok: false, message: `Import refusé : ${reasons[r.reason] ?? r.reason}. La partie en cours est conservée.` };
+          return {
+            ok: false,
+            message: `Import refusé : ${reasons[r.reason] ?? r.reason}. La partie en cours est conservée.`,
+          };
         }
         const res = restore(r.save, 'import');
-        return { ok: res.ok, message: r.migratedFrom ? `${res.message} (migrée depuis le format ${r.migratedFrom}).` : res.message };
+        return {
+          ok: res.ok,
+          message: r.migratedFrom
+            ? `${res.message} (migrée depuis le format ${r.migratedFrom}).`
+            : res.message,
+        };
       },
 
       // --- ui --------------------------------------------------------------

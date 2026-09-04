@@ -250,7 +250,10 @@ describe('refus non destructifs', () => {
     expect(cursorResult).toMatchObject({ ok: false, reason: 'invalid-schema' });
     if (!cursorResult.ok) expect(cursorResult.issues[0]).toContain('ui.cursor');
     // un curseur temporel plausible (secondes simulées) est accepté quel que soit le nombre d'actions
-    expect(parseSave(makeSave({ ui: { cursor: 1_500, selectedId: null, activeSpace: null } }), EXPECTED).ok).toBe(true);
+    expect(
+      parseSave(makeSave({ ui: { cursor: 1_500, selectedId: null, activeSpace: null } }), EXPECTED)
+        .ok,
+    ).toBe(true);
 
     expect(parseSave({ formatVersion: 0, scenarioId: 'x' }, EXPECTED)).toMatchObject({
       ok: false,

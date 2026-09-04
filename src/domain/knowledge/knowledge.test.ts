@@ -6,7 +6,13 @@ import { characterId } from '../model/ids';
 
 describe('connaissance et provenance', () => {
   it('aucun personnage ne possède une connaissance sans provenance', () => {
-    const s = run([confront('malik', 's_malik_initial', 'e_camera_gap'), confront('jo', 's_jo_initial', 'e_camera_gap'), { type: 'request-round-table' } as never].slice(0, 2));
+    const s = run(
+      [
+        confront('malik', 's_malik_initial', 'e_camera_gap'),
+        confront('jo', 's_jo_initial', 'e_camera_gap'),
+        { type: 'request-round-table' } as never,
+      ].slice(0, 2),
+    );
     for (const c of scenario.data.characters) {
       for (const k of s.characters[c.id]?.knowledge ?? []) {
         expect(k.provenanceIds.length, `${c.id}/${k.propositionId}`).toBeGreaterThan(0);
@@ -25,7 +31,21 @@ describe('connaissance et provenance', () => {
     expect(noe.has('prop_refund_happened' as never)).toBe(false);
     // une perception propre n'est pas une certitude : Noé croit sincèrement (0,48) avoir vu Inès
     expect(noe.get('prop_ines_went_stockroom' as never)?.confidence).toBeCloseTo(0.48);
-    expect(isSelfProposition({ type: 'perceived', observerId: characterId('noe'), modality: 'visual', target: { zoneId: 'x' as never, interval: { start: 0, end: 1 } as never, claimedTags: [] } }, characterId('noe'))).toBe(false);
+    expect(
+      isSelfProposition(
+        {
+          type: 'perceived',
+          observerId: characterId('noe'),
+          modality: 'visual',
+          target: {
+            zoneId: 'x' as never,
+            interval: { start: 0, end: 1 } as never,
+            claimedTags: [],
+          },
+        },
+        characterId('noe'),
+      ),
+    ).toBe(false);
   });
 
   it('une déclaration mensongère ne remplace pas la croyance du personnage', () => {
@@ -40,12 +60,19 @@ describe('connaissance et provenance', () => {
 
   it('la connaissance apprise porte la provenance de la confrontation et de la pièce', () => {
     const s = run([confront('malik', 's_malik_initial', 'e_camera_gap')]);
-    const learned = (s.characters.malik?.knowledge ?? []).find((k) => k.propositionId === 'prop_camera_offline_4m20');
-    expect(learned?.provenanceIds).toEqual(expect.arrayContaining(['c_malik_route', 'e_camera_gap']));
+    const learned = (s.characters.malik?.knowledge ?? []).find(
+      (k) => k.propositionId === 'prop_camera_offline_4m20',
+    );
+    expect(learned?.provenanceIds).toEqual(
+      expect.arrayContaining(['c_malik_route', 'e_camera_gap']),
+    );
   });
 
   it('les croyances peuvent être corrigées par une confrontation sans effacer la perception', () => {
-    const s = run([confront('jo', 's_jo_initial', 'e_camera_gap'), confront('noe', 's_noe_initial', 'e_pallet_scan')]);
+    const s = run([
+      confront('jo', 's_jo_initial', 'e_camera_gap'),
+      confront('noe', 's_noe_initial', 'e_pallet_scan'),
+    ]);
     const noe = new Map((s.characters.noe?.knowledge ?? []).map((k) => [k.propositionId, k]));
     expect(noe.get('prop_ines_went_stockroom' as never)?.confidence).toBeCloseTo(0.1);
     expect(noe.get('prop_trolley_maybe_door' as never)?.confidence).toBeCloseTo(0.8);

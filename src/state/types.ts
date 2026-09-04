@@ -1,11 +1,35 @@
 import type { SlotId } from '@/persistence';
 
-export type SelectionKind = 'evidence' | 'statement' | 'character' | 'fact' | 'hypothesis' | 'contradiction' | 'zone' | 'journal';
+export type SelectionKind =
+  | 'evidence'
+  | 'statement'
+  | 'character'
+  | 'fact'
+  | 'hypothesis'
+  | 'contradiction'
+  | 'zone'
+  | 'journal';
 export type SpaceId = 'map' | 'timeline' | 'casefile' | 'inspector';
 export type FocusPanel = SpaceId | null;
 export type InspectorTab = 'version' | 'contradictions';
-export type DialogId = 'confrontation' | 'saves' | 'settings' | 'help' | 'round-table' | 'new-game' | 'claim-form' | null;
-export type CasefileFilter = 'all' | 'evidence' | 'statements' | 'characters' | 'facts' | 'hypotheses' | 'contradictions' | 'journal';
+export type DialogId =
+  | 'confrontation'
+  | 'saves'
+  | 'settings'
+  | 'help'
+  | 'round-table'
+  | 'new-game'
+  | 'claim-form'
+  | null;
+export type CasefileFilter =
+  | 'all'
+  | 'evidence'
+  | 'statements'
+  | 'characters'
+  | 'facts'
+  | 'hypotheses'
+  | 'contradictions'
+  | 'journal';
 export type ReducedMotionPref = 'system' | 'on' | 'off';
 export type TextSizePref = 's' | 'm' | 'l';
 

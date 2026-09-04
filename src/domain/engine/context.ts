@@ -3,8 +3,20 @@
  * Le scénario canonique n'est jamais muté ; le monde proposé est une vue dérivée.
  */
 import type { EvaluationContextLike } from '../model/contradiction';
-import type { CharacterId, EvidenceId, ObstructionId, PropositionId, StatementId } from '../model/ids';
-import type { Evidence, Hypothesis, HypothesisExtension, LoadedScenario, Statement } from '../model/scenario';
+import type {
+  CharacterId,
+  EvidenceId,
+  ObstructionId,
+  PropositionId,
+  StatementId,
+} from '../model/ids';
+import type {
+  Evidence,
+  Hypothesis,
+  HypothesisExtension,
+  LoadedScenario,
+  Statement,
+} from '../model/scenario';
 import type { GameState } from '../model/state';
 import type { PlayerClaim } from '../model/version';
 import type { Interval } from '../model/time';
@@ -52,7 +64,10 @@ export interface EvaluationContext extends EvaluationContextLike {
 }
 
 /** Obstructions connues du joueur (publiques ou révélées par une pièce débloquée). */
-export function knownWorld(scenario: LoadedScenario, unlockedEvidenceIds: readonly EvidenceId[]): WorldState {
+export function knownWorld(
+  scenario: LoadedScenario,
+  unlockedEvidenceIds: readonly EvidenceId[],
+): WorldState {
   const unlocked = new Set(unlockedEvidenceIds);
   const ids = new Set<ObstructionId>();
   for (const o of scenario.data.obstructions) {
@@ -61,7 +76,10 @@ export function knownWorld(scenario: LoadedScenario, unlockedEvidenceIds: readon
   return { activeObstructionIds: ids };
 }
 
-export function availableHypothesisIds(scenario: LoadedScenario, unlockedEvidenceIds: readonly EvidenceId[]): Set<string> {
+export function availableHypothesisIds(
+  scenario: LoadedScenario,
+  unlockedEvidenceIds: readonly EvidenceId[],
+): Set<string> {
   const unlocked = new Set(unlockedEvidenceIds);
   const out = new Set<string>();
   for (const h of scenario.data.hypotheses) {
@@ -99,7 +117,10 @@ export function factSegments(scenario: LoadedScenario, state: GameState): Positi
     if (!(f.secrecy === 'public' || established.has(f.id))) continue;
     for (const c of f.participants) {
       const track = scenario.index.tracks.get(c);
-      const consistent = track?.segments.some((s) => s.zoneId === f.zoneId && s.start <= f.interval.start && f.interval.end <= s.end) ?? false;
+      const consistent =
+        track?.segments.some(
+          (s) => s.zoneId === f.zoneId && s.start <= f.interval.start && f.interval.end <= s.end,
+        ) ?? false;
       if (!consistent) continue;
       out.push({
         characterId: c,
@@ -123,7 +144,12 @@ export function buildClaimEvents(scenario: LoadedScenario, claims: PlayerClaim[]
     if (!hypothesis) continue;
     const extension = scenario.index.hypothesisExtensions.get(claim.hypothesisId);
     const effect = extension?.worldEffect;
-    const requiresPresence = effect?.type === 'event' ? effect.requiresPresence : effect?.type === 'sound' ? Boolean(claim.actorId) : false;
+    const requiresPresence =
+      effect?.type === 'event'
+        ? effect.requiresPresence
+        : effect?.type === 'sound'
+          ? Boolean(claim.actorId)
+          : false;
     const presence = presenceFromClaim(claim, requiresPresence);
     events.push({
       claim,
@@ -142,10 +168,13 @@ export function buildClaimEvents(scenario: LoadedScenario, claims: PlayerClaim[]
 export function buildContext(scenario: LoadedScenario, state: GameState): EvaluationContext {
   const world = knownWorld(scenario, state.unlockedEvidenceIds);
   const slotOrder = scenario.data.claimSlots.map((s) => s.id as string);
-  const claims = Object.values(state.claims).sort((a, b) => slotOrder.indexOf(a.slotId) - slotOrder.indexOf(b.slotId));
+  const claims = Object.values(state.claims).sort(
+    (a, b) => slotOrder.indexOf(a.slotId) - slotOrder.indexOf(b.slotId),
+  );
   const claimEvents = buildClaimEvents(scenario, claims);
   const versionPropositionSet = new Set<PropositionId>();
-  for (const ev of claimEvents) for (const p of ev.hypothesis.propositions) versionPropositionSet.add(p);
+  for (const ev of claimEvents)
+    for (const p of ev.hypothesis.propositions) versionPropositionSet.add(p);
   const versionPropositions = [...versionPropositionSet].sort();
 
   const standing = standingStatements(scenario, state);
@@ -162,8 +191,14 @@ export function buildContext(scenario: LoadedScenario, state: GameState): Evalua
     const def = scenario.index.propositions.get(s.propositionId);
     if (def) reported.push(...presencesFromSemantics(def.semantics, s.id, s.speakerId));
   }
-  const proposed = claimEvents.map((e) => e.presence).filter((p): p is PositionSegment => p !== null);
-  const positions = buildPositionModel(scenario, cameraSegments(scenario), [...factSegments(scenario, state), ...reported, ...proposed]);
+  const proposed = claimEvents
+    .map((e) => e.presence)
+    .filter((p): p is PositionSegment => p !== null);
+  const positions = buildPositionModel(scenario, cameraSegments(scenario), [
+    ...factSegments(scenario, state),
+    ...reported,
+    ...proposed,
+  ]);
 
   const known = new Set<PropositionId>();
   for (const id of state.unlockedStatementIds) {
@@ -175,7 +210,8 @@ export function buildContext(scenario: LoadedScenario, state: GameState): Evalua
     for (const p of e.excludes) known.add(p);
   }
   const available = availableHypothesisIds(scenario, state.unlockedEvidenceIds);
-  for (const h of scenario.data.hypotheses) if (available.has(h.id)) for (const p of h.propositions) known.add(p);
+  for (const h of scenario.data.hypotheses)
+    if (available.has(h.id)) for (const p of h.propositions) known.add(p);
 
   return {
     __evaluationContext: true,

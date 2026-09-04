@@ -16,7 +16,13 @@ function topbarClock(): string | null {
 
 function dispatchFirstClaim(): void {
   const a = firstClaimAction();
-  const r = useGameStore.getState().dispatch({ type: 'set-claim', slotId: a.slotId as ClaimSlotId, hypothesisId: a.hypothesisId as HypothesisId });
+  const r = useGameStore
+    .getState()
+    .dispatch({
+      type: 'set-claim',
+      slotId: a.slotId as ClaimSlotId,
+      hypothesisId: a.hypothesisId as HypothesisId,
+    });
   expect(r.ok).toBe(true);
 }
 
@@ -34,30 +40,54 @@ describe('<App /> — coquille du bureau', () => {
     useGameStore.setState({ scenario: null, game: null, loadIssues: null });
     render(<App />);
     expect(useGameStore.getState().scenario).not.toBeNull();
-    expect(screen.getByRole('heading', { level: 1, name: 'LA VERSION ACCEPTABLE' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'LA VERSION ACCEPTABLE' }),
+    ).toBeInTheDocument();
     const spaces = document.querySelectorAll('main.workbench > .space[data-space]');
-    expect(Array.from(spaces).map((s) => s.getAttribute('data-space')).sort()).toEqual(['casefile', 'inspector', 'map', 'timeline']);
+    expect(
+      Array.from(spaces)
+        .map((s) => s.getAttribute('data-space'))
+        .sort(),
+    ).toEqual(['casefile', 'inspector', 'map', 'timeline']);
     spaces.forEach((s) => expect(s).toHaveAttribute('data-active', 'true'));
     expect(topbarClock()).toBe('20:49:00');
     const meter = document.querySelector('[role="meter"]');
     expect(meter).toHaveAttribute('aria-valuenow', String(useGameStore.getState().game?.pressure));
     expect(meter).toHaveTextContent(/Pression \d\/6/);
     expect(document.querySelector('.topbar-act')).toHaveTextContent('Acte I — Les traces');
-    expect(screen.getByRole('link', { name: 'Aller au dossier' })).toHaveAttribute('href', '#space-casefile');
+    expect(screen.getByRole('link', { name: 'Aller au dossier' })).toHaveAttribute(
+      'href',
+      '#space-casefile',
+    );
   });
 
   it('en mobile (≤ 1023 px), la barre d’espaces change l’espace actif', async () => {
     stubViewport(390);
     const user = userEvent.setup();
     render(<App />);
-    expect(document.querySelector('.space[data-space="casefile"]')).toHaveAttribute('data-active', 'true');
-    expect(document.querySelector('.space[data-space="inspector"]')).toHaveAttribute('data-active', 'false');
+    expect(document.querySelector('.space[data-space="casefile"]')).toHaveAttribute(
+      'data-active',
+      'true',
+    );
+    expect(document.querySelector('.space[data-space="inspector"]')).toHaveAttribute(
+      'data-active',
+      'false',
+    );
     const nav = screen.getByRole('navigation', { name: 'Espaces de travail' });
     await user.click(within(nav).getByRole('button', { name: /^Version/ }));
     expect(useGameStore.getState().activeSpace).toBe('inspector');
-    expect(document.querySelector('.space[data-space="inspector"]')).toHaveAttribute('data-active', 'true');
-    expect(document.querySelector('.space[data-space="casefile"]')).toHaveAttribute('data-active', 'false');
-    expect(within(nav).getByRole('button', { name: /^Version/ })).toHaveAttribute('aria-current', 'page');
+    expect(document.querySelector('.space[data-space="inspector"]')).toHaveAttribute(
+      'data-active',
+      'true',
+    );
+    expect(document.querySelector('.space[data-space="casefile"]')).toHaveAttribute(
+      'data-active',
+      'false',
+    );
+    expect(within(nav).getByRole('button', { name: /^Version/ })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
     // Pas de bouton « Agrandir » sur petit écran ; les commandes sont derrière « Menu ».
     expect(screen.queryByRole('button', { name: /Agrandir/ })).toBeNull();
     const menu = screen.getByRole('button', { name: 'Menu' });
@@ -111,7 +141,10 @@ describe('<App /> — coquille du bureau', () => {
     await user.click(screen.getByRole('button', { name: 'Agrandir l’espace Plan' }));
     expect(useGameStore.getState().focusPanel).toBe('map');
     expect(workbench).toHaveAttribute('data-focus', 'map');
-    expect(screen.getByRole('button', { name: 'Réduire l’espace Plan' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Réduire l’espace Plan' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
     await user.keyboard('{Escape}');
     expect(useGameStore.getState().focusPanel).toBeNull();
     expect(workbench).not.toHaveAttribute('data-focus');
@@ -200,10 +233,19 @@ describe('<App /> — coquille du bureau', () => {
     useGameStore.setState({
       scenario: null,
       game: null,
-      loadIssues: [{ severity: 'error', code: 'schema', path: 'scenario.zones.0.polygon', message: 'Polygone invalide' }],
+      loadIssues: [
+        {
+          severity: 'error',
+          code: 'schema',
+          path: 'scenario.zones.0.polygon',
+          message: 'Polygone invalide',
+        },
+      ],
     });
     render(<App />);
-    expect(screen.getByRole('heading', { name: 'Le dossier ne peut pas être ouvert' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Le dossier ne peut pas être ouvert' }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/ceci n’est pas une réponse du jeu/)).toBeInTheDocument();
     expect(screen.getByText('scenario.zones.0.polygon')).toBeInTheDocument();
     expect(screen.getByText('Polygone invalide')).toBeInTheDocument();

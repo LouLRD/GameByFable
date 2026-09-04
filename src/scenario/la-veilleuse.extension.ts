@@ -15,7 +15,7 @@ import type { ScenarioExtension } from '@/domain/model/scenario';
 const s = (start: number, end: number) => ({ start, end });
 
 // Les identifiants sont typés à la validation (Zod) ; ici on écrit des chaînes brutes.
- 
+
 export const laVeilleuseExtension = {
   propositions: [
     {
@@ -49,13 +49,24 @@ export const laVeilleuseExtension = {
         'prop_sleeve_contained_cash',
       ],
       knowledgeTags: ['refund', 'cash'],
-      costKeys: { ana: ['exposeRefund'], malik: ['exposeRefund'], mina: ['exposeRefund'], jo: ['exposeRefund'], noe: ['exposeRefund'] },
+      costKeys: {
+        ana: ['exposeRefund'],
+        malik: ['exposeRefund'],
+        mina: ['exposeRefund'],
+        jo: ['exposeRefund'],
+        noe: ['exposeRefund'],
+      },
       truth: true,
     },
     {
       id: 'prop_customer_left_2052',
       label: 'Une personne extérieure est sortie du magasin à 20 h 52',
-      semantics: { type: 'event', tags: ['exit', 'customer'], zoneId: 'entrance', interval: s(175, 185) },
+      semantics: {
+        type: 'event',
+        tags: ['exit', 'customer'],
+        zoneId: 'entrance',
+        interval: s(175, 185),
+      },
       excludes: [],
       knowledgeTags: ['customer'],
       costKeys: {},
@@ -99,7 +110,11 @@ export const laVeilleuseExtension = {
       id: 'prop_ana_knew_refund',
       label: "Ana savait que l'argent correspondait à un remboursement hors procédure",
       semantics: { type: 'assertion', tags: ['refund', 'knowledge'], subjectId: 'ana' },
-      excludes: ['prop_ana_unaware_all_evening', 'prop_ana_expected_deposit', 'prop_ana_no_unusual_drawer'],
+      excludes: [
+        'prop_ana_unaware_all_evening',
+        'prop_ana_expected_deposit',
+        'prop_ana_no_unusual_drawer',
+      ],
       knowledgeTags: ['refund', 'ana'],
       costKeys: { ana: ['admitProcedureBreach'] },
       truth: true,
@@ -117,7 +132,11 @@ export const laVeilleuseExtension = {
       id: 'prop_ana_staged_theft',
       label: "Ana a organisé la disparition et l'interruption vidéo",
       semantics: { type: 'assertion', tags: ['staging'], subjectId: 'ana' },
-      excludes: ['prop_ana_unaware_all_evening', 'prop_ana_expected_deposit', 'prop_kettle_caused_trip'],
+      excludes: [
+        'prop_ana_unaware_all_evening',
+        'prop_ana_expected_deposit',
+        'prop_kettle_caused_trip',
+      ],
       knowledgeTags: ['ana', 'staging'],
       costKeys: {},
       truth: false,
@@ -126,7 +145,12 @@ export const laVeilleuseExtension = {
       id: 'prop_malik_took_300',
       label: 'Malik a pris 300 € lors du transport de la pochette',
       semantics: { type: 'event', tags: ['theft'], actorId: 'malik', requiresPresence: true },
-      excludes: ['prop_refund_happened', 'prop_counting_error', 'prop_cash_in_safe', 'prop_mina_took_300'],
+      excludes: [
+        'prop_refund_happened',
+        'prop_counting_error',
+        'prop_cash_in_safe',
+        'prop_mina_took_300',
+      ],
       knowledgeTags: ['theft', 'malik'],
       costKeys: {},
       truth: false,
@@ -135,7 +159,12 @@ export const laVeilleuseExtension = {
       id: 'prop_mina_took_300',
       label: 'Mina a pris 300 € sur le chariot',
       semantics: { type: 'event', tags: ['theft'], actorId: 'mina', requiresPresence: true },
-      excludes: ['prop_refund_happened', 'prop_counting_error', 'prop_cash_in_safe', 'prop_malik_took_300'],
+      excludes: [
+        'prop_refund_happened',
+        'prop_counting_error',
+        'prop_cash_in_safe',
+        'prop_malik_took_300',
+      ],
       knowledgeTags: ['theft', 'mina'],
       costKeys: {},
       truth: false,
@@ -144,7 +173,12 @@ export const laVeilleuseExtension = {
       id: 'prop_counting_error',
       label: "L'écart vient d'un double comptage ou d'une saisie erronée",
       semantics: { type: 'assertion', tags: ['counting'] },
-      excludes: ['prop_refund_happened', 'prop_malik_took_300', 'prop_mina_took_300', 'prop_cash_in_safe'],
+      excludes: [
+        'prop_refund_happened',
+        'prop_malik_took_300',
+        'prop_mina_took_300',
+        'prop_cash_in_safe',
+      ],
       knowledgeTags: ['counting'],
       costKeys: {},
       truth: false,
@@ -152,8 +186,18 @@ export const laVeilleuseExtension = {
     {
       id: 'prop_cash_in_safe',
       label: 'Les 300 € ont été déposés au bureau sans être déduits du fond attendu',
-      semantics: { type: 'object-location', objectTag: 'cash', zoneId: 'office', interval: s(260, 850) },
-      excludes: ['prop_refund_happened', 'prop_counting_error', 'prop_malik_took_300', 'prop_mina_took_300'],
+      semantics: {
+        type: 'object-location',
+        objectTag: 'cash',
+        zoneId: 'office',
+        interval: s(260, 850),
+      },
+      excludes: [
+        'prop_refund_happened',
+        'prop_counting_error',
+        'prop_malik_took_300',
+        'prop_mina_took_300',
+      ],
       knowledgeTags: ['cash', 'safe'],
       costKeys: {},
       truth: false,
@@ -161,7 +205,12 @@ export const laVeilleuseExtension = {
     {
       id: 'prop_camera_offline_4m20',
       label: "L'enregistreur est resté hors ligne 4 min 20",
-      semantics: { type: 'event', tags: ['camera-offline'], zoneId: 'office', interval: s(500, 760) },
+      semantics: {
+        type: 'event',
+        tags: ['camera-offline'],
+        zoneId: 'office',
+        interval: s(500, 760),
+      },
       excludes: [],
       knowledgeTags: ['camera-offline'],
       costKeys: {},
@@ -170,7 +219,12 @@ export const laVeilleuseExtension = {
     {
       id: 'prop_local_overload',
       label: 'Le circuit partagé salle de pause–enregistreur a déclenché sur surcharge',
-      semantics: { type: 'event', tags: ['breaker-trip', 'electrical-load'], zoneId: 'staffroom', interval: s(480, 560) },
+      semantics: {
+        type: 'event',
+        tags: ['breaker-trip', 'electrical-load'],
+        zoneId: 'staffroom',
+        interval: s(480, 560),
+      },
       excludes: ['prop_camera_unplugged', 'prop_scheduled_reboot', 'prop_pallet_blocked_camera'],
       knowledgeTags: ['breaker-trip'],
       costKeys: {},
@@ -187,7 +241,12 @@ export const laVeilleuseExtension = {
         interval: s(480, 550),
         requiresPresence: true,
       },
-      excludes: ['prop_camera_unplugged', 'prop_scheduled_reboot', 'prop_ines_cold_aisle_continuous', 'prop_ana_staged_theft'],
+      excludes: [
+        'prop_camera_unplugged',
+        'prop_scheduled_reboot',
+        'prop_ines_cold_aisle_continuous',
+        'prop_ana_staged_theft',
+      ],
       knowledgeTags: ['kettle', 'staffroom'],
       costKeys: { ines: ['admitKettle'] },
       truth: true,
@@ -204,8 +263,18 @@ export const laVeilleuseExtension = {
     {
       id: 'prop_camera_unplugged',
       label: "Quelqu'un a débranché l'enregistreur pour créer un angle mort",
-      semantics: { type: 'event', tags: ['camera-unplugged'], zoneId: 'office', requiresPresence: true },
-      excludes: ['prop_local_overload', 'prop_kettle_caused_trip', 'prop_scheduled_reboot', 'prop_pallet_blocked_camera'],
+      semantics: {
+        type: 'event',
+        tags: ['camera-unplugged'],
+        zoneId: 'office',
+        requiresPresence: true,
+      },
+      excludes: [
+        'prop_local_overload',
+        'prop_kettle_caused_trip',
+        'prop_scheduled_reboot',
+        'prop_pallet_blocked_camera',
+      ],
       knowledgeTags: ['camera-unplugged'],
       costKeys: {},
       truth: false,
@@ -223,7 +292,12 @@ export const laVeilleuseExtension = {
       id: 'prop_scheduled_reboot',
       label: "L'enregistreur a exécuté une maintenance automatique",
       semantics: { type: 'event', tags: ['reboot'], zoneId: 'office', interval: s(500, 760) },
-      excludes: ['prop_local_overload', 'prop_camera_unplugged', 'prop_kettle_caused_trip', 'prop_pallet_blocked_camera'],
+      excludes: [
+        'prop_local_overload',
+        'prop_camera_unplugged',
+        'prop_kettle_caused_trip',
+        'prop_pallet_blocked_camera',
+      ],
       knowledgeTags: ['reboot'],
       costKeys: {},
       truth: false,
@@ -231,7 +305,12 @@ export const laVeilleuseExtension = {
     {
       id: 'prop_pallet_present_2056',
       label: "La palette était dans l'allée froide avant 21 h",
-      semantics: { type: 'object-location', objectTag: 'pallet', zoneId: 'cold_aisle', interval: s(414, 500) },
+      semantics: {
+        type: 'object-location',
+        objectTag: 'pallet',
+        zoneId: 'cold_aisle',
+        interval: s(414, 500),
+      },
       excludes: ['prop_pallet_arrived_2102'],
       knowledgeTags: ['pallet'],
       costKeys: { jo: ['admitObstruction'] },
@@ -249,7 +328,12 @@ export const laVeilleuseExtension = {
     {
       id: 'prop_sleeve_left_office',
       label: "Malik a posé la pochette directement sur le bureau d'Ana",
-      semantics: { type: 'presence', characterId: 'malik', zoneId: 'office', interval: s(250, 340) },
+      semantics: {
+        type: 'presence',
+        characterId: 'malik',
+        zoneId: 'office',
+        interval: s(250, 340),
+      },
       excludes: ['prop_sleeve_left_trolley'],
       knowledgeTags: ['blue-sleeve', 'malik'],
       costKeys: {},
@@ -311,7 +395,12 @@ export const laVeilleuseExtension = {
       id: 'prop_no_receipt_created',
       label: "Aucun document relatif aux 300 € n'a été créé",
       semantics: { type: 'assertion', tags: ['no-receipt'] },
-      excludes: ['prop_receipt_existed', 'prop_mina_hid_receipt', 'prop_receipt_lost', 'prop_receipt_destroyed'],
+      excludes: [
+        'prop_receipt_existed',
+        'prop_mina_hid_receipt',
+        'prop_receipt_lost',
+        'prop_receipt_destroyed',
+      ],
       knowledgeTags: ['pink-receipt'],
       costKeys: {},
       truth: false,
@@ -335,7 +424,12 @@ export const laVeilleuseExtension = {
     {
       id: 'prop_receipt_lost',
       label: 'Un document a glissé du chariot sans être récupéré',
-      semantics: { type: 'event', tags: ['pink-receipt', 'lost'], zoneId: 'stockroom', interval: s(500, 700) },
+      semantics: {
+        type: 'event',
+        tags: ['pink-receipt', 'lost'],
+        zoneId: 'stockroom',
+        interval: s(500, 700),
+      },
       excludes: ['prop_mina_hid_receipt', 'prop_receipt_destroyed', 'prop_no_receipt_created'],
       knowledgeTags: ['pink-receipt'],
       costKeys: {},
@@ -352,7 +446,12 @@ export const laVeilleuseExtension = {
         interval: s(660, 740),
         requiresPresence: true,
       },
-      excludes: ['prop_receipt_lost', 'prop_receipt_destroyed', 'prop_no_receipt_created', 'prop_mina_saw_no_paperwork'],
+      excludes: [
+        'prop_receipt_lost',
+        'prop_receipt_destroyed',
+        'prop_no_receipt_created',
+        'prop_mina_saw_no_paperwork',
+      ],
       knowledgeTags: ['pink-receipt', 'mina'],
       costKeys: { mina: ['admitHiddenReceipt'] },
       truth: true,
@@ -360,7 +459,11 @@ export const laVeilleuseExtension = {
     {
       id: 'prop_mina_saw_no_paperwork',
       label: "Il n'y avait ni argent ni document sur le chariot",
-      semantics: { type: 'assertion', tags: ['returns-trolley', 'no-paperwork'], subjectId: 'mina' },
+      semantics: {
+        type: 'assertion',
+        tags: ['returns-trolley', 'no-paperwork'],
+        subjectId: 'mina',
+      },
       excludes: ['prop_sleeve_left_trolley', 'prop_mina_hid_receipt'],
       knowledgeTags: ['returns-trolley', 'mina'],
       costKeys: {},
@@ -452,7 +555,12 @@ export const laVeilleuseExtension = {
     {
       id: 'prop_ines_cold_aisle_continuous',
       label: "Inès est restée dans l'allée froide tout le temps",
-      semantics: { type: 'continuous-presence', characterId: 'ines', zoneId: 'cold_aisle', interval: s(0, 1560) },
+      semantics: {
+        type: 'continuous-presence',
+        characterId: 'ines',
+        zoneId: 'cold_aisle',
+        interval: s(0, 1560),
+      },
       excludes: ['prop_ines_went_stockroom', 'prop_kettle_caused_trip'],
       knowledgeTags: ['ines'],
       costKeys: {},
@@ -466,7 +574,12 @@ export const laVeilleuseExtension = {
         observerId: 'noe',
         modality: 'audio',
         observerZoneId: 'loading',
-        target: { zoneId: 'stockroom', interval: s(520, 550), claimedTags: ['metal', 'door-like'], identityClaimed: false },
+        target: {
+          zoneId: 'stockroom',
+          interval: s(520, 550),
+          claimedTags: ['metal', 'door-like'],
+          identityClaimed: false,
+        },
       },
       excludes: [],
       knowledgeTags: ['metal', 'door-like'],
@@ -492,85 +605,391 @@ export const laVeilleuseExtension = {
   ],
 
   evidenceMarkers: [
-    { evidenceId: 'e_till_report', zoneId: 'checkout', interval: s(1240, 1380), label: 'Écart de 300 € au comptage' },
-    { evidenceId: 'e_camera_gap', zoneId: 'office', interval: s(500, 760), label: 'Flux vidéo absent' },
+    {
+      evidenceId: 'e_till_report',
+      zoneId: 'checkout',
+      interval: s(1240, 1380),
+      label: 'Écart de 300 € au comptage',
+    },
+    {
+      evidenceId: 'e_camera_gap',
+      zoneId: 'office',
+      interval: s(500, 760),
+      label: 'Flux vidéo absent',
+    },
     { evidenceId: 'e_door_exit', zoneId: 'entrance', at: 180, label: 'Sortie non salariée' },
-    { evidenceId: 'e_drawer_log', zoneId: 'checkout', at: 132, label: 'Ouverture manuelle du tiroir' },
-    { evidenceId: 'e_pallet_scan', zoneId: 'cold_aisle', at: 414, label: 'Palette validée par le terminal' },
-    { evidenceId: 'e_breaker_log', zoneId: 'office', interval: s(500, 760), label: 'Déclenchement du circuit partagé' },
-    { evidenceId: 'e_warm_kettle', zoneId: 'staffroom', at: 540, label: 'Minuteur arrêté vers 20 h 58' },
+    {
+      evidenceId: 'e_drawer_log',
+      zoneId: 'checkout',
+      at: 132,
+      label: 'Ouverture manuelle du tiroir',
+    },
+    {
+      evidenceId: 'e_pallet_scan',
+      zoneId: 'cold_aisle',
+      at: 414,
+      label: 'Palette validée par le terminal',
+    },
+    {
+      evidenceId: 'e_breaker_log',
+      zoneId: 'office',
+      interval: s(500, 760),
+      label: 'Déclenchement du circuit partagé',
+    },
+    {
+      evidenceId: 'e_warm_kettle',
+      zoneId: 'staffroom',
+      at: 540,
+      label: 'Minuteur arrêté vers 20 h 58',
+    },
     { evidenceId: 'e_trolley_mark', zoneId: 'stockroom', label: 'Trace de roue sur le seuil' },
     { evidenceId: 'e_blue_sleeve', zoneId: 'office', label: 'Pochette vide (objets trouvés)' },
-    { evidenceId: 'e_pressure_imprint', zoneId: 'checkout', interval: s(120, 210), label: 'Empreinte du duplicata' },
-    { evidenceId: 'e_hidden_receipt', zoneId: 'staffroom', label: 'Justificatif derrière la fiche d’entretien' },
+    {
+      evidenceId: 'e_pressure_imprint',
+      zoneId: 'checkout',
+      interval: s(120, 210),
+      label: 'Empreinte du duplicata',
+    },
+    {
+      evidenceId: 'e_hidden_receipt',
+      zoneId: 'staffroom',
+      label: 'Justificatif derrière la fiche d’entretien',
+    },
   ],
 
   facts: [
-    { factId: 'f_customer_return', label: 'Retour d’une cliente après l’heure des retours', revealedByEvidenceIds: [], reportedByStatementIds: [], revealedByConfrontationIds: ['c_ana_refund'] },
-    { factId: 'f_manual_drawer_open', label: 'Ouverture manuelle du tiroir (clé responsable)', revealedByEvidenceIds: ['e_drawer_log'], reportedByStatementIds: [], revealedByConfrontationIds: [] },
-    { factId: 'f_cash_refund', label: 'Remboursement manuel de 300 € en espèces', revealedByEvidenceIds: ['e_hidden_receipt', 'e_pressure_imprint'], reportedByStatementIds: ['s_mina_clarified'], revealedByConfrontationIds: [] },
-    { factId: 'f_receipt_written', label: 'Rédaction du justificatif rose signé A. Sorel', revealedByEvidenceIds: ['e_pressure_imprint', 'e_hidden_receipt'], reportedByStatementIds: ['s_mina_clarified'], revealedByConfrontationIds: [] },
-    { factId: 'f_sleeve_handover', label: 'Remise d’une pochette bleue à Malik', revealedByEvidenceIds: [], reportedByStatementIds: ['s_malik_initial', 's_malik_clarified'], revealedByConfrontationIds: [] },
-    { factId: 'f_sleeve_on_trolley', label: 'Pochette laissée sur le chariot de retours', revealedByEvidenceIds: [], reportedByStatementIds: ['s_malik_clarified'], revealedByConfrontationIds: [] },
-    { factId: 'f_bottle_break', label: 'Bouteille brisée au rayon 2', revealedByEvidenceIds: [], reportedByStatementIds: ['s_malik_clarified'], revealedByConfrontationIds: [] },
-    { factId: 'f_trolley_move', label: 'Chariot de retours poussé vers la réserve', revealedByEvidenceIds: ['e_trolley_mark'], reportedByStatementIds: ['s_mina_initial'], revealedByConfrontationIds: [] },
-    { factId: 'f_pallet_placed', label: 'Palette déposée dans l’allée froide', revealedByEvidenceIds: ['e_pallet_scan'], reportedByStatementIds: ['s_jo_clarified'], revealedByConfrontationIds: [] },
-    { factId: 'f_kettle_on', label: 'Bouilloire lancée en salle de pause', revealedByEvidenceIds: ['e_warm_kettle'], reportedByStatementIds: ['s_ines_clarified'], revealedByConfrontationIds: [] },
-    { factId: 'f_camera_trip', label: 'Interruption de l’enregistreur vidéo', revealedByEvidenceIds: ['e_camera_gap', 'e_breaker_log'], reportedByStatementIds: [], revealedByConfrontationIds: [] },
-    { factId: 'f_trolley_bang', label: 'Choc métallique du chariot sur le seuil de la réserve', revealedByEvidenceIds: ['e_trolley_mark'], reportedByStatementIds: ['s_noe_clarified'], revealedByConfrontationIds: [] },
-    { factId: 'f_receipt_falls', label: 'Le justificatif tombe de la pochette', revealedByEvidenceIds: [], reportedByStatementIds: ['s_mina_clarified'], revealedByConfrontationIds: [] },
-    { factId: 'f_receipt_hidden', label: 'Justificatif glissé derrière la fiche d’entretien', revealedByEvidenceIds: ['e_hidden_receipt'], reportedByStatementIds: ['s_mina_clarified'], revealedByConfrontationIds: [] },
-    { factId: 'f_empty_sleeve_found', label: 'Pochette bleue retrouvée vide dans la réserve', revealedByEvidenceIds: ['e_blue_sleeve'], reportedByStatementIds: [], revealedByConfrontationIds: ['c_jo_sleeve'] },
-    { factId: 'f_sleeve_in_drawer', label: 'Pochette déposée dans les objets trouvés du bureau', revealedByEvidenceIds: ['e_blue_sleeve'], reportedByStatementIds: [], revealedByConfrontationIds: [] },
-    { factId: 'f_count_complete', label: 'Comptage de fermeture : 300 € manquants', revealedByEvidenceIds: ['e_till_report'], reportedByStatementIds: [], revealedByConfrontationIds: [] },
-    { factId: 'f_report_opened', label: 'Ouverture du rapport d’écart', revealedByEvidenceIds: [], reportedByStatementIds: [], revealedByConfrontationIds: [] },
+    {
+      factId: 'f_customer_return',
+      label: 'Retour d’une cliente après l’heure des retours',
+      revealedByEvidenceIds: [],
+      reportedByStatementIds: [],
+      revealedByConfrontationIds: ['c_ana_refund'],
+    },
+    {
+      factId: 'f_manual_drawer_open',
+      label: 'Ouverture manuelle du tiroir (clé responsable)',
+      revealedByEvidenceIds: ['e_drawer_log'],
+      reportedByStatementIds: [],
+      revealedByConfrontationIds: [],
+    },
+    {
+      factId: 'f_cash_refund',
+      label: 'Remboursement manuel de 300 € en espèces',
+      revealedByEvidenceIds: ['e_hidden_receipt', 'e_pressure_imprint'],
+      reportedByStatementIds: ['s_mina_clarified'],
+      revealedByConfrontationIds: [],
+    },
+    {
+      factId: 'f_receipt_written',
+      label: 'Rédaction du justificatif rose signé A. Sorel',
+      revealedByEvidenceIds: ['e_pressure_imprint', 'e_hidden_receipt'],
+      reportedByStatementIds: ['s_mina_clarified'],
+      revealedByConfrontationIds: [],
+    },
+    {
+      factId: 'f_sleeve_handover',
+      label: 'Remise d’une pochette bleue à Malik',
+      revealedByEvidenceIds: [],
+      reportedByStatementIds: ['s_malik_initial', 's_malik_clarified'],
+      revealedByConfrontationIds: [],
+    },
+    {
+      factId: 'f_sleeve_on_trolley',
+      label: 'Pochette laissée sur le chariot de retours',
+      revealedByEvidenceIds: [],
+      reportedByStatementIds: ['s_malik_clarified'],
+      revealedByConfrontationIds: [],
+    },
+    {
+      factId: 'f_bottle_break',
+      label: 'Bouteille brisée au rayon 2',
+      revealedByEvidenceIds: [],
+      reportedByStatementIds: ['s_malik_clarified'],
+      revealedByConfrontationIds: [],
+    },
+    {
+      factId: 'f_trolley_move',
+      label: 'Chariot de retours poussé vers la réserve',
+      revealedByEvidenceIds: ['e_trolley_mark'],
+      reportedByStatementIds: ['s_mina_initial'],
+      revealedByConfrontationIds: [],
+    },
+    {
+      factId: 'f_pallet_placed',
+      label: 'Palette déposée dans l’allée froide',
+      revealedByEvidenceIds: ['e_pallet_scan'],
+      reportedByStatementIds: ['s_jo_clarified'],
+      revealedByConfrontationIds: [],
+    },
+    {
+      factId: 'f_kettle_on',
+      label: 'Bouilloire lancée en salle de pause',
+      revealedByEvidenceIds: ['e_warm_kettle'],
+      reportedByStatementIds: ['s_ines_clarified'],
+      revealedByConfrontationIds: [],
+    },
+    {
+      factId: 'f_camera_trip',
+      label: 'Interruption de l’enregistreur vidéo',
+      revealedByEvidenceIds: ['e_camera_gap', 'e_breaker_log'],
+      reportedByStatementIds: [],
+      revealedByConfrontationIds: [],
+    },
+    {
+      factId: 'f_trolley_bang',
+      label: 'Choc métallique du chariot sur le seuil de la réserve',
+      revealedByEvidenceIds: ['e_trolley_mark'],
+      reportedByStatementIds: ['s_noe_clarified'],
+      revealedByConfrontationIds: [],
+    },
+    {
+      factId: 'f_receipt_falls',
+      label: 'Le justificatif tombe de la pochette',
+      revealedByEvidenceIds: [],
+      reportedByStatementIds: ['s_mina_clarified'],
+      revealedByConfrontationIds: [],
+    },
+    {
+      factId: 'f_receipt_hidden',
+      label: 'Justificatif glissé derrière la fiche d’entretien',
+      revealedByEvidenceIds: ['e_hidden_receipt'],
+      reportedByStatementIds: ['s_mina_clarified'],
+      revealedByConfrontationIds: [],
+    },
+    {
+      factId: 'f_empty_sleeve_found',
+      label: 'Pochette bleue retrouvée vide dans la réserve',
+      revealedByEvidenceIds: ['e_blue_sleeve'],
+      reportedByStatementIds: [],
+      revealedByConfrontationIds: ['c_jo_sleeve'],
+    },
+    {
+      factId: 'f_sleeve_in_drawer',
+      label: 'Pochette déposée dans les objets trouvés du bureau',
+      revealedByEvidenceIds: ['e_blue_sleeve'],
+      reportedByStatementIds: [],
+      revealedByConfrontationIds: [],
+    },
+    {
+      factId: 'f_count_complete',
+      label: 'Comptage de fermeture : 300 € manquants',
+      revealedByEvidenceIds: ['e_till_report'],
+      reportedByStatementIds: [],
+      revealedByConfrontationIds: [],
+    },
+    {
+      factId: 'f_report_opened',
+      label: 'Ouverture du rapport d’écart',
+      revealedByEvidenceIds: [],
+      reportedByStatementIds: [],
+      revealedByConfrontationIds: [],
+    },
   ],
 
   hypotheses: [
-    { hypothesisId: 'h_emergency_refund', accusatory: false, worldEffect: { type: 'event', tags: ['refund', 'cash-leaves-store'], requiresPresence: true }, costKeys: {} },
-    { hypothesisId: 'h_malik_theft', accusatory: true, worldEffect: { type: 'event', tags: ['theft'], requiresPresence: true }, costKeys: { ana: ['accuseEmployee'], jo: ['accuseMalik'], mina: ['accuseMalik'], ines: ['signAccusation'], malik: ['signAccusation'], noe: ['accuseEmployee'] } },
-    { hypothesisId: 'h_mina_theft', accusatory: true, worldEffect: { type: 'event', tags: ['theft'], requiresPresence: true }, costKeys: { ana: ['accuseEmployee'], ines: ['signAccusation'], malik: ['signAccusation'], noe: ['accuseEmployee'] } },
-    { hypothesisId: 'h_counting_error', accusatory: false, worldEffect: { type: 'none' }, costKeys: {} },
-    { hypothesisId: 'h_safe_transfer', accusatory: false, worldEffect: { type: 'event', tags: ['cash', 'safe'], requiresPresence: false }, costKeys: {} },
-    { hypothesisId: 'h_circuit_overload', accusatory: false, worldEffect: { type: 'event', tags: ['electrical-load'], requiresPresence: true }, costKeys: {}, actorCostKeys: ['admitKettle'] },
-    { hypothesisId: 'h_deliberate_unplug', accusatory: true, worldEffect: { type: 'event', tags: ['camera-unplugged'], requiresPresence: true }, costKeys: {} },
-    { hypothesisId: 'h_pallet_camera', accusatory: false, worldEffect: { type: 'event', tags: ['pallet'], requiresPresence: true }, costKeys: {}, actorCostKeys: ['admitObstruction'] },
-    { hypothesisId: 'h_scheduled_reboot', accusatory: false, worldEffect: { type: 'none' }, costKeys: {} },
-    { hypothesisId: 'h_mina_hidden_receipt', accusatory: false, worldEffect: { type: 'event', tags: ['pink-receipt', 'hidden'], requiresPresence: true }, costKeys: { malik: ['admitNegligence'] } },
-    { hypothesisId: 'h_ana_destroyed_receipt', accusatory: true, worldEffect: { type: 'event', tags: ['pink-receipt', 'destroyed'], requiresPresence: true }, costKeys: { ines: ['accuseAna'] } },
-    { hypothesisId: 'h_receipt_lost', accusatory: false, worldEffect: { type: 'event', tags: ['pink-receipt', 'lost'], requiresPresence: false }, costKeys: { malik: ['admitNegligence'] } },
-    { hypothesisId: 'h_no_receipt', accusatory: false, worldEffect: { type: 'none' }, costKeys: {} },
-    { hypothesisId: 'h_trolley_threshold', accusatory: false, worldEffect: { type: 'sound', signatureTags: ['metal', 'door-like', 'brief'], intensity: 0.72 }, costKeys: {} },
-    { hypothesisId: 'h_stockroom_door', accusatory: false, worldEffect: { type: 'sound', signatureTags: ['door-like', 'brief', 'heavy'], intensity: 0.7 }, costKeys: {} },
-    { hypothesisId: 'h_bottle_noise', accusatory: false, worldEffect: { type: 'sound', signatureTags: ['sharp', 'glass', 'brief'], intensity: 0.8 }, costKeys: {} },
-    { hypothesisId: 'h_freezer_alarm', accusatory: false, worldEffect: { type: 'sound', signatureTags: ['beep', 'electronic', 'continuous'], intensity: 0.5 }, costKeys: {} },
-    { hypothesisId: 'h_ana_initiated_refund', accusatory: false, worldEffect: { type: 'event', tags: ['refund', 'decision'], requiresPresence: true }, costKeys: {} },
-    { hypothesisId: 'h_ana_unaware', accusatory: false, worldEffect: { type: 'none' }, costKeys: {} },
-    { hypothesisId: 'h_ana_deposit', accusatory: false, worldEffect: { type: 'none' }, costKeys: {} },
+    {
+      hypothesisId: 'h_emergency_refund',
+      accusatory: false,
+      worldEffect: { type: 'event', tags: ['refund', 'cash-leaves-store'], requiresPresence: true },
+      costKeys: {},
+    },
+    {
+      hypothesisId: 'h_malik_theft',
+      accusatory: true,
+      worldEffect: { type: 'event', tags: ['theft'], requiresPresence: true },
+      costKeys: {
+        ana: ['accuseEmployee'],
+        jo: ['accuseMalik'],
+        mina: ['accuseMalik'],
+        ines: ['signAccusation'],
+        malik: ['signAccusation'],
+        noe: ['accuseEmployee'],
+      },
+    },
+    {
+      hypothesisId: 'h_mina_theft',
+      accusatory: true,
+      worldEffect: { type: 'event', tags: ['theft'], requiresPresence: true },
+      costKeys: {
+        ana: ['accuseEmployee'],
+        ines: ['signAccusation'],
+        malik: ['signAccusation'],
+        noe: ['accuseEmployee'],
+      },
+    },
+    {
+      hypothesisId: 'h_counting_error',
+      accusatory: false,
+      worldEffect: { type: 'none' },
+      costKeys: {},
+    },
+    {
+      hypothesisId: 'h_safe_transfer',
+      accusatory: false,
+      worldEffect: { type: 'event', tags: ['cash', 'safe'], requiresPresence: false },
+      costKeys: {},
+    },
+    {
+      hypothesisId: 'h_circuit_overload',
+      accusatory: false,
+      worldEffect: { type: 'event', tags: ['electrical-load'], requiresPresence: true },
+      costKeys: {},
+      actorCostKeys: ['admitKettle'],
+    },
+    {
+      hypothesisId: 'h_deliberate_unplug',
+      accusatory: true,
+      worldEffect: { type: 'event', tags: ['camera-unplugged'], requiresPresence: true },
+      costKeys: {},
+    },
+    {
+      hypothesisId: 'h_pallet_camera',
+      accusatory: false,
+      worldEffect: { type: 'event', tags: ['pallet'], requiresPresence: true },
+      costKeys: {},
+      actorCostKeys: ['admitObstruction'],
+    },
+    {
+      hypothesisId: 'h_scheduled_reboot',
+      accusatory: false,
+      worldEffect: { type: 'none' },
+      costKeys: {},
+    },
+    {
+      hypothesisId: 'h_mina_hidden_receipt',
+      accusatory: false,
+      worldEffect: { type: 'event', tags: ['pink-receipt', 'hidden'], requiresPresence: true },
+      costKeys: { malik: ['admitNegligence'] },
+    },
+    {
+      hypothesisId: 'h_ana_destroyed_receipt',
+      accusatory: true,
+      worldEffect: { type: 'event', tags: ['pink-receipt', 'destroyed'], requiresPresence: true },
+      costKeys: { ines: ['accuseAna'] },
+    },
+    {
+      hypothesisId: 'h_receipt_lost',
+      accusatory: false,
+      worldEffect: { type: 'event', tags: ['pink-receipt', 'lost'], requiresPresence: false },
+      costKeys: { malik: ['admitNegligence'] },
+    },
+    {
+      hypothesisId: 'h_no_receipt',
+      accusatory: false,
+      worldEffect: { type: 'none' },
+      costKeys: {},
+    },
+    {
+      hypothesisId: 'h_trolley_threshold',
+      accusatory: false,
+      worldEffect: {
+        type: 'sound',
+        signatureTags: ['metal', 'door-like', 'brief'],
+        intensity: 0.72,
+      },
+      costKeys: {},
+    },
+    {
+      hypothesisId: 'h_stockroom_door',
+      accusatory: false,
+      worldEffect: {
+        type: 'sound',
+        signatureTags: ['door-like', 'brief', 'heavy'],
+        intensity: 0.7,
+      },
+      costKeys: {},
+    },
+    {
+      hypothesisId: 'h_bottle_noise',
+      accusatory: false,
+      worldEffect: { type: 'sound', signatureTags: ['sharp', 'glass', 'brief'], intensity: 0.8 },
+      costKeys: {},
+    },
+    {
+      hypothesisId: 'h_freezer_alarm',
+      accusatory: false,
+      worldEffect: {
+        type: 'sound',
+        signatureTags: ['beep', 'electronic', 'continuous'],
+        intensity: 0.5,
+      },
+      costKeys: {},
+    },
+    {
+      hypothesisId: 'h_ana_initiated_refund',
+      accusatory: false,
+      worldEffect: { type: 'event', tags: ['refund', 'decision'], requiresPresence: true },
+      costKeys: {},
+    },
+    {
+      hypothesisId: 'h_ana_unaware',
+      accusatory: false,
+      worldEffect: { type: 'none' },
+      costKeys: {},
+    },
+    {
+      hypothesisId: 'h_ana_deposit',
+      accusatory: false,
+      worldEffect: { type: 'none' },
+      costKeys: {},
+    },
     { hypothesisId: 'h_ana_staged', accusatory: true, worldEffect: { type: 'none' }, costKeys: {} },
   ],
 
   statements: [
     { statementId: 's_ana_initial', supersedes: [], revealsPerceptionIds: [], admitsCostKeys: [] },
-    { statementId: 's_malik_initial', supersedes: [], revealsPerceptionIds: [], admitsCostKeys: [] },
+    {
+      statementId: 's_malik_initial',
+      supersedes: [],
+      revealsPerceptionIds: [],
+      admitsCostKeys: [],
+    },
     { statementId: 's_ines_initial', supersedes: [], revealsPerceptionIds: [], admitsCostKeys: [] },
     { statementId: 's_jo_initial', supersedes: [], revealsPerceptionIds: [], admitsCostKeys: [] },
     { statementId: 's_mina_initial', supersedes: [], revealsPerceptionIds: [], admitsCostKeys: [] },
     { statementId: 's_noe_initial', supersedes: [], revealsPerceptionIds: [], admitsCostKeys: [] },
-    { statementId: 's_malik_clarified', supersedes: ['s_malik_initial'], revealsPerceptionIds: [], admitsCostKeys: ['admitNegligence'] },
-    { statementId: 's_ines_clarified', supersedes: ['s_ines_initial'], revealsPerceptionIds: [], admitsCostKeys: ['admitKettle'] },
-    { statementId: 's_jo_clarified', supersedes: ['s_jo_initial'], revealsPerceptionIds: [], admitsCostKeys: ['admitObstruction'] },
-    { statementId: 's_mina_clarified', supersedes: ['s_mina_initial'], revealsPerceptionIds: ['p_mina_receipt', 'p_mina_sleeve'], admitsCostKeys: ['admitHiddenReceipt'] },
-    { statementId: 's_noe_clarified', supersedes: ['s_noe_initial'], revealsPerceptionIds: ['p_noe_bang', 'p_noe_silhouette'], admitsCostKeys: ['admitUncertainty'] },
+    {
+      statementId: 's_malik_clarified',
+      supersedes: ['s_malik_initial'],
+      revealsPerceptionIds: [],
+      admitsCostKeys: ['admitNegligence'],
+    },
+    {
+      statementId: 's_ines_clarified',
+      supersedes: ['s_ines_initial'],
+      revealsPerceptionIds: [],
+      admitsCostKeys: ['admitKettle'],
+    },
+    {
+      statementId: 's_jo_clarified',
+      supersedes: ['s_jo_initial'],
+      revealsPerceptionIds: [],
+      admitsCostKeys: ['admitObstruction'],
+    },
+    {
+      statementId: 's_mina_clarified',
+      supersedes: ['s_mina_initial'],
+      revealsPerceptionIds: ['p_mina_receipt', 'p_mina_sleeve'],
+      admitsCostKeys: ['admitHiddenReceipt'],
+    },
+    {
+      statementId: 's_noe_clarified',
+      supersedes: ['s_noe_initial'],
+      revealsPerceptionIds: ['p_noe_bang', 'p_noe_silhouette'],
+      admitsCostKeys: ['admitUncertainty'],
+    },
   ],
 
   confrontations: [
     {
       confrontationId: 'c_ana_drawer',
       responseVariants: {
-        neutral: 'Ana regarde le rapport de caisse sans le prendre. « Ma clé a pu servir. Ça ne veut pas dire ce que vous croyez. » Elle vous laisse consulter le journal d’ouverture, mais n’ira pas plus loin ce soir.',
-        empathetic: 'Ana souffle longuement. « Oui, ma clé a servi. Je vous dirai pourquoi quand je saurai ce que ça coûte à l’équipe. » Elle vous ouvre elle-même le journal des ouvertures manuelles.',
-        direct: 'Ana se redresse. « Vérifiez le journal si vous voulez. Ma clé a servi. Le reste ne vous regarde pas encore. » Le ton s’est refroidi.',
+        neutral:
+          'Ana regarde le rapport de caisse sans le prendre. « Ma clé a pu servir. Ça ne veut pas dire ce que vous croyez. » Elle vous laisse consulter le journal d’ouverture, mais n’ira pas plus loin ce soir.',
+        empathetic:
+          'Ana souffle longuement. « Oui, ma clé a servi. Je vous dirai pourquoi quand je saurai ce que ça coûte à l’équipe. » Elle vous ouvre elle-même le journal des ouvertures manuelles.',
+        direct:
+          'Ana se redresse. « Vérifiez le journal si vous voulez. Ma clé a servi. Le reste ne vous regarde pas encore. » Le ton s’est refroidi.',
       },
       retractsStatementIds: [],
       admitsCostKeys: {},
@@ -580,47 +999,64 @@ export const laVeilleuseExtension = {
     {
       confrontationId: 'c_malik_route',
       responseVariants: {
-        neutral: 'Malik fixe le journal vidéo comme s’il pouvait encore le contredire. « Bon. Je ne suis pas allé au bureau. Je l’ai posée sur le chariot quand la bouteille a cassé. Je comptais la reprendre. »',
-        empathetic: '« Vous voyez bien que je n’ai jamais quitté les rayons. » Malik baisse la voix. « Je l’ai posée sur le chariot, le temps de ramasser le verre. Je croyais qu’il y avait les 300 € dedans. J’ai eu peur d’être le suspect facile. »',
-        direct: 'Malik encaisse. « D’accord, pas le bureau. Le chariot de retours. J’y ai laissé la pochette une minute, la bouteille venait de casser. » Il ne vous regarde plus.',
+        neutral:
+          'Malik fixe le journal vidéo comme s’il pouvait encore le contredire. « Bon. Je ne suis pas allé au bureau. Je l’ai posée sur le chariot quand la bouteille a cassé. Je comptais la reprendre. »',
+        empathetic:
+          '« Vous voyez bien que je n’ai jamais quitté les rayons. » Malik baisse la voix. « Je l’ai posée sur le chariot, le temps de ramasser le verre. Je croyais qu’il y avait les 300 € dedans. J’ai eu peur d’être le suspect facile. »',
+        direct:
+          'Malik encaisse. « D’accord, pas le bureau. Le chariot de retours. J’y ai laissé la pochette une minute, la bouteille venait de casser. » Il ne vous regarde plus.',
       },
       retractsStatementIds: [],
       admitsCostKeys: { malik: ['admitNegligence'] },
       beliefUpdates: [],
-      annotation: 'Malik : la pochette est restée sur le chariot de retours, rayon 1, vers 20 h 54. Il croyait l’argent dedans.',
+      annotation:
+        'Malik : la pochette est restée sur le chariot de retours, rayon 1, vers 20 h 54. Il croyait l’argent dedans.',
     },
     {
       confrontationId: 'c_jo_timing',
       responseVariants: {
-        neutral: 'Jo hausse les épaules. « Vérifiez le terminal. La palette était là avant 21 h. Je l’ai laissée dans le passage pour qu’on ne voie pas que la livraison était en retard. »',
-        empathetic: '« Le retard n’est pas le sujet, Jo. » Iel expire. « La palette était dans l’allée froide avant 21 h. Je l’ai laissée là exprès, pour masquer le retard de Noé et le mien. Le terminal a l’heure. »',
-        direct: 'Jo pousse le terminal vers vous. « Regardez l’heure vous-même. » Iel ne commentera pas la raison.',
+        neutral:
+          'Jo hausse les épaules. « Vérifiez le terminal. La palette était là avant 21 h. Je l’ai laissée dans le passage pour qu’on ne voie pas que la livraison était en retard. »',
+        empathetic:
+          '« Le retard n’est pas le sujet, Jo. » Iel expire. « La palette était dans l’allée froide avant 21 h. Je l’ai laissée là exprès, pour masquer le retard de Noé et le mien. Le terminal a l’heure. »',
+        direct:
+          'Jo pousse le terminal vers vous. « Regardez l’heure vous-même. » Iel ne commentera pas la raison.',
       },
-      guardedVariant: 'Jo pousse le terminal vers vous. « Regardez l’heure vous-même. » Iel ne commentera pas la raison.',
+      guardedVariant:
+        'Jo pousse le terminal vers vous. « Regardez l’heure vous-même. » Iel ne commentera pas la raison.',
       retractsStatementIds: [],
       admitsCostKeys: {},
       beliefUpdates: [],
-      annotation: 'Palette validée à 20 h 56 min 54 s dans l’allée froide. Le passage vers la réserve était encombré pendant la coupure.',
+      annotation:
+        'Palette validée à 20 h 56 min 54 s dans l’allée froide. Le passage vers la réserve était encombré pendant la coupure.',
     },
     {
       confrontationId: 'c_ines_camera',
       responseVariants: {
-        neutral: 'Inès regarde vers la salle de pause avant de répondre. « J’ai lancé la bouilloire. Les néons ont baissé et l’enregistreur s’est éteint. J’ai paniqué, mais je n’ai rien débranché. » Le diagnostic du circuit devient accessible.',
-        empathetic: '« Personne ne va vous reprocher une bouilloire, Inès. » Elle se détend d’un cran. « J’étais en salle de pause. J’ai lancé la bouilloire, tout a baissé, l’enregistreur s’est coupé. J’ai cru que j’allais être renvoyée. » Elle vous montre la bouilloire encore tiède.',
-        direct: 'Inès se ferme. « Vérifiez le tableau électrique si vous voulez. Je n’ai touché à rien. » Elle ne dira rien de plus ce soir.',
+        neutral:
+          'Inès regarde vers la salle de pause avant de répondre. « J’ai lancé la bouilloire. Les néons ont baissé et l’enregistreur s’est éteint. J’ai paniqué, mais je n’ai rien débranché. » Le diagnostic du circuit devient accessible.',
+        empathetic:
+          '« Personne ne va vous reprocher une bouilloire, Inès. » Elle se détend d’un cran. « J’étais en salle de pause. J’ai lancé la bouilloire, tout a baissé, l’enregistreur s’est coupé. J’ai cru que j’allais être renvoyée. » Elle vous montre la bouilloire encore tiède.',
+        direct:
+          'Inès se ferme. « Vérifiez le tableau électrique si vous voulez. Je n’ai touché à rien. » Elle ne dira rien de plus ce soir.',
       },
-      guardedVariant: 'Inès se ferme. « Vérifiez le tableau électrique si vous voulez. Je n’ai touché à rien. » Elle ne dira rien de plus ce soir.',
+      guardedVariant:
+        'Inès se ferme. « Vérifiez le tableau électrique si vous voulez. Je n’ai touché à rien. » Elle ne dira rien de plus ce soir.',
       retractsStatementIds: [],
       admitsCostKeys: {},
       beliefUpdates: [],
-      annotation: 'Circuit commun salle de pause – enregistreur : déclenchement sur surcharge, réarmement automatique.',
+      annotation:
+        'Circuit commun salle de pause – enregistreur : déclenchement sur surcharge, réarmement automatique.',
     },
     {
       confrontationId: 'c_noe_noise',
       responseVariants: {
-        neutral: 'Noé réfléchit vraiment pour la première fois. « Du métal, bref, du côté de la réserve. Et une silhouette, chaude, à travers la palette. Le visage… non. J’ai complété. » Il vous indique le seuil de la réserve.',
-        empathetic: '« Vous étiez loin, Noé, et la palette était devant. » Il acquiesce. « Je n’ai pas vu le visage. J’ai entendu du métal, vu une silhouette chaude. J’ai dit Inès parce que c’est elle que je croise d’habitude. »',
-        direct: 'Noé se raidit. « Je n’ai pas vu le visage, d’accord. Du métal et une silhouette. Mais j’ai entendu quelque chose, ça je le maintiens. »',
+        neutral:
+          'Noé réfléchit vraiment pour la première fois. « Du métal, bref, du côté de la réserve. Et une silhouette, chaude, à travers la palette. Le visage… non. J’ai complété. » Il vous indique le seuil de la réserve.',
+        empathetic:
+          '« Vous étiez loin, Noé, et la palette était devant. » Il acquiesce. « Je n’ai pas vu le visage. J’ai entendu du métal, vu une silhouette chaude. J’ai dit Inès parce que c’est elle que je croise d’habitude. »',
+        direct:
+          'Noé se raidit. « Je n’ai pas vu le visage, d’accord. Du métal et une silhouette. Mais j’ai entendu quelque chose, ça je le maintiens. »',
       },
       retractsStatementIds: [],
       admitsCostKeys: { noe: ['admitUncertainty'] },
@@ -628,26 +1064,34 @@ export const laVeilleuseExtension = {
         { characterId: 'noe', propositionId: 'prop_ines_went_stockroom', confidence: 0.1 },
         { characterId: 'noe', propositionId: 'prop_trolley_maybe_door', confidence: 0.8 },
       ],
-      annotation: 'Noé : perception ≠ conclusion. Métal + silhouette chaude ; l’identité a été complétée.',
+      annotation:
+        'Noé : perception ≠ conclusion. Métal + silhouette chaude ; l’identité a été complétée.',
     },
     {
       confrontationId: 'c_mina_trolley',
       responseVariants: {
-        neutral: 'Mina confirme le trajet du chariot jusqu’à la réserve. « Une roue a accroché le seuil, oui. » Sur le document, elle ne bouge pas : « Rien qui ressemblait à un papier. »',
-        empathetic: 'Mina hoche la tête. « J’ai poussé le chariot jusqu’à la réserve. Une roue a tapé le seuil, ça a résonné. » Elle marque une pause avant de répéter qu’il n’y avait aucun document.',
-        direct: '« Le chariot, oui. Le seuil, oui. » Mina croise les bras. « Le reste, je l’ai déjà dit. »',
+        neutral:
+          'Mina confirme le trajet du chariot jusqu’à la réserve. « Une roue a accroché le seuil, oui. » Sur le document, elle ne bouge pas : « Rien qui ressemblait à un papier. »',
+        empathetic:
+          'Mina hoche la tête. « J’ai poussé le chariot jusqu’à la réserve. Une roue a tapé le seuil, ça a résonné. » Elle marque une pause avant de répéter qu’il n’y avait aucun document.',
+        direct:
+          '« Le chariot, oui. Le seuil, oui. » Mina croise les bras. « Le reste, je l’ai déjà dit. »',
       },
       retractsStatementIds: [],
       admitsCostKeys: {},
       beliefUpdates: [],
-      annotation: 'Trace métallique fraîche sur le seuil de la réserve : le chariot y est bien passé.',
+      annotation:
+        'Trace métallique fraîche sur le seuil de la réserve : le chariot y est bien passé.',
     },
     {
       confrontationId: 'c_jo_sleeve',
       responseVariants: {
-        neutral: 'Jo réfléchit. « Une pochette bleue, vide, sur une étagère de la réserve. Je l’ai mise dans les objets trouvés du bureau. »',
-        empathetic: '« Vous avez trouvé quelque chose dans la réserve, Jo ? » Iel hésite puis : « Une pochette bleue. Vide. Je l’ai rangée dans le tiroir des objets trouvés, je pensais bien faire. »',
-        direct: 'Jo soupire. « Une pochette vide. Bureau, tiroir des objets trouvés. Allez vérifier. »',
+        neutral:
+          'Jo réfléchit. « Une pochette bleue, vide, sur une étagère de la réserve. Je l’ai mise dans les objets trouvés du bureau. »',
+        empathetic:
+          '« Vous avez trouvé quelque chose dans la réserve, Jo ? » Iel hésite puis : « Une pochette bleue. Vide. Je l’ai rangée dans le tiroir des objets trouvés, je pensais bien faire. »',
+        direct:
+          'Jo soupire. « Une pochette vide. Bureau, tiroir des objets trouvés. Allez vérifier. »',
       },
       retractsStatementIds: [],
       admitsCostKeys: {},
@@ -657,48 +1101,69 @@ export const laVeilleuseExtension = {
     {
       confrontationId: 'c_ana_refund',
       responseVariants: {
-        neutral: 'Ana pose la main sur le carnet de duplicatas. « Une cliente est revenue après l’heure des retours. Je l’ai reçue. » Elle ne prononce pas le mot remboursement, mais vous laisse regarder la feuille suivante du carnet.',
-        empathetic: '« Ana, la porte a enregistré une sortie à 20 h 52. Qui était-ce ? » Elle ferme les yeux un instant. « Une cliente. Un appareil défectueux, un enfant qui pleurait. Je l’ai reçue après l’heure. » Elle pousse le carnet vers vous.',
-        direct: '« Ma clé, la porte, d’accord. » Ana serre la mâchoire. « Une cliente est revenue. C’est tout ce que vous obtiendrez ce soir. » Vous examinez le carnet sans son aide.',
+        neutral:
+          'Ana pose la main sur le carnet de duplicatas. « Une cliente est revenue après l’heure des retours. Je l’ai reçue. » Elle ne prononce pas le mot remboursement, mais vous laisse regarder la feuille suivante du carnet.',
+        empathetic:
+          '« Ana, la porte a enregistré une sortie à 20 h 52. Qui était-ce ? » Elle ferme les yeux un instant. « Une cliente. Un appareil défectueux, un enfant qui pleurait. Je l’ai reçue après l’heure. » Elle pousse le carnet vers vous.',
+        direct:
+          '« Ma clé, la porte, d’accord. » Ana serre la mâchoire. « Une cliente est revenue. C’est tout ce que vous obtiendrez ce soir. » Vous examinez le carnet sans son aide.',
       },
       retractsStatementIds: ['s_ana_initial'],
       admitsCostKeys: { ana: ['admitProcedureBreach'] },
       beliefUpdates: [],
-      annotation: 'Une cliente reçue après l’heure des retours. Le duplicata parle de 300 €, signé A. Sorel.',
+      annotation:
+        'Une cliente reçue après l’heure des retours. Le duplicata parle de 300 €, signé A. Sorel.',
     },
     {
       confrontationId: 'c_mina_receipt',
       responseVariants: {
-        neutral: 'Mina regarde longuement l’empreinte du duplicata. « Le papier est tombé de la pochette quand la roue a tapé. J’ai reconnu la signature d’Ana. Je l’ai glissé derrière la fiche d’entretien. Un remboursement hors procédure, ça peut lui coûter sa place. »',
-        empathetic: '« Vous avez protégé quelqu’un, Mina. » Elle s’assoit. « La pochette s’est ouverte. Le papier rose, la signature d’Ana, 300. Je l’ai caché derrière la fiche d’entretien de la salle de pause. Je ne voulais pas qu’on la mette dehors pour ça. »',
-        direct: 'Mina se lève. « Vous avez une empreinte et une trace de roue. Très bien. Cherchez. » Elle quitte la pièce sans un mot de plus.',
+        neutral:
+          'Mina regarde longuement l’empreinte du duplicata. « Le papier est tombé de la pochette quand la roue a tapé. J’ai reconnu la signature d’Ana. Je l’ai glissé derrière la fiche d’entretien. Un remboursement hors procédure, ça peut lui coûter sa place. »',
+        empathetic:
+          '« Vous avez protégé quelqu’un, Mina. » Elle s’assoit. « La pochette s’est ouverte. Le papier rose, la signature d’Ana, 300. Je l’ai caché derrière la fiche d’entretien de la salle de pause. Je ne voulais pas qu’on la mette dehors pour ça. »',
+        direct:
+          'Mina se lève. « Vous avez une empreinte et une trace de roue. Très bien. Cherchez. » Elle quitte la pièce sans un mot de plus.',
       },
-      guardedVariant: 'Mina se lève. « Vous avez une empreinte et une trace de roue. Très bien. Cherchez. » Elle quitte la pièce sans un mot de plus.',
+      guardedVariant:
+        'Mina se lève. « Vous avez une empreinte et une trace de roue. Très bien. Cherchez. » Elle quitte la pièce sans un mot de plus.',
       retractsStatementIds: [],
       admitsCostKeys: {},
       beliefUpdates: [],
-      annotation: 'Le justificatif est derrière la fiche d’entretien. Mina l’a caché pour protéger Ana.',
+      annotation:
+        'Le justificatif est derrière la fiche d’entretien. Mina l’a caché pour protéger Ana.',
     },
   ],
 
   characters: [
     {
       characterId: 'ana',
-      costLabels: { admitProcedureBreach: 'admettre un remboursement hors procédure', accuseEmployee: 'désigner un membre de l’équipe', exposeRefund: 'voir le remboursement exposé' },
+      costLabels: {
+        admitProcedureBreach: 'admettre un remboursement hors procédure',
+        accuseEmployee: 'désigner un membre de l’équipe',
+        exposeRefund: 'voir le remboursement exposé',
+      },
       reactions: {
         signs: 'Ana relit chaque ligne, puis signe d’un trait net.',
-        refusesAccusation: 'Ana repousse le rapport. « Je ne signerai pas une version qui me fait porter ça. »',
-        refusesBelief: 'Ana secoue la tête. « Ce n’est pas ce qui s’est passé, et vous le savez peut-être déjà. »',
+        refusesAccusation:
+          'Ana repousse le rapport. « Je ne signerai pas une version qui me fait porter ça. »',
+        refusesBelief:
+          'Ana secoue la tête. « Ce n’est pas ce qui s’est passé, et vous le savez peut-être déjà. »',
         signsSilently: 'Ana signe sans relire. Elle n’a pas d’objection à formuler.',
         requestsChange: 'Ana pointe un emplacement du rapport. « Changez ça, et on en reparle. »',
         probeNeutral: 'Ana écoute l’hypothèse jusqu’au bout, sans la commenter.',
-        probeDirectAccused: 'Ana se ferme. « Si c’est ça votre version, cherchez une autre signature. »',
-        probeEvidenceUnknown: 'Ana regarde la pièce. « Je ne vois pas ce que vous voulez que j’en dise. »',
+        probeDirectAccused:
+          'Ana se ferme. « Si c’est ça votre version, cherchez une autre signature. »',
+        probeEvidenceUnknown:
+          'Ana regarde la pièce. « Je ne vois pas ce que vous voulez que j’en dise. »',
       },
     },
     {
       characterId: 'malik',
-      costLabels: { admitNegligence: 'admettre avoir laissé la pochette sans surveillance', signAccusation: 'signer une accusation', exposeRefund: 'voir le remboursement exposé' },
+      costLabels: {
+        admitNegligence: 'admettre avoir laissé la pochette sans surveillance',
+        signAccusation: 'signer une accusation',
+        exposeRefund: 'voir le remboursement exposé',
+      },
       reactions: {
         signs: 'Malik lit deux fois, puis signe. « Tant que ça ne dit pas que j’ai volé. »',
         refusesAccusation: 'Malik se lève. « Je ne signerai jamais ça. Jamais. »',
@@ -706,13 +1171,18 @@ export const laVeilleuseExtension = {
         signsSilently: 'Malik signe vite, sans regarder les autres.',
         requestsChange: 'Malik tape sur une ligne. « Enlevez ça et je signe. »',
         probeNeutral: 'Malik hausse une épaule. « Possible. Je n’étais pas là. »',
-        probeDirectAccused: 'Malik blêmit. « Vous cherchez le suspect facile. Je ne suis pas d’accord. »',
+        probeDirectAccused:
+          'Malik blêmit. « Vous cherchez le suspect facile. Je ne suis pas d’accord. »',
         probeEvidenceUnknown: 'Malik regarde la pièce sans comprendre ce qu’on attend de lui.',
       },
     },
     {
       characterId: 'ines',
-      costLabels: { admitKettle: 'admettre la bouilloire et la coupure', accuseAna: 'accuser Ana', signAccusation: 'signer une accusation' },
+      costLabels: {
+        admitKettle: 'admettre la bouilloire et la coupure',
+        accuseAna: 'accuser Ana',
+        signAccusation: 'signer une accusation',
+      },
       reactions: {
         signs: 'Inès signe en s’assurant que son nom n’est associé à rien de grave.',
         refusesAccusation: 'Inès rougit. « Je ne signerai pas ça. »',
@@ -726,7 +1196,11 @@ export const laVeilleuseExtension = {
     },
     {
       characterId: 'jo',
-      costLabels: { admitObstruction: 'admettre avoir laissé la palette dans le passage', accuseMalik: 'accuser Malik', exposeRefund: 'voir le remboursement exposé' },
+      costLabels: {
+        admitObstruction: 'admettre avoir laissé la palette dans le passage',
+        accuseMalik: 'accuser Malik',
+        exposeRefund: 'voir le remboursement exposé',
+      },
       reactions: {
         signs: 'Jo signe rapidement. « Si tout le monde est d’accord. »',
         refusesAccusation: 'Jo secoue la tête. « Pas avec moi dedans. »',
@@ -740,7 +1214,11 @@ export const laVeilleuseExtension = {
     },
     {
       characterId: 'mina',
-      costLabels: { admitHiddenReceipt: 'admettre avoir caché le justificatif', accuseMalik: 'accuser Malik', exposeRefund: 'voir le remboursement exposé' },
+      costLabels: {
+        admitHiddenReceipt: 'admettre avoir caché le justificatif',
+        accuseMalik: 'accuser Malik',
+        exposeRefund: 'voir le remboursement exposé',
+      },
       reactions: {
         signs: 'Mina lit lentement, puis signe. « Que chacun garde sa place. »',
         refusesAccusation: 'Mina pose le stylo. « Non. Pas ça. »',
@@ -748,13 +1226,18 @@ export const laVeilleuseExtension = {
         signsSilently: 'Mina signe sans relever la tête. Personne ne lui a demandé autre chose.',
         requestsChange: 'Mina désigne l’emplacement. « Retirez ça. »',
         probeNeutral: 'Mina écoute, les mains croisées, sans répondre.',
-        probeDirectAccused: 'Mina se fige. « Je rends les choses à leur place. Je ne prends rien. »',
+        probeDirectAccused:
+          'Mina se fige. « Je rends les choses à leur place. Je ne prends rien. »',
         probeEvidenceUnknown: 'Mina regarde la pièce comme un objet qu’il faudrait ranger.',
       },
     },
     {
       characterId: 'noe',
-      costLabels: { admitUncertainty: 'admettre ne pas avoir vraiment vu', accuseEmployee: 'désigner un membre de l’équipe', exposeRefund: 'voir le remboursement exposé' },
+      costLabels: {
+        admitUncertainty: 'admettre ne pas avoir vraiment vu',
+        accuseEmployee: 'désigner un membre de l’équipe',
+        exposeRefund: 'voir le remboursement exposé',
+      },
       reactions: {
         signs: 'Noé signe en regardant l’heure. « Si ça vous permet de conclure. »',
         refusesAccusation: 'Noé lève les mains. « Je ne signe pas ça. »',
@@ -769,10 +1252,22 @@ export const laVeilleuseExtension = {
   ],
 
   endings: [
-    { endingId: 'ending_transparent', hint: 'Une version qui nomme chaque faute sans inventer de coupable existe.' },
-    { endingId: 'ending_protective', hint: 'Une version que presque tout le monde signe peut laisser un document dans l’ombre.' },
-    { endingId: 'ending_scapegoat', hint: 'Une histoire simple trouve toujours des signataires, sauf celui qu’elle désigne.' },
-    { endingId: 'ending_procedural', hint: 'Un dossier peut se refermer sur une anomalie sans jamais nommer personne.' },
+    {
+      endingId: 'ending_transparent',
+      hint: 'Une version qui nomme chaque faute sans inventer de coupable existe.',
+    },
+    {
+      endingId: 'ending_protective',
+      hint: 'Une version que presque tout le monde signe peut laisser un document dans l’ombre.',
+    },
+    {
+      endingId: 'ending_scapegoat',
+      hint: 'Une histoire simple trouve toujours des signataires, sauf celui qu’elle désigne.',
+    },
+    {
+      endingId: 'ending_procedural',
+      hint: 'Un dossier peut se refermer sur une anomalie sans jamais nommer personne.',
+    },
     { endingId: 'ending_impossible', hint: 'Trop de contradictions, et la table se défait.' },
   ],
 

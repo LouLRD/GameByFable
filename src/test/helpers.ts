@@ -7,24 +7,39 @@ import type { Approach } from '@/domain/model/scenario';
 
 export const scenario = requireBundledScenario();
 
-export function run(actions: readonly PlayerAction[], from: GameState = createInitialState(scenario)): GameState {
+export function run(
+  actions: readonly PlayerAction[],
+  from: GameState = createInitialState(scenario),
+): GameState {
   let state = from;
   for (const a of actions) {
     const r = applyAction(scenario, state, a);
-    if (!r.ok) throw new Error(`Action refusée (${r.error.code}) : ${r.error.message} — ${JSON.stringify(a)}`);
+    if (!r.ok)
+      throw new Error(
+        `Action refusée (${r.error.code}) : ${r.error.message} — ${JSON.stringify(a)}`,
+      );
     state = r.state;
   }
   return state;
 }
 
-export const claim = (slotId: string, hypothesisId: string, extra: Partial<Extract<PlayerAction, { type: 'set-claim' }>> = {}): PlayerAction => ({
+export const claim = (
+  slotId: string,
+  hypothesisId: string,
+  extra: Partial<Extract<PlayerAction, { type: 'set-claim' }>> = {},
+): PlayerAction => ({
   type: 'set-claim',
   slotId: slotId as ClaimSlotId,
   hypothesisId: hypothesisId as HypothesisId,
   ...extra,
 });
 
-export const confront = (characterId: string, targetId: string, supportId: string | undefined, approach: Approach = 'neutral'): PlayerAction => ({
+export const confront = (
+  characterId: string,
+  targetId: string,
+  supportId: string | undefined,
+  approach: Approach = 'neutral',
+): PlayerAction => ({
   type: 'confront',
   characterId: characterId as CharacterId,
   targetId,

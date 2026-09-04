@@ -46,9 +46,18 @@ export function loadSizes(): LayoutSizes {
     if (typeof parsed !== 'object' || parsed === null) return DEFAULT_SIZES;
     const record = parsed as Record<string, unknown>;
     return {
-      casefile: clampSize(readNumber(record.casefile, DEFAULT_SIZES.casefile), layoutBounds('casefile')),
-      inspector: clampSize(readNumber(record.inspector, DEFAULT_SIZES.inspector), layoutBounds('inspector')),
-      timeline: clampSize(readNumber(record.timeline, DEFAULT_SIZES.timeline), layoutBounds('timeline')),
+      casefile: clampSize(
+        readNumber(record.casefile, DEFAULT_SIZES.casefile),
+        layoutBounds('casefile'),
+      ),
+      inspector: clampSize(
+        readNumber(record.inspector, DEFAULT_SIZES.inspector),
+        layoutBounds('inspector'),
+      ),
+      timeline: clampSize(
+        readNumber(record.timeline, DEFAULT_SIZES.timeline),
+        layoutBounds('timeline'),
+      ),
     };
   } catch {
     return DEFAULT_SIZES;

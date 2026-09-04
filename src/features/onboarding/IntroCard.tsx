@@ -20,10 +20,15 @@ export function IntroCard({ view }: { view: PlayerView }): React.JSX.Element | n
       <p className="intro-premise">{view.premise}</p>
       <ul className="intro-loop">
         <li>Observez les pièces et les déclarations : distinguez l’établi du rapporté.</li>
-        <li>Formulez une version dans le canevas, puis rejouez la soirée sur le plan et la frise.</li>
+        <li>
+          Formulez une version dans le canevas, puis rejouez la soirée sur le plan et la frise.
+        </li>
         <li>Confrontez, révisez, et ne scellez le rapport que lorsque la version tient.</li>
       </ul>
-      <p className="muted intro-note">Aucune limite de temps. Tout se joue au clavier comme à la souris ; la touche ? ouvre l’aide.</p>
+      <p className="muted intro-note">
+        Aucune limite de temps. Tout se joue au clavier comme à la souris ; la touche ? ouvre
+        l’aide.
+      </p>
       <div>
         <button
           type="button"

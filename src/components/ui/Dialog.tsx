@@ -18,9 +18,19 @@ export interface DialogProps {
   className?: string;
 }
 
-const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-export function Dialog({ open, title, onClose, children, width = 560, blocking = false, describedBy, className }: DialogProps): React.JSX.Element | null {
+export function Dialog({
+  open,
+  title,
+  onClose,
+  children,
+  width = 560,
+  blocking = false,
+  describedBy,
+  className,
+}: DialogProps): React.JSX.Element | null {
   const panelRef = useRef<HTMLDivElement>(null);
   const previousFocus = useRef<Element | null>(null);
   const titleId = useId();
@@ -29,7 +39,9 @@ export function Dialog({ open, title, onClose, children, width = 560, blocking =
     if (!open) return;
     previousFocus.current = document.activeElement;
     const panel = panelRef.current;
-    const first = panel?.querySelector<HTMLElement>('[data-autofocus]') ?? panel?.querySelector<HTMLElement>(FOCUSABLE);
+    const first =
+      panel?.querySelector<HTMLElement>('[data-autofocus]') ??
+      panel?.querySelector<HTMLElement>(FOCUSABLE);
     (first ?? panel)?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && !blocking) {
@@ -38,7 +50,9 @@ export function Dialog({ open, title, onClose, children, width = 560, blocking =
         return;
       }
       if (e.key === 'Tab' && panel) {
-        const items = [...panel.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((el) => el.offsetParent !== null || el === document.activeElement);
+        const items = [...panel.querySelectorAll<HTMLElement>(FOCUSABLE)].filter(
+          (el) => el.offsetParent !== null || el === document.activeElement,
+        );
         if (items.length === 0) {
           e.preventDefault();
           return;
@@ -87,7 +101,12 @@ export function Dialog({ open, title, onClose, children, width = 560, blocking =
             {title}
           </h2>
           {!blocking && (
-            <button type="button" className="btn btn-ghost dialog-close" onClick={onClose} aria-label="Fermer la fenêtre">
+            <button
+              type="button"
+              className="btn btn-ghost dialog-close"
+              onClick={onClose}
+              aria-label="Fermer la fenêtre"
+            >
               ×
             </button>
           )}

@@ -205,13 +205,7 @@ export interface ConfrontationDef {
 // ---------------------------------------------------------------------------
 
 export type ContradictionKind =
-  | 'physical'
-  | 'temporal'
-  | 'sensory'
-  | 'material'
-  | 'epistemic'
-  | 'discursive'
-  | 'motivational';
+  'physical' | 'temporal' | 'sensory' | 'material' | 'epistemic' | 'discursive' | 'motivational';
 
 export interface GenericRule {
   id: RuleId;

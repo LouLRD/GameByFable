@@ -22,12 +22,19 @@ export function NewGameDialog(): React.JSX.Element | null {
 
   if (!open || !needsConfirmation) return null;
   return (
-    <Dialog open title="Nouvelle partie" onClose={closeDialog} width={520} describedBy={descriptionId}>
+    <Dialog
+      open
+      title="Nouvelle partie"
+      onClose={closeDialog}
+      width={520}
+      describedBy={descriptionId}
+    >
       <div className="new-game">
         <p id={descriptionId}>
-          Une progression non exportée existe : {actionCount} {actionCount > 1 ? 'actions' : 'action'} dans le dossier
-          de La Veilleuse. Commencer une nouvelle partie la remplacera (la sauvegarde automatique sera écrasée ; les
-          emplacements manuels sont conservés).
+          Une progression non exportée existe : {actionCount}{' '}
+          {actionCount > 1 ? 'actions' : 'action'} dans le dossier de La Veilleuse. Commencer une
+          nouvelle partie la remplacera (la sauvegarde automatique sera écrasée ; les emplacements
+          manuels sont conservés).
         </p>
         <div className="new-game-actions">
           <button
@@ -41,7 +48,11 @@ export function NewGameDialog(): React.JSX.Element | null {
           >
             Exporter d’abord
           </button>
-          <button type="button" className="btn btn-danger" onClick={() => useGameStore.getState().newGame()}>
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={() => useGameStore.getState().newGame()}
+          >
             Commencer une nouvelle partie
           </button>
           <button type="button" className="btn btn-ghost" onClick={closeDialog} data-autofocus>

@@ -29,6 +29,8 @@ npm ci
 
 Première exécution des tests end-to-end : `npx playwright install chromium`.
 
+Le fichier `.npmrc` active `legacy-peer-deps` : sans lui, npm 9/10 échoue sur un bug d'arborist provoqué par les pairs optionnels de Vitest (voir DECISIONS.md, § Technique).
+
 ## Déploiement statique
 
 `npm run build` produit un site statique dans `dist/` (`base: './'`, donc servable depuis n'importe quel sous-dossier). Copiez `dist/` sur n'importe quel hébergement de fichiers (GitHub Pages, Netlify, un serveur nginx, un dossier partagé) ; aucune variable d'environnement ni configuration serveur n'est requise. La sauvegarde utilise `localStorage` du navigateur ; l'export/import JSON permet de transporter une partie.
@@ -39,7 +41,8 @@ Première exécution des tests end-to-end : `npx playwright install chromium`.
 - **Plan** : les zones du magasin, les passages (durées, visibilité, obstruction), les jetons des personnes à l'instant du curseur (plein = établi par la caméra, pointillé = rapporté, losange = proposé). Les personnes hors champ sont listées à part.
 - **Frise** : le curseur temporel unique (20:49 → 21:15), les pistes par personne, les pièces et faits, les intervalles de la version, la coupure vidéo. Lecture, pause, pas de 1 s / 10 s, saut d'événement.
 - **Version** : cinq emplacements à remplir avec des hypothèses paramétrables (acteur, lieu, intervalle). Trois axes séparés : cohérence, dévoilement, adhésion. L'onglet **Contradictions** explique chaque conflit étape par étape et propose quoi examiner.
-- **Confronter** : un protagoniste, une cible (sa déclaration), une pièce d'appui facultative, une approche (neutre, empathique, directe). Le résultat est déterministe ; une confrontation non recevable ne coûte jamais de pression.
+- **Confronter** (depuis la fiche d'une personne ou d'une déclaration) : un protagoniste, une cible (sa déclaration), une pièce d'appui facultative, une approche (neutre, empathique, directe). Le résultat est déterministe ; une confrontation non recevable ne coûte jamais de pression. « Sonder » présente une hypothèse à quelqu'un sans rien consommer.
+- **Sauvegardes** : sauvegarde automatique après chaque action, trois emplacements manuels, export JSON et import (validation de schéma, migration, refus non destructif). Sur mobile, ces commandes sont sous « Menu ».
 - **Table ronde** puis **Sceller** : chacun signe, refuse ou demande une modification ; le rapport scellé ouvre l'épilogue qui compare version signée et faits.
 
 Raccourcis : `1`–`4` espaces, `Espace` lecture/pause, `←`/`→` curseur (±1 s, `Maj` ±10 s), `Début`/`Fin`, `?` aide, `Échap` fermer.

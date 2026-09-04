@@ -66,16 +66,21 @@ export function selectEpilogue(scenario: LoadedScenario, state: GameState): Epil
     return {
       slotId: slot.id,
       slotLabel: slot.label,
-      chosenLabel: claim ? (scenario.index.hypotheses.get(claim.hypothesisId)?.label ?? null) : null,
+      chosenLabel: claim
+        ? (scenario.index.hypotheses.get(claim.hypothesisId)?.label ?? null)
+        : null,
       matches,
-      canonicalLabel: canonical && (matches || available.has(canonical.id)) ? canonical.label : null,
+      canonicalLabel:
+        canonical && (matches || available.has(canonical.id)) ? canonical.label : null,
     };
   });
 
   const facts: EpilogueFactView[] = scenario.data.canonicalFacts
     .map((f) => {
       const revealed = f.secrecy === 'public' || established.has(f.id) || reported.has(f.id);
-      const slotLabel = f.variableSlotId ? (scenario.index.slots.get(f.variableSlotId)?.label ?? null) : null;
+      const slotLabel = f.variableSlotId
+        ? (scenario.index.slots.get(f.variableSlotId)?.label ?? null)
+        : null;
       return {
         id: f.id,
         label: revealed ? (scenario.index.factPresentations.get(f.id)?.label ?? f.id) : null,
@@ -93,13 +98,37 @@ export function selectEpilogue(scenario: LoadedScenario, state: GameState): Epil
     const ext = scenario.index.characterExtensions.get(d.characterId);
     switch (d.verdict) {
       case 'signs':
-        return { characterId: d.characterId, name, outcome: 'signed', line: ext?.reactions.signs ?? `${name} a signé.`, publicReasons: d.publicReasons };
+        return {
+          characterId: d.characterId,
+          name,
+          outcome: 'signed',
+          line: ext?.reactions.signs ?? `${name} a signé.`,
+          publicReasons: d.publicReasons,
+        };
       case 'signs-silently':
-        return { characterId: d.characterId, name, outcome: 'signed-silently', line: `${name} a signé sans un mot. Une part de la soirée reste entre ses mains.`, publicReasons: [] };
+        return {
+          characterId: d.characterId,
+          name,
+          outcome: 'signed-silently',
+          line: `${name} a signé sans un mot. Une part de la soirée reste entre ses mains.`,
+          publicReasons: [],
+        };
       case 'requests-change':
-        return { characterId: d.characterId, name, outcome: 'requested-change', line: ext?.reactions.requestsChange ?? `${name} a demandé une modification.`, publicReasons: d.publicReasons };
+        return {
+          characterId: d.characterId,
+          name,
+          outcome: 'requested-change',
+          line: ext?.reactions.requestsChange ?? `${name} a demandé une modification.`,
+          publicReasons: d.publicReasons,
+        };
       case 'refuses':
-        return { characterId: d.characterId, name, outcome: 'refused', line: ext?.reactions.refusesBelief ?? `${name} a refusé de signer.`, publicReasons: d.publicReasons };
+        return {
+          characterId: d.characterId,
+          name,
+          outcome: 'refused',
+          line: ext?.reactions.refusesBelief ?? `${name} a refusé de signer.`,
+          publicReasons: d.publicReasons,
+        };
     }
   });
 
@@ -107,7 +136,11 @@ export function selectEpilogue(scenario: LoadedScenario, state: GameState): Epil
     ? scenario.data.endings
         .filter((e) => e.id !== ending.id)
         .sort((a, b) => b.priority - a.priority)
-        .map((e) => ({ id: e.id, title: e.title, hint: scenario.index.endingExtensions.get(e.id)?.hint ?? '' }))
+        .map((e) => ({
+          id: e.id,
+          title: e.title,
+          hint: scenario.index.endingExtensions.get(e.id)?.hint ?? '',
+        }))
     : [];
 
   const detached = new Set(state.detachedEvidenceIds);
@@ -121,6 +154,8 @@ export function selectEpilogue(scenario: LoadedScenario, state: GameState): Epil
     signatureCount: evaluation.signatureCount,
     otherEndings,
     tracks: scenario.data.movementTracks,
-    omittedEvidenceLabels: state.unlockedEvidenceIds.filter((id) => detached.has(id)).map((id) => scenario.index.evidence.get(id)?.label ?? id),
+    omittedEvidenceLabels: state.unlockedEvidenceIds
+      .filter((id) => detached.has(id))
+      .map((id) => scenario.index.evidence.get(id)?.label ?? id),
   };
 }

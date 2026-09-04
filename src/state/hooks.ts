@@ -11,19 +11,28 @@ export function usePlayerView(): PlayerView | null {
   const scenario = useGameStore((s) => s.scenario);
   const game = useGameStore((s) => s.game);
   const selectedId = useGameStore((s) => s.selection?.id ?? null);
-  return useMemo(() => (scenario && game ? selectPlayerView(scenario, game, { selectedId }) : null), [scenario, game, selectedId]);
+  return useMemo(
+    () => (scenario && game ? selectPlayerView(scenario, game, { selectedId }) : null),
+    [scenario, game, selectedId],
+  );
 }
 
 export function useEvaluation(): FullEvaluation | null {
   const scenario = useGameStore((s) => s.scenario);
   const game = useGameStore((s) => s.game);
-  return useMemo(() => (scenario && game ? evaluateVersion(scenario, game) : null), [scenario, game]);
+  return useMemo(
+    () => (scenario && game ? evaluateVersion(scenario, game) : null),
+    [scenario, game],
+  );
 }
 
 export function useEpilogue(): EpilogueView | null {
   const scenario = useGameStore((s) => s.scenario);
   const game = useGameStore((s) => s.game);
-  return useMemo(() => (scenario && game ? selectEpilogue(scenario, game) : null), [scenario, game]);
+  return useMemo(
+    () => (scenario && game ? selectEpilogue(scenario, game) : null),
+    [scenario, game],
+  );
 }
 
 /** Mouvement réduit effectif : préférence explicite ou média système. */
@@ -31,5 +40,7 @@ export function useReducedMotion(): boolean {
   const pref = useGameStore((s) => s.prefs.reducedMotion);
   if (pref === 'on') return true;
   if (pref === 'off') return false;
-  return typeof window !== 'undefined' && typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false;
+  return typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    : false;
 }

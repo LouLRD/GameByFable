@@ -2,9 +2,19 @@
  * Détecteurs physique (trajet / absence caméra) et temporel (chevauchement) :
  * appliqués aux claims paramétrées et aux déclarations debout impliquant une présence.
  */
-import type { Contradiction, ContradictionDetector, ExplanationStep } from '../../model/contradiction';
+import type {
+  Contradiction,
+  ContradictionDetector,
+  ExplanationStep,
+} from '../../model/contradiction';
 import type { EvidenceId } from '../../model/ids';
-import { canOccupy, checkPairCompatibility, presencesFromSemantics, type OccupancyConflict, type PositionSegment } from '../../engine/positions';
+import {
+  canOccupy,
+  checkPairCompatibility,
+  presencesFromSemantics,
+  type OccupancyConflict,
+  type PositionSegment,
+} from '../../engine/positions';
 import type { EvaluationContext } from '../../engine/context';
 import { characterName, makeContradiction, zoneLabel } from '../common';
 
@@ -29,15 +39,26 @@ function suggestions(ctx: EvaluationContext, c: OccupancyConflict): EvidenceId[]
   if (c.segment.source === 'camera') return [ctx.cameraEvidenceId];
   if (c.segment.source === 'fact') {
     const pres = ctx.scenario.index.factPresentations.get(c.segment.sourceIds[0] as never);
-    return pres ? pres.revealedByEvidenceIds.filter((e) => ctx.unlockedEvidence.some((u) => u.id === e)) : [];
+    return pres
+      ? pres.revealedByEvidenceIds.filter((e) => ctx.unlockedEvidence.some((u) => u.id === e))
+      : [];
   }
-  return c.segment.sourceIds.filter((id) => ctx.scenario.index.evidence.has(id as never)) as EvidenceId[];
+  return c.segment.sourceIds.filter((id) =>
+    ctx.scenario.index.evidence.has(id as never),
+  ) as EvidenceId[];
 }
 
 function fromConflict(
   ctx: EvaluationContext,
   c: OccupancyConflict,
-  subject: { id: string; kind: 'claim' | 'statement'; slotIds: string[]; leadStep: ExplanationStep; characterId: string; zoneId: string },
+  subject: {
+    id: string;
+    kind: 'claim' | 'statement';
+    slotIds: string[];
+    leadStep: ExplanationStep;
+    characterId: string;
+    zoneId: string;
+  },
 ): Contradiction | null {
   const kind = conflictKind(c);
   if (!kind) return null;
@@ -72,7 +93,9 @@ function fromConflict(
   });
 }
 
-export const physicalTemporalDetector: ContradictionDetector & { detect(ctx: EvaluationContext): Contradiction[] } = {
+export const physicalTemporalDetector: ContradictionDetector & {
+  detect(ctx: EvaluationContext): Contradiction[];
+} = {
   id: 'physical-temporal',
   detect(ctx: EvaluationContext): Contradiction[] {
     const out: Contradiction[] = [];
@@ -81,9 +104,23 @@ export const physicalTemporalDetector: ContradictionDetector & { detect(ctx: Eva
       if (!ev.presence) continue;
       proposed.push(ev.presence);
       const p = ev.presence;
-      const res = canOccupy(p.characterId, p.zoneId, p.interval, ctx.positions, ctx.scenario, ctx.world, [ev.hypothesis.id]);
+      const res = canOccupy(
+        p.characterId,
+        p.zoneId,
+        p.interval,
+        ctx.positions,
+        ctx.scenario,
+        ctx.world,
+        [ev.hypothesis.id],
+      );
       if (res.status !== 'impossible') continue;
-      const lead: ExplanationStep = { type: 'claim', hypothesisId: ev.hypothesis.id, actorId: p.characterId, zoneId: p.zoneId, interval: p.interval };
+      const lead: ExplanationStep = {
+        type: 'claim',
+        hypothesisId: ev.hypothesis.id,
+        actorId: p.characterId,
+        zoneId: p.zoneId,
+        interval: p.interval,
+      };
       for (const c of res.conflicts) {
         const contradiction = fromConflict(ctx, c, {
           id: ev.hypothesis.id,
@@ -108,20 +145,40 @@ export const physicalTemporalDetector: ContradictionDetector & { detect(ctx: Eva
         const name = characterName(ctx.scenario, a.characterId);
         const ha = a.sourceIds[0] ?? '';
         const hb = b.sourceIds[0] ?? '';
-        const slotIds = [ha, hb].map((h) => ctx.scenario.index.hypotheses.get(h as never)?.slotId).filter((s): s is NonNullable<typeof s> => s !== undefined);
+        const slotIds = [ha, hb]
+          .map((h) => ctx.scenario.index.hypotheses.get(h as never)?.slotId)
+          .filter((s): s is NonNullable<typeof s> => s !== undefined);
         out.push(
           makeContradiction({
             kind,
             severity: 'critical',
-            title: kind === 'temporal' ? `${name} ne peut pas être à deux endroits` : `Trajet impossible pour ${name} entre deux hypothèses`,
+            title:
+              kind === 'temporal'
+                ? `${name} ne peut pas être à deux endroits`
+                : `Trajet impossible pour ${name} entre deux hypothèses`,
             ruleId: kind === 'temporal' ? TEMPORAL_RULE : PHYSICAL_RULE,
             involvedIds: [ha, hb, a.characterId],
             slotIds,
             explanation: [
-              { type: 'claim', hypothesisId: ha as never, actorId: a.characterId, zoneId: a.zoneId, interval: a.interval },
-              { type: 'claim', hypothesisId: hb as never, actorId: b.characterId, zoneId: b.zoneId, interval: b.interval },
+              {
+                type: 'claim',
+                hypothesisId: ha as never,
+                actorId: a.characterId,
+                zoneId: a.zoneId,
+                interval: a.interval,
+              },
+              {
+                type: 'claim',
+                hypothesisId: hb as never,
+                actorId: b.characterId,
+                zoneId: b.zoneId,
+                interval: b.interval,
+              },
               ...c.steps,
-              { type: 'conclusion', text: `Deux hypothèses de la version exigent de ${name} des présences incompatibles.` },
+              {
+                type: 'conclusion',
+                text: `Deux hypothèses de la version exigent de ${name} des présences incompatibles.`,
+              },
             ],
             inspectableAt: c.at,
             inspectableZoneIds: c.zoneIds,
@@ -134,11 +191,30 @@ export const physicalTemporalDetector: ContradictionDetector & { detect(ctx: Eva
       const def = ctx.scenario.index.propositions.get(s.propositionId);
       if (!def) continue;
       for (const seg of presencesFromSemantics(def.semantics, s.id, s.speakerId)) {
-        const res = canOccupy(seg.characterId, seg.zoneId, seg.interval, ctx.positions, ctx.scenario, ctx.world, [s.id]);
+        const res = canOccupy(
+          seg.characterId,
+          seg.zoneId,
+          seg.interval,
+          ctx.positions,
+          ctx.scenario,
+          ctx.world,
+          [s.id],
+        );
         if (res.status !== 'impossible') continue;
-        const lead: ExplanationStep = { type: 'statement', statementId: s.id, speakerId: s.speakerId };
+        const lead: ExplanationStep = {
+          type: 'statement',
+          statementId: s.id,
+          speakerId: s.speakerId,
+        };
         for (const c of res.conflicts) {
-          const contradiction = fromConflict(ctx, c, { id: s.id, kind: 'statement', slotIds: [], leadStep: lead, characterId: seg.characterId, zoneId: seg.zoneId });
+          const contradiction = fromConflict(ctx, c, {
+            id: s.id,
+            kind: 'statement',
+            slotIds: [],
+            leadStep: lead,
+            characterId: seg.characterId,
+            zoneId: seg.zoneId,
+          });
           if (contradiction) out.push(contradiction);
         }
       }

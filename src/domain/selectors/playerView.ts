@@ -6,7 +6,13 @@
 import type { Contradiction } from '../model/contradiction';
 import type { SlotEvaluation } from '../model/evaluation';
 import type { CharacterId, EvidenceId, FactId, HypothesisId, StatementId } from '../model/ids';
-import type { ClaimSlot, Hypothesis, LoadedScenario, Obstruction, OnboardingStep } from '../model/scenario';
+import type {
+  ClaimSlot,
+  Hypothesis,
+  LoadedScenario,
+  Obstruction,
+  OnboardingStep,
+} from '../model/scenario';
 import type { GameState, JournalEntry } from '../model/state';
 import type { PlayerClaim } from '../model/version';
 import type { Interval } from '../model/time';
@@ -18,7 +24,11 @@ import { availableHypothesisIds, knownWorld } from '../engine/context';
 import { renderExplanation, type RenderedStep } from '../contradictions/render';
 import { trustState } from '../endings/signatures';
 import { findConfrontation } from '../dialogue/confrontation';
-import { roundTableBlockers, roundTableBlockerMessage, structuringRevelations } from '../replay/reducer';
+import {
+  roundTableBlockers,
+  roundTableBlockerMessage,
+  structuringRevelations,
+} from '../replay/reducer';
 
 export type Degree = 'established' | 'reported' | 'deduced' | 'proposed';
 
@@ -100,7 +110,12 @@ export interface VersionView {
   coherenceStatus: string;
   blockingIds: string[];
   noticeIds: string[];
-  disclosure: { establishedExplained: number; explainedEvidenceIds: string[]; unexplainedEvidenceIds: string[]; canonicalAlignment: number | null };
+  disclosure: {
+    establishedExplained: number;
+    explainedEvidenceIds: string[];
+    unexplainedEvidenceIds: string[];
+    canonicalAlignment: number | null;
+  };
   adhesion: AdhesionView[];
   signatureCount: number;
   roundTableAvailable: boolean;
@@ -150,7 +165,8 @@ export interface PlayerView {
 
 export function selectAct(scenario: LoadedScenario, state: GameState): PlayerView['act'] {
   if (state.phase === 'sealed') return 'Épilogue';
-  if (state.phase === 'round-table' || roundTableBlockers(scenario, state).length === 0) return 'III';
+  if (state.phase === 'round-table' || roundTableBlockers(scenario, state).length === 0)
+    return 'III';
   if (Object.keys(state.claims).length > 0) return 'II';
   return 'I';
 }
@@ -170,7 +186,12 @@ export function selectEvidence(scenario: LoadedScenario, state: GameState): Evid
         attached: !detached.has(e.id),
         mandatory: e.availableAtStart,
         marker: marker
-          ? { label: marker.label, ...(marker.zoneId ? { zoneId: marker.zoneId } : {}), ...(marker.at !== undefined ? { at: marker.at } : {}), ...(marker.interval ? { interval: marker.interval } : {}) }
+          ? {
+              label: marker.label,
+              ...(marker.zoneId ? { zoneId: marker.zoneId } : {}),
+              ...(marker.at !== undefined ? { at: marker.at } : {}),
+              ...(marker.interval ? { interval: marker.interval } : {}),
+            }
           : null,
         supportsLabels: e.supports.map((p) => scenario.index.propositions.get(p)?.label ?? p),
         excludesLabels: e.excludes.map((p) => scenario.index.propositions.get(p)?.label ?? p),
@@ -185,13 +206,16 @@ export function selectStatements(scenario: LoadedScenario, state: GameState): St
     .map((id) => scenario.index.statements.get(id))
     .filter((s): s is NonNullable<typeof s> => s !== undefined)
     .map((s) => {
-      const successor = [...scenario.index.statementExtensions.values()].find((x) => x.supersedes.includes(s.id) && unlocked.has(x.statementId));
+      const successor = [...scenario.index.statementExtensions.values()].find(
+        (x) => x.supersedes.includes(s.id) && unlocked.has(x.statementId),
+      );
       return {
         id: s.id,
         speakerId: s.speakerId,
         speakerName: scenario.index.characters.get(s.speakerId)?.name ?? s.speakerId,
         text: s.publicText,
-        propositionLabel: scenario.index.propositions.get(s.propositionId)?.label ?? s.propositionId,
+        propositionLabel:
+          scenario.index.propositions.get(s.propositionId)?.label ?? s.propositionId,
         standing: !retracted.has(s.id),
         supersededById: successor ? successor.statementId : null,
         degree: 'reported',
@@ -208,7 +232,14 @@ export function selectFacts(scenario: LoadedScenario, state: GameState): FactVie
     const isReported = reported.has(f.id);
     if (!isEstablished && !isReported) continue;
     const pres = scenario.index.factPresentations.get(f.id);
-    out.push({ id: f.id, label: pres?.label ?? f.id, degree: isEstablished ? 'established' : 'reported', zoneId: f.zoneId, interval: f.interval, participantIds: [...f.participants] });
+    out.push({
+      id: f.id,
+      label: pres?.label ?? f.id,
+      degree: isEstablished ? 'established' : 'reported',
+      zoneId: f.zoneId,
+      interval: f.interval,
+      participantIds: [...f.participants],
+    });
   }
   return out.sort((a, b) => a.interval.start - b.interval.start);
 }
@@ -224,8 +255,18 @@ export function selectCharacters(scenario: LoadedScenario, state: GameState): Ch
       .filter((p) => p.observerId === c.id && revealed.has(p.id))
       .map((p) => {
         const fact = scenario.index.facts.get(p.sourceFactId);
-        const visible = fact && (fact.secrecy === 'public' || established.has(fact.id) || reported.has(fact.id));
-        return { id: p.id, observerId: p.observerId, modality: p.modality, fidelity: p.fidelity, perceivedTags: [...p.perceivedTags], factLabel: visible ? scenario.index.factPresentations.get(p.sourceFactId)?.label ?? null : null };
+        const visible =
+          fact && (fact.secrecy === 'public' || established.has(fact.id) || reported.has(fact.id));
+        return {
+          id: p.id,
+          observerId: p.observerId,
+          modality: p.modality,
+          fidelity: p.fidelity,
+          perceivedTags: [...p.perceivedTags],
+          factLabel: visible
+            ? (scenario.index.factPresentations.get(p.sourceFactId)?.label ?? null)
+            : null,
+        };
       });
     return {
       id: c.id,
@@ -235,10 +276,13 @@ export function selectCharacters(scenario: LoadedScenario, state: GameState): Ch
       portraitSeed: c.portraitSeed,
       accentColor: c.accentColor,
       trustState: trustState(cs?.trust ?? c.initialTrust),
-      statementIds: state.unlockedStatementIds.filter((id) => scenario.index.statements.get(id)?.speakerId === c.id),
+      statementIds: state.unlockedStatementIds.filter(
+        (id) => scenario.index.statements.get(id)?.speakerId === c.id,
+      ),
       perceptions,
       admittedLabels: (cs?.admittedCostKeys ?? []).map((k) => ext?.costLabels[k] ?? k),
-      confrontationsResolved: state.confrontationHistory.filter((h) => h.characterId === c.id).length,
+      confrontationsResolved: state.confrontationHistory.filter((h) => h.characterId === c.id)
+        .length,
     };
   });
 }
@@ -249,11 +293,19 @@ export function selectHypotheses(scenario: LoadedScenario, state: GameState): Hy
     .filter((h) => available.has(h.id))
     .map((h) => {
       const ext = scenario.index.hypothesisExtensions.get(h.id);
-      return { ...h, accusatory: ext?.accusatory ?? false, hasWorldEffect: (ext?.worldEffect?.type ?? 'none') !== 'none' };
+      return {
+        ...h,
+        accusatory: ext?.accusatory ?? false,
+        hasWorldEffect: (ext?.worldEffect?.type ?? 'none') !== 'none',
+      };
     });
 }
 
-export function selectOnboarding(scenario: LoadedScenario, state: GameState, ui: { selectedId: string | null }): OnboardingStep | null {
+export function selectOnboarding(
+  scenario: LoadedScenario,
+  state: GameState,
+  ui: { selectedId: string | null },
+): OnboardingStep | null {
   const dismissed = new Set(state.dismissedOnboardingIds);
   const { evaluation } = evaluateVersion(scenario, state);
   for (const step of scenario.data.onboarding) {
@@ -261,31 +313,73 @@ export function selectOnboarding(scenario: LoadedScenario, state: GameState, ui:
     const t = step.trigger;
     let met = false;
     if (t === 'new-game') met = true;
-    else if (t.startsWith('evidence-selected:')) met = ui.selectedId === t.slice('evidence-selected:'.length);
+    else if (t.startsWith('evidence-selected:'))
+      met = ui.selectedId === t.slice('evidence-selected:'.length);
     else if (t === 'first-claim-available') met = state.dismissedOnboardingIds.length >= 1;
-    else if (t === 'first-contradiction') met = evaluation.contradictions.some((c) => c.involvesVersion);
-    else if (t === 'first-confrontation-ready') met = scenario.data.confrontations.some((c) => c.targetIds.some((tid) => findConfrontation(scenario, state, c.characterId, tid, c.supportIds[0]).ok));
+    else if (t === 'first-contradiction')
+      met = evaluation.contradictions.some((c) => c.involvesVersion);
+    else if (t === 'first-confrontation-ready')
+      met = scenario.data.confrontations.some((c) =>
+        c.targetIds.some(
+          (tid) => findConfrontation(scenario, state, c.characterId, tid, c.supportIds[0]).ok,
+        ),
+      );
     if (met) return step;
   }
   return null;
 }
 
-export function selectConfrontationOption(scenario: LoadedScenario, state: GameState, characterId: CharacterId, targetId: string, supportId: string | undefined): ConfrontationOptionView {
+export function selectConfrontationOption(
+  scenario: LoadedScenario,
+  state: GameState,
+  characterId: CharacterId,
+  targetId: string,
+  supportId: string | undefined,
+): ConfrontationOptionView {
   const found = findConfrontation(scenario, state, characterId, targetId, supportId);
-  if (!found.ok) return { characterId, targetId, supportId, valid: false, cost: null, requiresTrustAtLeast: null, message: found.error.message };
-  return { characterId, targetId, supportId, valid: true, cost: found.def.pressureCost, requiresTrustAtLeast: found.def.requiresTrustAtLeast ?? null, message: null };
+  if (!found.ok)
+    return {
+      characterId,
+      targetId,
+      supportId,
+      valid: false,
+      cost: null,
+      requiresTrustAtLeast: null,
+      message: found.error.message,
+    };
+  return {
+    characterId,
+    targetId,
+    supportId,
+    valid: true,
+    cost: found.def.pressureCost,
+    requiresTrustAtLeast: found.def.requiresTrustAtLeast ?? null,
+    message: null,
+  };
 }
 
-export function selectPlayerView(scenario: LoadedScenario, state: GameState, ui: { selectedId: string | null } = { selectedId: null }): PlayerView {
+export function selectPlayerView(
+  scenario: LoadedScenario,
+  state: GameState,
+  ui: { selectedId: string | null } = { selectedId: null },
+): PlayerView {
   const { evaluation, context } = evaluateVersion(scenario, state);
   const start = scenario.data.scenario.timeline.startClock;
-  const withSteps = (c: Contradiction): ContradictionView => ({ ...c, steps: renderExplanation(c.explanation, scenario) });
+  const withSteps = (c: Contradiction): ContradictionView => ({
+    ...c,
+    steps: renderExplanation(c.explanation, scenario),
+  });
   const blockers = roundTableBlockers(scenario, state);
   const world = knownWorld(scenario, state.unlockedEvidenceIds);
   const adhesion: AdhesionView[] = evaluation.adhesion.map((d) => ({
     characterId: d.characterId,
     verdict: d.verdict === 'signs' || d.verdict === 'signs-silently' ? 'signs' : d.verdict,
-    publicReasons: d.verdict === 'signs-silently' ? [`${scenario.index.characters.get(d.characterId)?.name ?? d.characterId} n’a pas d’objection à formuler.`] : [...d.publicReasons],
+    publicReasons:
+      d.verdict === 'signs-silently'
+        ? [
+            `${scenario.index.characters.get(d.characterId)?.name ?? d.characterId} n’a pas d’objection à formuler.`,
+          ]
+        : [...d.publicReasons],
     ...(d.requestedSlotId ? { requestedSlotId: d.requestedSlotId } : {}),
   }));
   return {
@@ -314,7 +408,11 @@ export function selectPlayerView(scenario: LoadedScenario, state: GameState, ui:
       coherenceStatus: evaluation.coherence.status,
       blockingIds: evaluation.coherence.blocking.map((c) => c.id),
       noticeIds: evaluation.coherence.notices.map((c) => c.id),
-      disclosure: { ...evaluation.disclosure, canonicalAlignment: state.phase === 'sealed' ? evaluation.disclosure.canonicalAlignment : null },
+      disclosure: {
+        ...evaluation.disclosure,
+        canonicalAlignment:
+          state.phase === 'sealed' ? evaluation.disclosure.canonicalAlignment : null,
+      },
       adhesion,
       signatureCount: evaluation.signatureCount,
       roundTableAvailable: blockers.length === 0,
@@ -333,8 +431,12 @@ export function selectPlayerView(scenario: LoadedScenario, state: GameState, ui:
 }
 
 function parseIncident(scenario: LoadedScenario): number {
-  const [h = 0, m = 0, s = 0] = scenario.data.scenario.timeline.incidentClock.split(':').map(Number);
-  const [h0 = 0, m0 = 0, s0 = 0] = scenario.data.scenario.timeline.startClock.split(':').map(Number);
+  const [h = 0, m = 0, s = 0] = scenario.data.scenario.timeline.incidentClock
+    .split(':')
+    .map(Number);
+  const [h0 = 0, m0 = 0, s0 = 0] = scenario.data.scenario.timeline.startClock
+    .split(':')
+    .map(Number);
   return h * 3600 + m * 60 + s - (h0 * 3600 + m0 * 60 + s0);
 }
 

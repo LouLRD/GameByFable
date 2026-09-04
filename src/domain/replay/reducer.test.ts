@@ -1,11 +1,24 @@
 import { describe, expect, it } from 'vitest';
-import { scenario, run, claim, confront, CANONICAL_CLAIMS, CANONICAL_CONFRONTATIONS, PROCEDURAL_CLAIMS } from '@/test/helpers';
+import {
+  scenario,
+  run,
+  claim,
+  confront,
+  CANONICAL_CLAIMS,
+  CANONICAL_CONFRONTATIONS,
+  PROCEDURAL_CLAIMS,
+} from '@/test/helpers';
 import { applyAction, createInitialState, reduceEnvelope, reduceGame, toEnvelope } from './reducer';
 import { semanticHash } from './hash';
 import type { PlayerAction } from '../model/actions';
 
 describe('déterminisme et replay', () => {
-  const actions: PlayerAction[] = [...CANONICAL_CONFRONTATIONS, ...CANONICAL_CLAIMS, { type: 'request-round-table' }, { type: 'seal-report' }];
+  const actions: PlayerAction[] = [
+    ...CANONICAL_CONFRONTATIONS,
+    ...CANONICAL_CLAIMS,
+    { type: 'request-round-table' },
+    { type: 'seal-report' },
+  ];
 
   it('deux replays identiques sont profondément égaux', () => {
     const a = reduceGame(scenario, createInitialState(scenario), actions);
@@ -25,7 +38,10 @@ describe('déterminisme et replay', () => {
 
   it('les identifiants du journal dérivent de la graine et de l’index d’action', () => {
     const a = run([claim('cash_origin', 'h_counting_error')]);
-    const b = run([claim('cash_origin', 'h_counting_error')], createInitialState(scenario, 'autre-graine'));
+    const b = run(
+      [claim('cash_origin', 'h_counting_error')],
+      createInitialState(scenario, 'autre-graine'),
+    );
     expect(a.journal[0]?.id).toBeDefined();
     expect(a.journal[0]?.id).not.toBe(b.journal[0]?.id);
     const c = run([claim('cash_origin', 'h_counting_error')]);
@@ -34,8 +50,12 @@ describe('déterminisme et replay', () => {
 
   it('refuse une enveloppe de scénario inconnu ou plus récent sans lever', () => {
     const s = run([]);
-    expect(reduceEnvelope(scenario, { ...toEnvelope(s, []), scenarioId: 'autre' })).toHaveProperty('error');
-    expect(reduceEnvelope(scenario, { ...toEnvelope(s, []), scenarioVersion: 99 })).toHaveProperty('error');
+    expect(reduceEnvelope(scenario, { ...toEnvelope(s, []), scenarioId: 'autre' })).toHaveProperty(
+      'error',
+    );
+    expect(reduceEnvelope(scenario, { ...toEnvelope(s, []), scenarioVersion: 99 })).toHaveProperty(
+      'error',
+    );
   });
 });
 
@@ -75,7 +95,13 @@ describe('actions refusées', () => {
       applyAction(scenario, s, confront('malik', 's_malik_initial', undefined)),
       applyAction(scenario, s, { type: 'request-round-table' }),
     ].map((r) => (r.ok ? 'ok' : r.error.code));
-    expect(codes).toEqual(['hypothesis-slot-mismatch', 'hypothesis-locked', 'actor-required', 'no-matching-confrontation', 'version-incomplete']);
+    expect(codes).toEqual([
+      'hypothesis-slot-mismatch',
+      'hypothesis-locked',
+      'actor-required',
+      'no-matching-confrontation',
+      'version-incomplete',
+    ]);
   });
 
   it('une confrontation invalide n’est jamais consommée (pression intacte)', () => {
@@ -99,7 +125,12 @@ describe('conclusion verrouillée', () => {
     expect(sealed.phase).toBe('sealed');
     expect(sealed.endingId).toBe('ending_procedural');
     const h = semanticHash(sealed);
-    for (const a of [claim('cash_origin', 'h_malik_theft'), { type: 'clear-claim', slotId: 'cash_origin' } as PlayerAction, confront('malik', 's_malik_initial', 'e_camera_gap'), { type: 'leave-round-table' } as PlayerAction]) {
+    for (const a of [
+      claim('cash_origin', 'h_malik_theft'),
+      { type: 'clear-claim', slotId: 'cash_origin' } as PlayerAction,
+      confront('malik', 's_malik_initial', 'e_camera_gap'),
+      { type: 'leave-round-table' } as PlayerAction,
+    ]) {
       const r = applyAction(scenario, sealed, a);
       expect(r.ok).toBe(false);
       if (!r.ok) expect(r.error.code).toBe('sealed');
@@ -135,10 +166,15 @@ describe('pression et déblocages', () => {
   });
 
   it('débloquer une déclaration rétracte la précédente et révèle les perceptions liées', () => {
-    const s = run([confront('jo', 's_jo_initial', 'e_camera_gap'), confront('noe', 's_noe_initial', 'e_pallet_scan')]);
+    const s = run([
+      confront('jo', 's_jo_initial', 'e_camera_gap'),
+      confront('noe', 's_noe_initial', 'e_pallet_scan'),
+    ]);
     expect(s.unlockedStatementIds).toContain('s_noe_clarified');
     expect(s.retractedStatementIds).toContain('s_noe_initial');
-    expect(s.revealedPerceptionIds).toEqual(expect.arrayContaining(['p_noe_bang', 'p_noe_silhouette']));
+    expect(s.revealedPerceptionIds).toEqual(
+      expect.arrayContaining(['p_noe_bang', 'p_noe_silhouette']),
+    );
     // la perception initiale n'est pas effacée : la déclaration initiale reste dans l'historique
     expect(s.unlockedStatementIds).toContain('s_noe_initial');
   });
@@ -146,7 +182,13 @@ describe('pression et déblocages', () => {
   it('les hypothèses verrouillées deviennent formulables après la pièce requise', () => {
     const s0 = run([]);
     expect(applyAction(scenario, s0, claim('video_outage', 'h_circuit_overload')).ok).toBe(false);
-    const s1 = run([confront('jo', 's_jo_initial', 'e_camera_gap'), confront('ines', 's_ines_initial', 'e_pallet_scan', 'direct')], s0);
+    const s1 = run(
+      [
+        confront('jo', 's_jo_initial', 'e_camera_gap'),
+        confront('ines', 's_ines_initial', 'e_pallet_scan', 'direct'),
+      ],
+      s0,
+    );
     expect(s1.unlockedEvidenceIds).toContain('e_breaker_log');
     expect(applyAction(scenario, s1, claim('video_outage', 'h_circuit_overload')).ok).toBe(true);
   });

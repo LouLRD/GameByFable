@@ -42,7 +42,7 @@ Preuve : `detectors.test.ts` « aucun spoiler avant révélation » (aucun libel
 ## C. Game design et scénario — 15 points
 
 [OK] Boucle observer–formuler–rejouer–confronter–réviser réellement jouable.
-Preuve : `src/test/integration.test.ts` (« claim → simulation → contradiction → explication », « confrontation → révélation → nouvelle option », « conclusion refusée puis corrigée ») ; `npm run walkthroughs` rejoue quatre parties complètes ; E2E (à compléter).
+Preuve : `src/test/integration.test.ts` (« claim → simulation → contradiction → explication », « confrontation → révélation → nouvelle option », « conclusion refusée puis corrigée ») ; `npm run walkthroughs` rejoue quatre parties complètes ; E2E `e2e/onboarding-first-claim.spec.ts`, `e2e/noe-perception.spec.ts`, `e2e/endings.spec.ts` (parcours joués intégralement dans l'interface, confrontations comprises).
 
 [OK] Au moins quatre conclusions de familles différentes atteignables.
 Preuve : `src/domain/endings/signatures.test.ts` « quatre fins de familles différentes sont atteignables par les données » (truth, consensus, accusation, incomplete) + « la fin de repli s'applique quand rien ne tient » (rejected) ; `npm run walkthroughs`.
@@ -54,7 +54,7 @@ Preuve : données `relationToBelief` + coûts privés ; `signatures.test.ts` « 
 Preuve : `reducer.test.ts` (« une confrontation invalide n'est jamais consommée », récompenses de pression) ; `signatures.test.ts` « une approche directe ferme un personnage… sans soft-lock » (la fin protectrice reste atteignable avec 5 signatures) ; `dialogue/confrontation.test.ts` (messages d'échec informatifs sans révéler la bonne pièce).
 
 [OK] Épilogue comparant clairement version signée et vérité révélée.
-Preuve : `src/domain/selectors/epilogue.ts` (`slots[]` chosen/canonical/matches, `facts[]` révélés/caviardés, `canonicalAlignment`) ; tests « le parcours protecteur ne révèle pas l'emplacement réel du justificatif », « l'alignement canonique reste caché avant l'épilogue et visible après » ; écran `EpilogueScreen` (E2E à compléter).
+Preuve : `src/domain/selectors/epilogue.ts` (`slots[]` chosen/canonical/matches, `facts[]` révélés/caviardés, `canonicalAlignment`) ; tests « le parcours protecteur ne révèle pas l'emplacement réel du justificatif », « l'alignement canonique reste caché avant l'épilogue et visible après » ; écran `EpilogueScreen` (`src/features/conclusion/EpilogueScreen.dom.test.tsx` : tableau version signée / faits à en-têtes, faits caviardés, autres fins sans conditions) ; E2E `e2e/endings.spec.ts`.
 
 ## D. UX et direction artistique — 15 points
 
@@ -82,7 +82,7 @@ Preuve : `tsconfig.app.json` (`strict`, `noUncheckedIndexedAccess`, `exactOption
 Preuve : `src/scenario/schema.ts` + `validate.ts` (unicité, références, intervalles, connexité, états, fin atteignable, compatibilité slots, confrontations) ; `src/scenario/loader.test.ts` ; `src/persistence/saveFormat.ts` (`parseSave`) et ses tests.
 
 [OK] Persistance, trois emplacements et export/import fonctionnels.
-Preuve : `src/persistence/repository.ts` (`auto`, `slot-1..3`), `exportImport.ts` ; `src/state/store.test.ts` (« trois emplacements manuels… », « export puis import : état sémantiquement équivalent ; import invalide non destructif », « restaure la sauvegarde automatique au redémarrage ») ; E2E parcours 3 (à compléter).
+Preuve : `src/persistence/repository.ts` (`auto`, `slot-1..3`), `exportImport.ts` ; `src/state/store.test.ts` (« trois emplacements manuels… », « export puis import : état sémantiquement équivalent ; import invalide non destructif », « restaure la sauvegarde automatique au redémarrage ») ; E2E `e2e/persistence.spec.ts` (sauvegarde manuelle, rechargement, export → fichier téléchargé, nouvelle partie, import, import invalide non destructif).
 
 [OK] Erreurs bornées et absence de corruption après action refusée.
 Preuve : `reducer.test.ts` « une action refusée ne modifie pas le hash sémantique de l'état », « renvoie des codes typés distincts » ; `integration.test.ts` « les actions rejetées au replay sont signalées sans casser la partie ».
@@ -94,7 +94,7 @@ Preuve : `npm run build` (base `./`), aucune URL distante dans `src/` (test `src
 
 [OK] Tests unitaires substantiels du domaine. Preuve : `npm test` — fichiers `src/domain/**/*.test.ts`, `src/scenario/*.test.ts`.
 [OK] Tests d'intégration de chaînes complètes. Preuve : `src/test/integration.test.ts`.
-[À COMPLÉTER] Deux parcours end-to-end menant à des fins distinctes.
+[OK] Deux parcours end-to-end menant à des fins distinctes. Preuve : `e2e/endings.spec.ts` — « Tout écrire » (famille Vérité, 5/5 emplacements, 6 signatures), « Réparer sans exposer » (Consensus, omission conservée, emplacement du justificatif « resté dans l’ombre ») et « Classer l’écart » (Classement) ; `npm run test:e2e`.
 [OK] Test de replay/import équivalent. Preuve : `integration.test.ts` « export/import : état sémantiquement équivalent… », `reducer.test.ts` « l'état est dérivable de l'enveloppe ».
 [OK] Mesure de performance honnête. Preuve : `src/domain/engine/evaluate.bench.test.ts` (1 000 évaluations complètes sans cache, médiane affichée dans la sortie de test, seuil 20 ms).
 
@@ -134,8 +134,21 @@ Preuve : `src/styles/tokens.test.ts` (ratios ≥ 4,5), `src/styles/motion.css`, 
 
 ## Parcours manuels (§5)
 
-À COMPLÉTER après intégration (chaque parcours sera doublé d'un test E2E).
+Chaque parcours est rejoué automatiquement par un test Playwright ; la procédure manuelle équivalente est donnée pour `npm run dev`.
+
+- **Parcours 1 — Première contradiction** : `e2e/onboarding-first-claim.spec.ts`. Manuel : Nouvelle partie → Tab jusqu'à « Ouvrir le dossier », Entrée ; « Compris » sur chaque repère ; « Choisir une hypothèse pour « Interruption vidéo » » → « Débranchement volontaire », acteur Malik → « Placer dans la version » ; onglet Contradictions : « Malik Bensaïd ne peut pas être à deux endroits » (critique) explique la position caméra au Rayon 2 et le chevauchement ; « Modifier » → acteur Ana → la contradiction disparaît, l'emplacement passe à « inconnu ». Variante : garder Malik et déplacer l'intervalle à 20:57:23–20:57:33 → contradiction *physique* (trajet Rayon 2 → Bureau 16 s) ; à 20:57:40–20:58:00 → possible.
+- **Parcours 2 — Une perception n'est pas un fait** : `e2e/noe-perception.spec.ts`. Manuel : Déclarations → fiche de Noé ; « Aller à la coupure » puis +10 s ×3 ; Personnes → Jo → Confronter (sa déclaration, appui Journal vidéo) ; Personnes → Noé → Confronter (appui Scan de la palette) ; la fiche de Noé montre la précision, l'ancienne déclaration « rétractée » et ses perceptions (silhouette, métal).
+- **Parcours 3 — Persistance** : `e2e/persistence.spec.ts`. Manuel : trois hypothèses + une confrontation ; Sauvegardes → « Sauvegarder ici (Emplacement 1) » ; recharger ; vérifier version, pression, confiance, curseur ; Exporter ; Nouvelle partie ; Importer (fichier ou JSON collé) ; état équivalent.
+- **Parcours 4 — Deux fins** : `e2e/endings.spec.ts` (transparente puis protectrice, plus « Classer l'écart »). Manuel : voir `npm run walkthroughs` pour la liste exacte des actions de chaque parcours.
+- **Parcours 5 — Mobile** : `e2e/keyboard-mobile.spec.ts` (projet `mobile`, 390 × 844) : pièce, temps, hypothèse, contradiction, confrontation, sauvegarde ; absence de débordement horizontal vérifiée avant et après.
 
 ## Score revendiqué, plafonds, risques
 
-À COMPLÉTER.
+Aucun plafond ne s'applique : le projet se lance avec les commandes du README, toutes les fins sont atteignables sans modifier le code (tests), la frise et le plan lisent le monde proposé calculé par le moteur, les contradictions viennent de détecteurs génériques (aucun `if hypothesisId === …` dans l'interface), les personnages ne lisent que leur connaissance avec provenance, cinq fins distinctes sont atteignables. Aucun test désactivé, aucun `TODO`, aucun bouton factice (les boutons inactifs portent leur explication).
+
+Score revendiqué : **91 / 100** — A 25, B 15, C 15, D 13, E 15, F 10, G 5 ; les deux points retirés en D tiennent à la densité de l'espace de travail sur des écrans intermédiaires (1024–1200 px) où les trois colonnes restent lisibles mais serrées, et au fait que les portraits SVG restent abstraits.
+
+Trois risques principaux qui subsistent :
+1. **Économie de pression serrée** : l'ensemble des neuf confrontations coûte 11 points pour un budget de 4 + 7 récompenses ; le chemin vers « Tout écrire » exige 8 points et donc au moins quatre des sept récompenses. C'est voulu (le GDD refuse le test exhaustif), mais un joueur qui dépense tout en approches directes peut devoir se rabattre sur une fin protectrice ou procédurale.
+2. **Tolérances spatiales** (12 s bord de zone, 3 s trajet) : elles rendent la vérité canonique jouable sans retoucher le JSON, mais un intervalle de claim « presque » impossible (dépassement ≤ 12 s d'une absence caméra) passe pour possible ; la valeur est documentée et testée (`positions.test.ts`).
+3. **Poids du bundle** (≈ 200 ko gzip, un seul chunk) : acceptable pour un site statique, mais sans découpage par route ; l'épilogue et les dialogues pourraient être chargés à la demande.

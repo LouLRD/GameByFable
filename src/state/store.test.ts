@@ -16,9 +16,18 @@ describe('store : adaptation moteur ↔ interface', () => {
   it('démarre une partie et sauvegarde automatiquement après chaque action acceptée', () => {
     const { adapter, store } = make();
     expect(store.getState().game?.phase).toBe('investigation');
-    const repo = new SaveRepository(adapter, { scenarioId: 'la-veilleuse-300', scenarioVersion: 1 });
+    const repo = new SaveRepository(adapter, {
+      scenarioId: 'la-veilleuse-300',
+      scenarioVersion: 1,
+    });
     expect(repo.read('auto').ok).toBe(true);
-    const r = store.getState().dispatch({ type: 'set-claim', slotId: 'cash_origin' as never, hypothesisId: 'h_counting_error' as never });
+    const r = store
+      .getState()
+      .dispatch({
+        type: 'set-claim',
+        slotId: 'cash_origin' as never,
+        hypothesisId: 'h_counting_error' as never,
+      });
     expect(r.ok).toBe(true);
     const auto = repo.read('auto');
     expect(auto.ok && auto.save.actions.length).toBe(1);
@@ -29,7 +38,14 @@ describe('store : adaptation moteur ↔ interface', () => {
   it('une action refusée laisse l’état intact et compte une impasse', () => {
     const { store } = make();
     const before = semanticHash(store.getState().game);
-    const r = store.getState().dispatch({ type: 'confront', characterId: 'noe' as never, targetId: 's_noe_initial', approach: 'neutral' });
+    const r = store
+      .getState()
+      .dispatch({
+        type: 'confront',
+        characterId: 'noe' as never,
+        targetId: 's_noe_initial',
+        approach: 'neutral',
+      });
     expect(r.ok).toBe(false);
     expect(semanticHash(store.getState().game)).toBe(before);
     expect(store.getState().lastError?.code).toBe('no-matching-confrontation');
@@ -39,9 +55,23 @@ describe('store : adaptation moteur ↔ interface', () => {
 
   it('restaure la sauvegarde automatique au redémarrage (état équivalent, curseur conservé)', () => {
     const { adapter, store } = make();
-    store.getState().dispatch({ type: 'confront', characterId: 'jo' as never, targetId: 's_jo_initial', supportId: 'e_camera_gap', approach: 'neutral' });
+    store
+      .getState()
+      .dispatch({
+        type: 'confront',
+        characterId: 'jo' as never,
+        targetId: 's_jo_initial',
+        supportId: 'e_camera_gap',
+        approach: 'neutral',
+      });
     store.getState().setCursor(533);
-    store.getState().dispatch({ type: 'set-claim', slotId: 'cash_origin' as never, hypothesisId: 'h_malik_theft' as never });
+    store
+      .getState()
+      .dispatch({
+        type: 'set-claim',
+        slotId: 'cash_origin' as never,
+        hypothesisId: 'h_malik_theft' as never,
+      });
     const h = semanticHash(store.getState().game);
     const second = createGameStore({ adapter, now: fixedNow });
     second.getState().bootstrap();
@@ -53,7 +83,13 @@ describe('store : adaptation moteur ↔ interface', () => {
 
   it('trois emplacements manuels : sauvegarder, lister, charger, effacer', () => {
     const { store } = make();
-    store.getState().dispatch({ type: 'set-claim', slotId: 'cash_origin' as never, hypothesisId: 'h_counting_error' as never });
+    store
+      .getState()
+      .dispatch({
+        type: 'set-claim',
+        slotId: 'cash_origin' as never,
+        hypothesisId: 'h_counting_error' as never,
+      });
     expect(store.getState().saveToSlot('slot-2', 'Avant la table ronde').ok).toBe(true);
     const slots = store.getState().listSlots();
     expect(slots.map((s) => s.slotId)).toEqual(['auto', 'slot-1', 'slot-2', 'slot-3']);
@@ -63,14 +99,33 @@ describe('store : adaptation moteur ↔ interface', () => {
     expect(store.getState().loadSlot('slot-2').ok).toBe(true);
     expect(store.getState().actions).toHaveLength(1);
     store.getState().clearSlot('slot-2');
-    expect(store.getState().listSlots().find((s) => s.slotId === 'slot-2')?.empty).toBe(true);
+    expect(
+      store
+        .getState()
+        .listSlots()
+        .find((s) => s.slotId === 'slot-2')?.empty,
+    ).toBe(true);
     expect(store.getState().loadSlot('slot-3').ok).toBe(false);
   });
 
   it('export puis import : état sémantiquement équivalent ; import invalide non destructif', () => {
     const { store } = make();
-    store.getState().dispatch({ type: 'confront', characterId: 'malik' as never, targetId: 's_malik_initial', supportId: 'e_camera_gap', approach: 'empathetic' });
-    store.getState().dispatch({ type: 'set-claim', slotId: 'noise_source' as never, hypothesisId: 'h_bottle_noise' as never });
+    store
+      .getState()
+      .dispatch({
+        type: 'confront',
+        characterId: 'malik' as never,
+        targetId: 's_malik_initial',
+        supportId: 'e_camera_gap',
+        approach: 'empathetic',
+      });
+    store
+      .getState()
+      .dispatch({
+        type: 'set-claim',
+        slotId: 'noise_source' as never,
+        hypothesisId: 'h_bottle_noise' as never,
+      });
     const h = semanticHash(store.getState().game);
     const exported = store.getState().exportSave();
     expect(exported.ok).toBe(true);
@@ -84,7 +139,10 @@ describe('store : adaptation moteur ↔ interface', () => {
     const good = store.getState().importSave(exported.content ?? '');
     expect(good.ok).toBe(true);
     expect(semanticHash(store.getState().game)).toBe(h);
-    const reparsed = parseImport(serializeSave(JSON.parse(exported.content ?? '{}')), { scenarioId: 'la-veilleuse-300', scenarioVersion: 1 });
+    const reparsed = parseImport(serializeSave(JSON.parse(exported.content ?? '{}')), {
+      scenarioId: 'la-veilleuse-300',
+      scenarioVersion: 1,
+    });
     expect(reparsed.ok).toBe(true);
   });
 
@@ -108,6 +166,14 @@ describe('store : adaptation moteur ↔ interface', () => {
     store.getState().bootstrap();
     expect(store.getState().storageAvailable).toBe(false);
     expect(store.getState().game).not.toBeNull();
-    expect(store.getState().dispatch({ type: 'set-claim', slotId: 'cash_origin' as never, hypothesisId: 'h_counting_error' as never }).ok).toBe(true);
+    expect(
+      store
+        .getState()
+        .dispatch({
+          type: 'set-claim',
+          slotId: 'cash_origin' as never,
+          hypothesisId: 'h_counting_error' as never,
+        }).ok,
+    ).toBe(true);
   });
 });

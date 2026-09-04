@@ -8,7 +8,13 @@ export function LiveRegion(): React.JSX.Element {
   const message = useGameStore((s) => s.liveMessage);
   const nonce = useGameStore((s) => s.liveNonce);
   return (
-    <div className="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-testid="live-region">
+    <div
+      className="visually-hidden"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      data-testid="live-region"
+    >
       <span key={nonce}>{message}</span>
     </div>
   );

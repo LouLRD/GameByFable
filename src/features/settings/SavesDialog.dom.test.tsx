@@ -11,7 +11,13 @@ vi.setConfig({ testTimeout: 30_000 });
 
 function dispatchFirstClaim(): void {
   const a = firstClaimAction();
-  const r = useGameStore.getState().dispatch({ type: 'set-claim', slotId: a.slotId as ClaimSlotId, hypothesisId: a.hypothesisId as HypothesisId });
+  const r = useGameStore
+    .getState()
+    .dispatch({
+      type: 'set-claim',
+      slotId: a.slotId as ClaimSlotId,
+      hypothesisId: a.hypothesisId as HypothesisId,
+    });
   expect(r.ok).toBe(true);
 }
 
@@ -33,9 +39,16 @@ describe('<SavesDialog />', () => {
     dispatchFirstClaim();
     const dialog = openSaves();
     expect(within(dialog).getAllByText('Vide.')).toHaveLength(3);
-    expect(within(dialog).getByRole('button', { name: 'Sauvegarder ici (Sauvegarde automatique)' })).toBeDisabled();
-    await user.type(within(dialog).getByLabelText('Libellé de la sauvegarde'), 'Avant la table ronde');
-    await user.click(within(dialog).getByRole('button', { name: 'Sauvegarder ici (Emplacement 1)' }));
+    expect(
+      within(dialog).getByRole('button', { name: 'Sauvegarder ici (Sauvegarde automatique)' }),
+    ).toBeDisabled();
+    await user.type(
+      within(dialog).getByLabelText('Libellé de la sauvegarde'),
+      'Avant la table ronde',
+    );
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Sauvegarder ici (Emplacement 1)' }),
+    );
     expect(within(dialog).getByRole('status')).toHaveTextContent('Partie sauvegardée.');
     const slot = within(dialog).getByRole('heading', { name: 'Emplacement 1' }).closest('li');
     expect(slot).not.toBeNull();
@@ -43,7 +56,10 @@ describe('<SavesDialog />', () => {
     expect(slot).toHaveTextContent(/1 action/);
     expect(slot?.querySelector('time')).not.toBeNull();
     expect(within(dialog).getAllByText('Vide.')).toHaveLength(2);
-    const summary = useGameStore.getState().listSlots().find((s) => s.slotId === 'slot-1');
+    const summary = useGameStore
+      .getState()
+      .listSlots()
+      .find((s) => s.slotId === 'slot-1');
     expect(summary?.empty).toBe(false);
     expect(summary?.label).toBe('Avant la table ronde');
     expect(summary?.actionCount).toBe(1);
@@ -68,7 +84,9 @@ describe('<SavesDialog />', () => {
     const user = userEvent.setup();
     dispatchFirstClaim();
     const dialog = openSaves();
-    await user.click(within(dialog).getByRole('button', { name: 'Sauvegarder ici (Emplacement 2)' }));
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Sauvegarder ici (Emplacement 2)' }),
+    );
     // Nouvelle action non exportée après la sauvegarde.
     useGameStore.getState().dispatch({ type: 'dismiss-onboarding', onboardingId: 'o1' as never });
     expect(useGameStore.getState().actions).toHaveLength(2);
@@ -87,18 +105,32 @@ describe('<SavesDialog />', () => {
     const user = userEvent.setup();
     dispatchFirstClaim();
     const dialog = openSaves();
-    await user.click(within(dialog).getByRole('button', { name: 'Sauvegarder ici (Emplacement 3)' }));
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Sauvegarder ici (Emplacement 3)' }),
+    );
     await user.click(within(dialog).getByRole('button', { name: 'Effacer (Emplacement 3)' }));
-    expect(useGameStore.getState().listSlots().find((s) => s.slotId === 'slot-3')?.empty).toBe(false);
+    expect(
+      useGameStore
+        .getState()
+        .listSlots()
+        .find((s) => s.slotId === 'slot-3')?.empty,
+    ).toBe(false);
     await user.click(within(dialog).getByRole('button', { name: 'Confirmer l’effacement' }));
-    expect(useGameStore.getState().listSlots().find((s) => s.slotId === 'slot-3')?.empty).toBe(true);
+    expect(
+      useGameStore
+        .getState()
+        .listSlots()
+        .find((s) => s.slotId === 'slot-3')?.empty,
+    ).toBe(true);
     expect(within(dialog).getByRole('button', { name: 'Charger (Emplacement 3)' })).toBeDisabled();
 
     expect(useGameStore.getState().unsavedSinceExport).toBe(true);
     await user.click(within(dialog).getByRole('button', { name: 'Exporter (JSON)' }));
     const toast = useGameStore.getState().toasts.at(-1);
     expect(toast?.tone).toBe('success');
-    expect(toast?.text).toMatch(/Sauvegarde exportée : la-veilleuse-300_\d{4}-\d{2}-\d{2}_\d{2}h\d{2}\.json/);
+    expect(toast?.text).toMatch(
+      /Sauvegarde exportée : la-veilleuse-300_\d{4}-\d{2}-\d{2}_\d{2}h\d{2}\.json/,
+    );
     expect(useGameStore.getState().unsavedSinceExport).toBe(false);
   });
 

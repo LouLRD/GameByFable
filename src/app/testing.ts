@@ -19,7 +19,13 @@ export function resetStore(): void {
     cursor: 0,
     playing: false,
     liveMessage: '',
-    prefs: { reducedMotion: 'system', textSize: 'm', hintsEnabled: true, audioEnabled: false, seenIntro: true },
+    prefs: {
+      reducedMotion: 'system',
+      textSize: 'm',
+      hintsEnabled: true,
+      audioEnabled: false,
+      seenIntro: true,
+    },
   });
 }
 
@@ -42,7 +48,11 @@ export function stubViewport(width: number): void {
       dispatchEvent: () => false,
     };
   };
-  Object.defineProperty(window, 'matchMedia', { configurable: true, writable: true, value: matchMedia });
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    writable: true,
+    value: matchMedia,
+  });
 }
 
 /** Première hypothèse posable dès le départ sans acteur (pour produire une action journalisée). */

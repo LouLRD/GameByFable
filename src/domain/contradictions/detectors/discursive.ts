@@ -3,11 +3,21 @@
  * debout sont incompatibles entre elles. Une déclaration déjà discréditée par une trace
  * jointe (ou physiquement impossible) ne bloque plus la version : la contradiction devient une note.
  */
-import type { Contradiction, ContradictionDetector, ExplanationStep } from '../../model/contradiction';
+import type {
+  Contradiction,
+  ContradictionDetector,
+  ExplanationStep,
+} from '../../model/contradiction';
 import type { EvaluationContext } from '../../engine/context';
 import { canOccupy, presencesFromSemantics } from '../../engine/positions';
 import type { Statement } from '../../model/scenario';
-import { characterName, claimsWithPropositions, makeContradiction, propositionsConflict, relatedEvidence } from '../common';
+import {
+  characterName,
+  claimsWithPropositions,
+  makeContradiction,
+  propositionsConflict,
+  relatedEvidence,
+} from '../common';
 
 const RULE = 'r_statement_conflict';
 
@@ -22,13 +32,24 @@ function discreditedBy(ctx: EvaluationContext, s: Statement): string[] {
   }
   // Impossibilité physique établie
   for (const seg of presencesFromSemantics(def.semantics, s.id, s.speakerId)) {
-    const occ = canOccupy(seg.characterId, seg.zoneId, seg.interval, ctx.positions, ctx.scenario, ctx.world, [s.id]);
-    if (occ.status === 'impossible') by.push(...occ.conflicts.flatMap((c) => c.segment?.sourceIds ?? [ctx.cameraEvidenceId]));
+    const occ = canOccupy(
+      seg.characterId,
+      seg.zoneId,
+      seg.interval,
+      ctx.positions,
+      ctx.scenario,
+      ctx.world,
+      [s.id],
+    );
+    if (occ.status === 'impossible')
+      by.push(...occ.conflicts.flatMap((c) => c.segment?.sourceIds ?? [ctx.cameraEvidenceId]));
   }
   return [...new Set(by)];
 }
 
-export const discursiveDetector: ContradictionDetector & { detect(ctx: EvaluationContext): Contradiction[] } = {
+export const discursiveDetector: ContradictionDetector & {
+  detect(ctx: EvaluationContext): Contradiction[];
+} = {
   id: 'discursive',
   detect(ctx: EvaluationContext): Contradiction[] {
     const out: Contradiction[] = [];
@@ -46,10 +67,17 @@ export const discursiveDetector: ContradictionDetector & { detect(ctx: Evaluatio
           const name = characterName(ctx.scenario, s.speakerId);
           const steps: ExplanationStep[] = [
             { type: 'statement', statementId: s.id, speakerId: s.speakerId },
-            { type: 'claim', hypothesisId: claim.hypothesis.id, ...(claim.actorId ? { actorId: claim.actorId } : {}), ...(claim.zoneId ? { zoneId: claim.zoneId } : {}), ...(claim.interval ? { interval: claim.interval } : {}) },
+            {
+              type: 'claim',
+              hypothesisId: claim.hypothesis.id,
+              ...(claim.actorId ? { actorId: claim.actorId } : {}),
+              ...(claim.zoneId ? { zoneId: claim.zoneId } : {}),
+              ...(claim.interval ? { interval: claim.interval } : {}),
+            },
             { type: 'proposition-conflict', a: sdef.id, b: qdef.id, reason },
           ];
-          if (discredit.length > 0) steps.push({ type: 'discredited', statementId: s.id, byIds: discredit });
+          if (discredit.length > 0)
+            steps.push({ type: 'discredited', statementId: s.id, byIds: discredit });
           steps.push({
             type: 'conclusion',
             text:
@@ -66,7 +94,12 @@ export const discursiveDetector: ContradictionDetector & { detect(ctx: Evaluatio
               involvedIds: [s.id, claim.hypothesis.id, s.speakerId],
               slotIds: [claim.hypothesis.slotId],
               explanation: steps,
-              suggestedEvidenceIds: [...relatedEvidence(ctx, [sdef.id, qdef.id]), ...(discredit.filter((d) => ctx.scenario.index.evidence.has(d as never)) as never[])],
+              suggestedEvidenceIds: [
+                ...relatedEvidence(ctx, [sdef.id, qdef.id]),
+                ...(discredit.filter((d) =>
+                  ctx.scenario.index.evidence.has(d as never),
+                ) as never[]),
+              ],
               involvesVersion: true,
             }),
           );
@@ -75,7 +108,15 @@ export const discursiveDetector: ContradictionDetector & { detect(ctx: Evaluatio
       // Claims paramétrées plaçant le locuteur ailleurs que sa déclaration (sans exclusion explicite)
       for (const ev of ctx.claimEvents) {
         if (ev.presence?.characterId !== s.speakerId) continue;
-        const occ = canOccupy(ev.presence.characterId, ev.presence.zoneId, ev.presence.interval, ctx.positions, ctx.scenario, ctx.world, [ev.hypothesis.id]);
+        const occ = canOccupy(
+          ev.presence.characterId,
+          ev.presence.zoneId,
+          ev.presence.interval,
+          ctx.positions,
+          ctx.scenario,
+          ctx.world,
+          [ev.hypothesis.id],
+        );
         if (occ.status !== 'reported-elsewhere') continue;
         for (const c of occ.conflicts) {
           if (c.segment?.sourceIds[0] !== s.id) continue;
@@ -89,10 +130,27 @@ export const discursiveDetector: ContradictionDetector & { detect(ctx: Evaluatio
               involvedIds: [s.id, ev.hypothesis.id, s.speakerId],
               slotIds: [ev.hypothesis.slotId],
               explanation: [
-                { type: 'claim', hypothesisId: ev.hypothesis.id, actorId: ev.presence.characterId, zoneId: ev.presence.zoneId, interval: ev.presence.interval },
+                {
+                  type: 'claim',
+                  hypothesisId: ev.hypothesis.id,
+                  actorId: ev.presence.characterId,
+                  zoneId: ev.presence.zoneId,
+                  interval: ev.presence.interval,
+                },
                 ...c.steps,
-                ...(discredit.length > 0 ? [{ type: 'discredited', statementId: s.id, byIds: discredit } as ExplanationStep] : []),
-                { type: 'conclusion', text: `L'hypothèse place ${name} là où sa déclaration dit qu'iel n'était pas. Tant que la déclaration tient, la version est contestée.` },
+                ...(discredit.length > 0
+                  ? [
+                      {
+                        type: 'discredited',
+                        statementId: s.id,
+                        byIds: discredit,
+                      } as ExplanationStep,
+                    ]
+                  : []),
+                {
+                  type: 'conclusion',
+                  text: `L'hypothèse place ${name} là où sa déclaration dit qu'iel n'était pas. Tant que la déclaration tient, la version est contestée.`,
+                },
               ],
               inspectableAt: c.at,
               inspectableZoneIds: c.zoneIds,
@@ -121,14 +179,20 @@ export const discursiveDetector: ContradictionDetector & { detect(ctx: Evaluatio
           makeContradiction({
             kind: 'discursive',
             severity: 'notice',
-            title: a.speakerId === b.speakerId ? `${na} se contredit` : `Témoignages incompatibles : ${na} / ${nb}`,
+            title:
+              a.speakerId === b.speakerId
+                ? `${na} se contredit`
+                : `Témoignages incompatibles : ${na} / ${nb}`,
             ruleId: RULE,
             involvedIds: [a.id, b.id, a.speakerId, b.speakerId],
             explanation: [
               { type: 'statement', statementId: a.id, speakerId: a.speakerId },
               { type: 'statement', statementId: b.id, speakerId: b.speakerId },
               { type: 'proposition-conflict', a: da.id, b: db.id, reason },
-              { type: 'conclusion', text: `Les deux déclarations ne peuvent pas être vraies ensemble. Au moins l'une des deux personnes se trompe ou ment — pas nécessairement pour la même raison.` },
+              {
+                type: 'conclusion',
+                text: `Les deux déclarations ne peuvent pas être vraies ensemble. Au moins l'une des deux personnes se trompe ou ment — pas nécessairement pour la même raison.`,
+              },
             ],
             suggestedEvidenceIds: relatedEvidence(ctx, [da.id, db.id]),
             involvesVersion: false,

@@ -6,7 +6,13 @@
  * sont appliquées (celles connues du joueur pour le monde proposé ; toutes pour le canon).
  */
 import type { ObstructionId, ZoneId } from '../model/ids';
-import type { ConditionExpr, Fidelity, LoadedScenario, Obstruction, Passage } from '../model/scenario';
+import type {
+  ConditionExpr,
+  Fidelity,
+  LoadedScenario,
+  Obstruction,
+  Passage,
+} from '../model/scenario';
 import { sec, type Second } from '../model/time';
 
 export interface WorldState {
@@ -37,7 +43,8 @@ export function evalCondition(expr: ConditionExpr, t: number): boolean {
   }
 }
 
-export const obstructionActiveAt = (o: Obstruction, t: number): boolean => o.interval.start <= t && t < o.interval.end;
+export const obstructionActiveAt = (o: Obstruction, t: number): boolean =>
+  o.interval.start <= t && t < o.interval.end;
 
 export function passageOpenAt(passage: Passage, t: number): boolean {
   return evalCondition(passage.openWhen, t);
@@ -58,7 +65,12 @@ export function passageObstructionAt(
 }
 
 /** Durée de traversée d'un passage en partant à l'instant t. */
-export function passageTravelSeconds(passage: Passage, t: number, scenario: LoadedScenario, world: WorldState): number {
+export function passageTravelSeconds(
+  passage: Passage,
+  t: number,
+  scenario: LoadedScenario,
+  world: WorldState,
+): number {
   const o = passageObstructionAt(passage, t, scenario, world);
   return o ? passage.travelSeconds * o.travelMultiplier : passage.travelSeconds;
 }
@@ -115,7 +127,16 @@ export function traceRoute(
 ): Route | null {
   const horizon = scenario.data.scenario.timeline.durationSeconds + 3600;
   if (from === to) {
-    return { from, to, departure: sec(departure), arrival: sec(departure), seconds: 0, via: [from], steps: [], obstructed: false };
+    return {
+      from,
+      to,
+      departure: sec(departure),
+      arrival: sec(departure),
+      seconds: 0,
+      via: [from],
+      steps: [],
+      obstructed: false,
+    };
   }
   const best = new Map<ZoneId, Label>();
   const startLabel: Label = { zone: from, arrival: departure, prev: null };
@@ -134,7 +155,9 @@ export function traceRoute(
     if (!current || settled.has(current.zone)) continue;
     settled.add(current.zone);
     if (current.zone === to) break;
-    const passages = [...(scenario.index.adjacency.get(current.zone) ?? [])].sort((a, b) => (a.id < b.id ? -1 : 1));
+    const passages = [...(scenario.index.adjacency.get(current.zone) ?? [])].sort((a, b) =>
+      a.id < b.id ? -1 : 1,
+    );
     for (const p of passages) {
       const next = p.from === current.zone ? p.to : p.from;
       if (settled.has(next)) continue;
@@ -205,7 +228,11 @@ export function shortestTravelTime(
 // ---------------------------------------------------------------------------
 
 export const MAX_SIGHT_HOPS = 3;
-const SIGHT_VALUE: Record<'none' | 'partial' | 'clear', number> = { none: 0, partial: 0.5, clear: 1 };
+const SIGHT_VALUE: Record<'none' | 'partial' | 'clear', number> = {
+  none: 0,
+  partial: 0.5,
+  clear: 1,
+};
 const HOP_DECAY = 0.85;
 const OCCLUSION_FACTOR = 0.35;
 
@@ -259,14 +286,37 @@ export function canSee(
   if (observerZoneId === targetZoneId) {
     const occ = obstructions.filter((o) => o.zoneId === targetZoneId).map((o) => o.id);
     const q = Math.min(1, lightFactor) * (occ.length > 0 ? 0.85 : 1);
-    return { observerZoneId, targetZoneId, at: t, quality: q, fidelity: fidelityFromQuality(q), via: [observerZoneId], hops: 0, occludedBy: occ, blockedBy: null };
+    return {
+      observerZoneId,
+      targetZoneId,
+      at: t,
+      quality: q,
+      fidelity: fidelityFromQuality(q),
+      via: [observerZoneId],
+      hops: 0,
+      occludedBy: occ,
+      blockedBy: null,
+    };
   }
 
   // Blocage explicite de paire
   for (const o of obstructions) {
     for (const [a, b] of o.blocksSightBetween) {
-      if ((a === observerZoneId && b === targetZoneId) || (a === targetZoneId && b === observerZoneId)) {
-        return { observerZoneId, targetZoneId, at: t, quality: 0, fidelity: 'none', via: [], hops: 0, occludedBy: [], blockedBy: o.id };
+      if (
+        (a === observerZoneId && b === targetZoneId) ||
+        (a === targetZoneId && b === observerZoneId)
+      ) {
+        return {
+          observerZoneId,
+          targetZoneId,
+          at: t,
+          quality: 0,
+          fidelity: 'none',
+          via: [],
+          hops: 0,
+          occludedBy: [],
+          blockedBy: o.id,
+        };
       }
     }
   }
@@ -276,10 +326,13 @@ export function canSee(
     if (via.length - 1 > MAX_SIGHT_HOPS) return;
     if (zone === targetZoneId) {
       const q = quality * lightFactor;
-      if (!best || q > best.quality || (q === best.quality && via.length < best.via.length)) best = { quality: q, via, occluded };
+      if (!best || q > best.quality || (q === best.quality && via.length < best.via.length))
+        best = { quality: q, via, occluded };
       return;
     }
-    const passages = [...(scenario.index.adjacency.get(zone) ?? [])].sort((a, b) => (a.id < b.id ? -1 : 1));
+    const passages = [...(scenario.index.adjacency.get(zone) ?? [])].sort((a, b) =>
+      a.id < b.id ? -1 : 1,
+    );
     for (const p of passages) {
       if (p.sight === 'none') continue;
       const next = p.from === zone ? p.to : p.from;
@@ -299,7 +352,17 @@ export function canSee(
   };
   visit(observerZoneId, 1, [observerZoneId], []);
   if (!best) {
-    return { observerZoneId, targetZoneId, at: t, quality: 0, fidelity: 'none', via: [], hops: 0, occludedBy: [], blockedBy: null };
+    return {
+      observerZoneId,
+      targetZoneId,
+      at: t,
+      quality: 0,
+      fidelity: 'none',
+      via: [],
+      hops: 0,
+      occludedBy: [],
+      blockedBy: null,
+    };
   }
   const found: { quality: number; via: ZoneId[]; occluded: ObstructionId[] } = best;
   const quality = Math.round(found.quality * 1000) / 1000;
@@ -341,7 +404,18 @@ export interface HearResult {
 }
 
 /** Étiquettes « grossières » perçues même lorsque le son est étouffé. */
-export const COARSE_SOUND_TAGS: ReadonlySet<string> = new Set(['brief', 'continuous', 'metal', 'hum', 'sharp', 'loud', 'quiet', 'low', 'high', 'heavy']);
+export const COARSE_SOUND_TAGS: ReadonlySet<string> = new Set([
+  'brief',
+  'continuous',
+  'metal',
+  'hum',
+  'sharp',
+  'loud',
+  'quiet',
+  'low',
+  'high',
+  'heavy',
+]);
 export const HEAR_THRESHOLDS = { exact: 0.35, partial: 0.15, ambiguous: 0.06 } as const;
 
 export function hearFidelity(intensity: number): Fidelity | 'none' {
@@ -397,7 +471,9 @@ export function hearSignal(
     settled.add(zone);
     if (zone === observerZoneId) break;
     const factorHere = bestFactor.get(zone) ?? 0;
-    const passages = [...(scenario.index.adjacency.get(zone) ?? [])].sort((a, b) => (a.id < b.id ? -1 : 1));
+    const passages = [...(scenario.index.adjacency.get(zone) ?? [])].sort((a, b) =>
+      a.id < b.id ? -1 : 1,
+    );
     for (const p of passages) {
       const next = p.from === zone ? p.to : p.from;
       if (settled.has(next)) continue;

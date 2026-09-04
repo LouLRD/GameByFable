@@ -17,7 +17,10 @@ export function HintCallout({ view }: { view: PlayerView }): React.JSX.Element |
   if (!hintsEnabled || impasseCount < threshold) return null;
 
   const blockingIds = new Set(view.version.blockingIds);
-  const contradiction = view.contradictions.find((c) => blockingIds.has(c.id)) ?? view.contradictions.find((c) => c.involvesVersion) ?? null;
+  const contradiction =
+    view.contradictions.find((c) => blockingIds.has(c.id)) ??
+    view.contradictions.find((c) => c.involvesVersion) ??
+    null;
   const evidenceLabels = contradiction
     ? contradiction.suggestedEvidenceIds
         .map((id) => view.evidence.find((e) => e.id === id)?.label)
@@ -32,7 +35,9 @@ export function HintCallout({ view }: { view: PlayerView }): React.JSX.Element |
       {contradiction ? (
         <>
           <p className="callout-text">La version bute sur « {contradiction.title} ».</p>
-          {evidenceLabels.length > 0 ? <p className="callout-text">Pièces à réexaminer : {evidenceLabels.join(', ')}.</p> : null}
+          {evidenceLabels.length > 0 ? (
+            <p className="callout-text">Pièces à réexaminer : {evidenceLabels.join(', ')}.</p>
+          ) : null}
         </>
       ) : (
         <p className="callout-text">Confrontez une déclaration avec la pièce qui la contredit.</p>

@@ -39,7 +39,8 @@ export function versionCosts(ctx: EvaluationContext, characterId: CharacterId): 
       for (const key of def?.costKeys[characterId] ?? []) add(key, p);
     }
     for (const key of ev.extension?.costKeys[characterId] ?? []) add(key, ev.hypothesis.id);
-    if (ev.actorId === characterId) for (const key of ev.extension?.actorCostKeys ?? []) add(key, ev.hypothesis.id);
+    if (ev.actorId === characterId)
+      for (const key of ev.extension?.actorCostKeys ?? []) add(key, ev.hypothesis.id);
   }
   return [...items.values()].sort((a, b) => (a.key < b.key ? -1 : 1));
 }
@@ -57,7 +58,10 @@ export function waivedCostKeys(ctx: EvaluationContext, characterId: CharacterId)
   return waived;
 }
 
-export function decideSignature(ctx: EvaluationContext, characterId: CharacterId): SignatureDecision {
+export function decideSignature(
+  ctx: EvaluationContext,
+  characterId: CharacterId,
+): SignatureDecision {
   const { scenario, state } = ctx;
   const character = scenario.index.characters.get(characterId);
   const cstate = state.characters[characterId];
@@ -67,18 +71,30 @@ export function decideSignature(ctx: EvaluationContext, characterId: CharacterId
   const publicReasons: string[] = [];
   const internalReasons: string[] = [];
   const conflicting: PropositionId[] = [];
-  const decision = (verdict: SignatureVerdict, requestedSlotId?: ClaimSlotId): SignatureDecision => {
-    const d: SignatureDecision = { characterId, verdict, publicReasons, internalReasons, conflictingPropositionIds: [...new Set(conflicting)].sort() };
+  const decision = (
+    verdict: SignatureVerdict,
+    requestedSlotId?: ClaimSlotId,
+  ): SignatureDecision => {
+    const d: SignatureDecision = {
+      characterId,
+      verdict,
+      publicReasons,
+      internalReasons,
+      conflictingPropositionIds: [...new Set(conflicting)].sort(),
+    };
     if (requestedSlotId) d.requestedSlotId = requestedSlotId;
     return d;
   };
-  const slotOf = (hypothesisId: string) => scenario.index.hypotheses.get(hypothesisId as never)?.slotId;
+  const slotOf = (hypothesisId: string) =>
+    scenario.index.hypotheses.get(hypothesisId as never)?.slotId;
 
   // 1. Propositions rejetées catégoriquement
   for (const p of rule?.rejectsPropositions ?? []) {
     if (!ctx.versionPropositionSet.has(p)) continue;
     const claim = ctx.claimEvents.find((ev) => ev.hypothesis.propositions.includes(p));
-    publicReasons.push(`${name} refuse catégoriquement : « ${scenario.index.propositions.get(p)?.label ?? p} ».`);
+    publicReasons.push(
+      `${name} refuse catégoriquement : « ${scenario.index.propositions.get(p)?.label ?? p} ».`,
+    );
     conflicting.push(p);
     return decision('requests-change', claim ? slotOf(claim.hypothesis.id) : undefined);
   }
@@ -117,13 +133,16 @@ export function decideSignature(ctx: EvaluationContext, characterId: CharacterId
       if (!conflict) continue;
       conflicting.push(q);
       // Coût de dire la vérité : la proposition certaine elle-même (si vraie) ou ses alternatives vraies (si la version affirme un faux).
-      const truthCosts =
-        value
-          ? (pdef.costKeys[characterId] ?? []).filter((k) => !waived.has(k) && (character?.privateCosts[k] ?? 0) > 0)
-          : trueAlternativesCost(ctx, characterId, q, certain, waived);
+      const truthCosts = value
+        ? (pdef.costKeys[characterId] ?? []).filter(
+            (k) => !waived.has(k) && (character?.privateCosts[k] ?? 0) > 0,
+          )
+        : trueAlternativesCost(ctx, characterId, q, certain, waived);
       if (truthCosts.length > 0) {
         silent = true;
-        internalReasons.push(`Sait que « ${pdef.label} » est ${value ? 'vrai' : 'faux'} ; contredire coûterait : ${truthCosts.join(', ')}.`);
+        internalReasons.push(
+          `Sait que « ${pdef.label} » est ${value ? 'vrai' : 'faux'} ; contredire coûterait : ${truthCosts.join(', ')}.`,
+        );
         continue;
       }
       objections.push({ q, label: pdef.label, known: ctx.playerKnownPropositions.has(p) });
@@ -134,7 +153,9 @@ export function decideSignature(ctx: EvaluationContext, characterId: CharacterId
     const objection = objections.find((o) => o.known) ?? objections[0];
     if (objection) {
       if (objection.known) {
-        publicReasons.push(`Cette version contredit ce que ${name} tient pour certain : « ${objection.label} ».`);
+        publicReasons.push(
+          `Cette version contredit ce que ${name} tient pour certain : « ${objection.label} ».`,
+        );
       } else {
         publicReasons.push(`${name} refuse cette formulation sans vouloir s'expliquer.`);
         internalReasons.push(`Certitude non révélée au joueur : « ${objection.label} ».`);
@@ -145,10 +166,22 @@ export function decideSignature(ctx: EvaluationContext, characterId: CharacterId
   }
 
   // 5. La vérité est acceptée si la confiance suffit
-  const costlyClaims = ctx.claimEvents.filter((ev) => costs.some((c) => c.sourceIds.includes(ev.hypothesis.id) || ev.hypothesis.propositions.some((p) => c.sourceIds.includes(p))));
-  const allCanonical = costlyClaims.length > 0 && costlyClaims.every((ev) => scenario.index.canonicalBySlot.get(ev.hypothesis.slotId) === ev.hypothesis.id);
+  const costlyClaims = ctx.claimEvents.filter((ev) =>
+    costs.some(
+      (c) =>
+        c.sourceIds.includes(ev.hypothesis.id) ||
+        ev.hypothesis.propositions.some((p) => c.sourceIds.includes(p)),
+    ),
+  );
+  const allCanonical =
+    costlyClaims.length > 0 &&
+    costlyClaims.every(
+      (ev) => scenario.index.canonicalBySlot.get(ev.hypothesis.slotId) === ev.hypothesis.id,
+    );
   if (allCanonical && rule && trust >= rule.acceptsTruthIfTrustAtLeast) {
-    internalReasons.push(`Version exacte sur les points coûteux ; confiance ${trust} ≥ ${rule.acceptsTruthIfTrustAtLeast}.`);
+    internalReasons.push(
+      `Version exacte sur les points coûteux ; confiance ${trust} ≥ ${rule.acceptsTruthIfTrustAtLeast}.`,
+    );
     publicReasons.push(`${name} accepte que les choses soient écrites telles qu'elles sont.`);
     return decision(silent ? 'signs-silently' : 'signs');
   }
@@ -159,7 +192,9 @@ export function decideSignature(ctx: EvaluationContext, characterId: CharacterId
   if (total > tolerance) {
     const ext = scenario.index.characterExtensions.get(characterId);
     const labels = unwaived.map((c) => ext?.costLabels[c.key] ?? c.key);
-    internalReasons.push(`Coût ${total} > tolérance ${tolerance} (${unwaived.map((c) => `${c.key}:${c.amount}`).join(', ')}).`);
+    internalReasons.push(
+      `Coût ${total} > tolérance ${tolerance} (${unwaived.map((c) => `${c.key}:${c.amount}`).join(', ')}).`,
+    );
     publicReasons.push(
       trust <= 0
         ? `${name} n'a pas assez confiance pour signer une version qui l'expose (${labels.join(', ')}).`
@@ -195,9 +230,11 @@ function trueAlternativesCost(
     const pdef = ctx.scenario.index.propositions.get(p);
     if (!pdef || !qdef) continue;
     if (!(pdef.excludes.includes(q) || qdef.excludes.includes(p))) continue;
-    for (const key of pdef.costKeys[characterId] ?? []) if (!waived.has(key) && (character?.privateCosts[key] ?? 0) > 0) out.push(key);
+    for (const key of pdef.costKeys[characterId] ?? [])
+      if (!waived.has(key) && (character?.privateCosts[key] ?? 0) > 0) out.push(key);
   }
   return [...new Set(out)].sort();
 }
 
-export const countsAsSignature = (v: SignatureVerdict): boolean => v === 'signs' || v === 'signs-silently';
+export const countsAsSignature = (v: SignatureVerdict): boolean =>
+  v === 'signs' || v === 'signs-silently';

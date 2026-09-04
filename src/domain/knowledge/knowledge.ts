@@ -36,30 +36,49 @@ export function isSelfProposition(sem: PropositionSemantics, characterId: Charac
 /** Propositions rendues publiques dès le départ (pièces disponibles au début). */
 export function publicPropositions(scenario: LoadedScenario): PropositionId[] {
   const out = new Set<PropositionId>();
-  for (const e of scenario.data.evidence) if (e.availableAtStart) for (const p of e.supports) out.add(p);
+  for (const e of scenario.data.evidence)
+    if (e.availableAtStart) for (const p of e.supports) out.add(p);
   return [...out].sort();
 }
 
 /** Connaissance initiale d'un personnage : soi-même, croyances de départ, informations publiques. */
-export function initialKnowledge(scenario: LoadedScenario, characterId: CharacterId): KnowledgeEntry[] {
+export function initialKnowledge(
+  scenario: LoadedScenario,
+  characterId: CharacterId,
+): KnowledgeEntry[] {
   const entries: KnowledgeEntry[] = [];
   const seen = new Set<PropositionId>();
   for (const p of scenario.data.extension.propositions) {
     if (p.truth === null) continue;
     if (!isSelfProposition(p.semantics, characterId)) continue;
-    entries.push({ propositionId: p.id, confidence: p.truth ? 1 : 0, provenanceIds: [`self:${characterId}`], origin: 'self' });
+    entries.push({
+      propositionId: p.id,
+      confidence: p.truth ? 1 : 0,
+      provenanceIds: [`self:${characterId}`],
+      origin: 'self',
+    });
     seen.add(p.id);
   }
   for (const b of scenario.data.initialBeliefs) {
     if (b.characterId !== characterId || seen.has(b.propositionId)) continue;
-    entries.push({ propositionId: b.propositionId, confidence: b.confidence, provenanceIds: [...b.provenanceIds], origin: 'belief' });
+    entries.push({
+      propositionId: b.propositionId,
+      confidence: b.confidence,
+      provenanceIds: [...b.provenanceIds],
+      origin: 'belief',
+    });
     seen.add(b.propositionId);
   }
   for (const pid of publicPropositions(scenario)) {
     if (seen.has(pid)) continue;
     const def = scenario.index.propositions.get(pid);
     const truth = def?.truth ?? true;
-    entries.push({ propositionId: pid, confidence: truth ? 1 : 0, provenanceIds: ['public'], origin: 'public' });
+    entries.push({
+      propositionId: pid,
+      confidence: truth ? 1 : 0,
+      provenanceIds: ['public'],
+      origin: 'public',
+    });
     seen.add(pid);
   }
   return entries.sort((a, b) => (a.propositionId < b.propositionId ? -1 : 1));
@@ -68,11 +87,17 @@ export function initialKnowledge(scenario: LoadedScenario, characterId: Characte
 /** Ajoute ou renforce une connaissance apprise, sans écraser une certitude propre. */
 export function learn(entries: readonly KnowledgeEntry[], entry: KnowledgeEntry): KnowledgeEntry[] {
   const existing = entries.find((e) => e.propositionId === entry.propositionId);
-  if (!existing) return [...entries, entry].sort((a, b) => (a.propositionId < b.propositionId ? -1 : 1));
+  if (!existing)
+    return [...entries, entry].sort((a, b) => (a.propositionId < b.propositionId ? -1 : 1));
   if (existing.origin === 'self') return [...entries];
   return entries.map((e) =>
     e.propositionId === entry.propositionId
-      ? { ...e, confidence: entry.confidence, provenanceIds: [...new Set([...e.provenanceIds, ...entry.provenanceIds])], origin: entry.origin }
+      ? {
+          ...e,
+          confidence: entry.confidence,
+          provenanceIds: [...new Set([...e.provenanceIds, ...entry.provenanceIds])],
+          origin: entry.origin,
+        }
       : e,
   );
 }
@@ -110,7 +135,13 @@ export function knowledgePath(
 ): KnowledgePath {
   const required = [...new Set(proposition.knowledgeTags)].sort();
   if (isSelfProposition(proposition.semantics, characterId)) {
-    return { status: 'self', requiredTags: required, availableTags: required, missingTags: [], sourceIds: [`self:${characterId}`] };
+    return {
+      status: 'self',
+      requiredTags: required,
+      availableTags: required,
+      missingTags: [],
+      sourceIds: [`self:${characterId}`],
+    };
   }
   const available = new Set<string>();
   const sources: string[] = [];
@@ -138,6 +169,17 @@ export function knowledgePath(
   }
   const availableTags = [...available].sort();
   const missing = required.filter((t) => !available.has(t));
-  const status: KnowledgePathStatus = required.length === 0 || missing.length === 0 ? 'full' : missing.length < required.length ? 'partial' : 'none';
-  return { status, requiredTags: required, availableTags, missingTags: missing, sourceIds: [...new Set(sources)].sort() };
+  const status: KnowledgePathStatus =
+    required.length === 0 || missing.length === 0
+      ? 'full'
+      : missing.length < required.length
+        ? 'partial'
+        : 'none';
+  return {
+    status,
+    requiredTags: required,
+    availableTags,
+    missingTags: missing,
+    sourceIds: [...new Set(sources)].sort(),
+  };
 }

@@ -1,5 +1,11 @@
 import { expect, test } from '@playwright/test';
-import { openFreshGame, placeClaim, requestRoundTableAndSeal, runCanonicalConfrontations, confront } from './support/game';
+import {
+  openFreshGame,
+  placeClaim,
+  requestRoundTableAndSeal,
+  runCanonicalConfrontations,
+  confront,
+} from './support/game';
 
 test.describe('Parcours 4 — deux fins distinctes', () => {
   test('résolution physique cohérente jusqu’à « Tout écrire »', async ({ page }) => {
@@ -23,9 +29,21 @@ test.describe('Parcours 4 — deux fins distinctes', () => {
   test('version socialement protectrice qui conserve une omission', async ({ page }) => {
     test.setTimeout(180_000);
     await openFreshGame(page);
-    await confront(page, 'Malik Bensaïd', /pochette directement sur son bureau/, 'Journal vidéo', 'empathique');
+    await confront(
+      page,
+      'Malik Bensaïd',
+      /posée directement sur son bureau/,
+      'Journal vidéo',
+      'empathique',
+    );
     await confront(page, 'Jo Harel', /palette n'est entrée/, 'Journal vidéo', 'neutre');
-    await confront(page, 'Inès Vidal', /restée dans l'allée froide/, 'Scan de la palette', 'empathique');
+    await confront(
+      page,
+      'Inès Vidal',
+      /restée dans l'allée froide/,
+      'Scan de la palette',
+      'empathique',
+    );
     await confront(page, 'Noé Rami', /vu Inès y entrer/, 'Scan de la palette', 'neutre');
     await confront(page, 'Ana Sorel', /rien fait d'inhabituel/, 'Rapport de caisse', 'empathique');
     await confront(page, 'Ana Sorel', /rien fait d'inhabituel/, 'Ouverture manuelle', 'neutre');
@@ -49,7 +67,13 @@ test.describe('Parcours 4 — deux fins distinctes', () => {
     test.setTimeout(180_000);
     await openFreshGame(page);
     await confront(page, 'Jo Harel', /palette n'est entrée/, 'Journal vidéo', 'directe');
-    await confront(page, 'Malik Bensaïd', /pochette directement sur son bureau/, 'Journal vidéo', 'directe');
+    await confront(
+      page,
+      'Malik Bensaïd',
+      /posée directement sur son bureau/,
+      'Journal vidéo',
+      'directe',
+    );
     await placeClaim(page, "Origine de l'écart", 'Erreur de comptage');
     await placeClaim(page, 'Interruption vidéo', 'Redémarrage programmé');
     await placeClaim(page, 'Parcours du justificatif', 'Aucun justificatif');

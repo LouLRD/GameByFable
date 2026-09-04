@@ -15,15 +15,27 @@ interface RawScenario {
 
 export function loadForbiddenAtStart(): string[] {
   const root = process.cwd();
-  const raw = JSON.parse(fs.readFileSync(path.join(root, 'src/scenario/la-veilleuse.json'), 'utf8')) as RawScenario;
+  const raw = JSON.parse(
+    fs.readFileSync(path.join(root, 'src/scenario/la-veilleuse.json'), 'utf8'),
+  ) as RawScenario;
   // L'extension est un module TS ; ses libellés de faits sont lus par expression régulière (sans transpilation).
-  const extSource = fs.readFileSync(path.join(root, 'src/scenario/la-veilleuse.extension.ts'), 'utf8');
+  const extSource = fs.readFileSync(
+    path.join(root, 'src/scenario/la-veilleuse.extension.ts'),
+    'utf8',
+  );
   const factLabels = new Map<string, string>();
   const reportedAtStart = new Set<string>();
-  const startStatements = new Set(raw.statements.filter((s) => s.availableAtStart).map((s) => s.id));
-  for (const m of extSource.matchAll(/factId: '([a-z_]+)', label: '([^']+)'[^\n]*reportedByStatementIds: \[([^\]]*)\]/g)) {
+  const startStatements = new Set(
+    raw.statements.filter((s) => s.availableAtStart).map((s) => s.id),
+  );
+  for (const m of extSource.matchAll(
+    /factId: '([a-z_]+)',\s*label: '([^']+)',[\s\S]*?reportedByStatementIds: \[([^\]]*)\]/g,
+  )) {
     factLabels.set(m[1] ?? '', m[2] ?? '');
-    const reporters = (m[3] ?? '').split(',').map((x) => x.trim().replace(/'/g, '')).filter(Boolean);
+    const reporters = (m[3] ?? '')
+      .split(',')
+      .map((x) => x.trim().replace(/'/g, ''))
+      .filter(Boolean);
     if (reporters.some((r) => startStatements.has(r))) reportedAtStart.add(m[1] ?? '');
   }
   const out: string[] = [];
@@ -37,9 +49,22 @@ export function loadForbiddenAtStart(): string[] {
   for (const s of raw.statements) if (!s.availableAtStart) out.push(s.publicText);
   for (const e of raw.evidence) if (!e.availableAtStart) out.push(e.playerText);
   for (const c of raw.characters) out.push(...c.values);
-  out.push('internalReasons', 'signs-silently', 'canonicalHypothesisId', 'movementTracks', 'privateCosts');
+  out.push(
+    'internalReasons',
+    'signs-silently',
+    'canonicalHypothesisId',
+    'movementTracks',
+    'privateCosts',
+  );
   return out;
 }
 
 /** Textes secrets thématiques (formulations libres) à ne pas trouver avant révélation. */
-export const THEMATIC_SECRETS = ['bouilloire', 'justificatif rose', 'fiche d’entretien', "fiche d'entretien", 'paper-only', 'protect-ana'];
+export const THEMATIC_SECRETS = [
+  'bouilloire',
+  'justificatif rose',
+  'fiche d’entretien',
+  "fiche d'entretien",
+  'paper-only',
+  'protect-ana',
+];

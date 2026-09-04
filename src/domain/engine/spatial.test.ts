@@ -35,7 +35,10 @@ describe('graphe temporel et chemins', () => {
         const a = track.segments[i - 1]!;
         const b = track.segments[i]!;
         const min = shortestTravelTime(a.zoneId, b.zoneId, a.end, scenario, known);
-        expect(b.start - a.end, `${track.characterId} ${a.zoneId}→${b.zoneId}`).toBeGreaterThanOrEqual(Math.floor(min));
+        expect(
+          b.start - a.end,
+          `${track.characterId} ${a.zoneId}→${b.zoneId}`,
+        ).toBeGreaterThanOrEqual(Math.floor(min));
       }
     }
   });
@@ -61,8 +64,11 @@ describe('graphe temporel et chemins', () => {
     expect(during?.obstructed).toBe(true);
   });
 
-  it('attend l\'ouverture d\'un passage fermé par intervalle', () => {
-    const p = { ...scenario.index.passages.get('p01' as never)!, openWhen: { type: 'between' as const, start: sec(100), end: sec(200) } };
+  it("attend l'ouverture d'un passage fermé par intervalle", () => {
+    const p = {
+      ...scenario.index.passages.get('p01' as never)!,
+      openWhen: { type: 'between' as const, start: sec(100), end: sec(200) },
+    };
     expect(nextOpenTime(p, 50, 1560)).toBe(100);
     expect(nextOpenTime(p, 150, 1560)).toBe(150);
     expect(nextOpenTime(p, 250, 1560)).toBeNull();
@@ -88,7 +94,7 @@ describe('visibilité', () => {
     expect(r.via).toEqual(['loading', 'stockroom', 'cold_aisle']);
   });
 
-  it('la palette occulte la vue vers l\'allée froide pendant son intervalle', () => {
+  it("la palette occulte la vue vers l'allée froide pendant son intervalle", () => {
     const before = canSee(Z('loading'), Z('cold_aisle'), 100, scenario, known);
     const during = canSee(Z('loading'), Z('cold_aisle'), 540, scenario, known);
     expect(during.quality).toBeLessThan(before.quality);
@@ -98,7 +104,7 @@ describe('visibilité', () => {
     expect(canSee(Z('loading'), Z('cold_aisle'), 540, scenario, emptyWorld).occludedBy).toEqual([]);
   });
 
-  it('bloque explicitement les paires listées par l\'obstruction', () => {
+  it("bloque explicitement les paires listées par l'obstruction", () => {
     const r = canSee(Z('aisle_one'), Z('stockroom'), 540, scenario, known);
     expect(r.blockedBy).toBe('pallet_obstruction');
     expect(r.quality).toBe(0);

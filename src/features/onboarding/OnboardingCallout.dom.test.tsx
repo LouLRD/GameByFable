@@ -67,7 +67,10 @@ describe('<OnboardingCallout />', () => {
     render(<App />);
     const callout = screen.getByText(first.text).closest('aside');
     expect(callout).not.toBeNull();
-    expect(document.querySelector('.callout-stack')).toHaveAttribute('data-anchor', focusToSpace(first.focus));
+    expect(document.querySelector('.callout-stack')).toHaveAttribute(
+      'data-anchor',
+      focusToSpace(first.focus),
+    );
     await user.click(screen.getByRole('button', { name: 'Compris' }));
     expect(screen.queryByText(first.text)).toBeNull();
   });
@@ -87,7 +90,13 @@ describe('<HintCallout /> — aide progressive', () => {
     // Trois actions refusées (hypothèse inconnue) : le moteur compte les impasses.
     act(() => {
       for (let i = 0; i < 3; i++) {
-        const r = useGameStore.getState().dispatch({ type: 'set-claim', slotId: 'cash_origin' as never, hypothesisId: 'h_inexistante' as never });
+        const r = useGameStore
+          .getState()
+          .dispatch({
+            type: 'set-claim',
+            slotId: 'cash_origin' as never,
+            hypothesisId: 'h_inexistante' as never,
+          });
         expect(r.ok).toBe(false);
       }
     });
@@ -103,7 +112,11 @@ describe('<HintCallout /> — aide progressive', () => {
 
   it('est désactivable par la préférence hintsEnabled', () => {
     useGameStore.setState((s) => ({ impasseCount: 5, prefs: { ...s.prefs, hintsEnabled: false } }));
-    const view = { version: { blockingIds: [] }, contradictions: [], evidence: [] } as unknown as Parameters<typeof HintCallout>[0]['view'];
+    const view = {
+      version: { blockingIds: [] },
+      contradictions: [],
+      evidence: [],
+    } as unknown as Parameters<typeof HintCallout>[0]['view'];
     const { container } = render(<HintCallout view={view} />);
     expect(container).toBeEmptyDOMElement();
   });

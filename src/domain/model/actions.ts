@@ -1,4 +1,11 @@
-import type { CharacterId, ClaimSlotId, EvidenceId, HypothesisId, OnboardingId, ZoneId } from './ids';
+import type {
+  CharacterId,
+  ClaimSlotId,
+  EvidenceId,
+  HypothesisId,
+  OnboardingId,
+  ZoneId,
+} from './ids';
 import type { Approach } from './scenario';
 import type { Interval } from './time';
 

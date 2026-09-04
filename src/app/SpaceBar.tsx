@@ -19,8 +19,18 @@ export function SpaceBar({ view }: { view: PlayerView }): React.JSX.Element {
   const tabs: TabDef[] = [
     { id: 'map', digit: '1' },
     { id: 'timeline', digit: '2' },
-    { id: 'casefile', digit: '3', count: view.evidence.length + view.statements.length, countLabel: 'éléments au dossier' },
-    { id: 'inspector', digit: '4', count: view.contradictions.length, countLabel: 'contradictions' },
+    {
+      id: 'casefile',
+      digit: '3',
+      count: view.evidence.length + view.statements.length,
+      countLabel: 'éléments au dossier',
+    },
+    {
+      id: 'inspector',
+      digit: '4',
+      count: view.contradictions.length,
+      countLabel: 'contradictions',
+    },
   ];
   return (
     <nav className="space-bar" aria-label="Espaces de travail">

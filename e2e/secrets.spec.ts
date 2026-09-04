@@ -3,7 +3,9 @@ import { openFreshGame } from './support/game';
 import { loadForbiddenAtStart, THEMATIC_SECRETS } from './support/secrets';
 
 test.describe('Sécurité narrative — aucun secret dans le DOM avant révélation', () => {
-  test('le DOM initial ne contient ni fait secret, ni déclaration ou pièce verrouillée, ni donnée interne', async ({ page }) => {
+  test('le DOM initial ne contient ni fait secret, ni déclaration ou pièce verrouillée, ni donnée interne', async ({
+    page,
+  }) => {
     await openFreshGame(page);
     await page.getByRole('tab', { name: 'Contradictions' }).click();
     const html = await page.content();

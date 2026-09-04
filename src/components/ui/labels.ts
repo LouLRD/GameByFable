@@ -35,4 +35,3 @@ export const KIND_LABELS: Record<string, string> = {
   discursive: 'discursive',
   motivational: 'motivationnelle',
 };
-

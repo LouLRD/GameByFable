@@ -1,12 +1,22 @@
 import type { Contradiction, ExplanationStep, Severity } from '../model/contradiction';
 import type { EvidenceId, PropositionId, ZoneId } from '../model/ids';
-import type { ContradictionKind, Evidence, LoadedScenario, PropositionDef, PropositionSemantics } from '../model/scenario';
+import type {
+  ContradictionKind,
+  Evidence,
+  LoadedScenario,
+  PropositionDef,
+  PropositionSemantics,
+} from '../model/scenario';
 import { intervalsOverlap, sec, type Interval } from '../model/time';
 import type { EvaluationContext } from '../engine/context';
 
 export const SEVERITY_RANK: Record<Severity, number> = { notice: 0, major: 1, critical: 2 };
 
-export function makeContradictionId(kind: ContradictionKind, ruleId: string, involvedIds: readonly string[]): string {
+export function makeContradictionId(
+  kind: ContradictionKind,
+  ruleId: string,
+  involvedIds: readonly string[],
+): string {
   return `${kind}:${ruleId}:${[...new Set(involvedIds)].sort().join('+')}`;
 }
 
@@ -55,8 +65,12 @@ export function dedupeContradictions(list: readonly Contradiction[]): Contradict
     const winner = SEVERITY_RANK[c.severity] > SEVERITY_RANK[prev.severity] ? c : prev;
     byId.set(c.id, {
       ...winner,
-      suggestedEvidenceIds: [...new Set([...prev.suggestedEvidenceIds, ...c.suggestedEvidenceIds])].sort(),
-      inspectableZoneIds: [...new Set([...prev.inspectableZoneIds, ...c.inspectableZoneIds])].sort(),
+      suggestedEvidenceIds: [
+        ...new Set([...prev.suggestedEvidenceIds, ...c.suggestedEvidenceIds]),
+      ].sort(),
+      inspectableZoneIds: [
+        ...new Set([...prev.inspectableZoneIds, ...c.inspectableZoneIds]),
+      ].sort(),
       slotIds: [...new Set([...prev.slotIds, ...c.slotIds])].sort(),
       involvesVersion: prev.involvesVersion || c.involvesVersion,
     });
@@ -69,22 +83,71 @@ export function dedupeContradictions(list: readonly Contradiction[]): Contradict
 }
 
 /** Présence(s) impliquée(s) par une sémantique, sans identité de source. */
-export function presenceOf(sem: PropositionSemantics): { characterId: string; zoneId: ZoneId; interval: Interval; continuous: boolean }[] {
+export function presenceOf(
+  sem: PropositionSemantics,
+): { characterId: string; zoneId: ZoneId; interval: Interval; continuous: boolean }[] {
   switch (sem.type) {
     case 'presence':
-      return [{ characterId: sem.characterId, zoneId: sem.zoneId, interval: sem.interval, continuous: false }];
+      return [
+        {
+          characterId: sem.characterId,
+          zoneId: sem.zoneId,
+          interval: sem.interval,
+          continuous: false,
+        },
+      ];
     case 'continuous-presence':
-      return [{ characterId: sem.characterId, zoneId: sem.zoneId, interval: sem.interval, continuous: true }];
+      return [
+        {
+          characterId: sem.characterId,
+          zoneId: sem.zoneId,
+          interval: sem.interval,
+          continuous: true,
+        },
+      ];
     case 'event':
       return sem.actorId && sem.zoneId && sem.interval && sem.requiresPresence
-        ? [{ characterId: sem.actorId, zoneId: sem.zoneId, interval: sem.interval, continuous: false }]
+        ? [
+            {
+              characterId: sem.actorId,
+              zoneId: sem.zoneId,
+              interval: sem.interval,
+              continuous: false,
+            },
+          ]
         : [];
     case 'sound':
-      return sem.actorId && sem.zoneId && sem.interval ? [{ characterId: sem.actorId, zoneId: sem.zoneId, interval: sem.interval, continuous: false }] : [];
+      return sem.actorId && sem.zoneId && sem.interval
+        ? [
+            {
+              characterId: sem.actorId,
+              zoneId: sem.zoneId,
+              interval: sem.interval,
+              continuous: false,
+            },
+          ]
+        : [];
     case 'perceived': {
-      const out: { characterId: string; zoneId: ZoneId; interval: Interval; continuous: boolean }[] = [];
-      if (sem.observerZoneId) out.push({ characterId: sem.observerId, zoneId: sem.observerZoneId, interval: sem.target.interval, continuous: false });
-      if (sem.target.characterId) out.push({ characterId: sem.target.characterId, zoneId: sem.target.zoneId, interval: sem.target.interval, continuous: false });
+      const out: {
+        characterId: string;
+        zoneId: ZoneId;
+        interval: Interval;
+        continuous: boolean;
+      }[] = [];
+      if (sem.observerZoneId)
+        out.push({
+          characterId: sem.observerId,
+          zoneId: sem.observerZoneId,
+          interval: sem.target.interval,
+          continuous: false,
+        });
+      if (sem.target.characterId)
+        out.push({
+          characterId: sem.target.characterId,
+          zoneId: sem.target.zoneId,
+          interval: sem.target.interval,
+          continuous: false,
+        });
       return out;
     }
     default:
@@ -108,7 +171,10 @@ export function propositionsConflict(a: PropositionDef, b: PropositionDef): Conf
 }
 
 /** Pièces (débloquées) en lien avec des propositions : pour suggérer quoi examiner. */
-export function relatedEvidence(ctx: EvaluationContext, propositionIds: readonly PropositionId[]): EvidenceId[] {
+export function relatedEvidence(
+  ctx: EvaluationContext,
+  propositionIds: readonly PropositionId[],
+): EvidenceId[] {
   const set = new Set(propositionIds);
   const out: EvidenceId[] = [];
   for (const e of ctx.unlockedEvidence) {
@@ -135,10 +201,14 @@ export function slotOfHypothesis(scenario: LoadedScenario, hypothesisId: string)
 }
 
 /** Slots dont une hypothèse contient l'une des propositions données. */
-export function slotsForPropositions(scenario: LoadedScenario, props: readonly PropositionId[]): string[] {
+export function slotsForPropositions(
+  scenario: LoadedScenario,
+  props: readonly PropositionId[],
+): string[] {
   const set = new Set(props);
   const out = new Set<string>();
-  for (const h of scenario.data.hypotheses) if (h.propositions.some((p) => set.has(p))) out.add(h.slotId);
+  for (const h of scenario.data.hypotheses)
+    if (h.propositions.some((p) => set.has(p))) out.add(h.slotId);
   return [...out].sort();
 }
 

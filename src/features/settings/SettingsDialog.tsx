@@ -27,7 +27,13 @@ const closeDialog = (): void => useGameStore.getState().closeDialog();
 export function SettingsDialog(): React.JSX.Element {
   const open = useGameStore((s) => s.dialog === 'settings');
   return (
-    <Dialog open={open} title="Options" onClose={closeDialog} width={640} className="settings-dialog">
+    <Dialog
+      open={open}
+      title="Options"
+      onClose={closeDialog}
+      width={640}
+      className="settings-dialog"
+    >
       {open ? <SettingsBody /> : null}
     </Dialog>
   );
@@ -103,13 +109,16 @@ function SettingsBody(): React.JSX.Element {
               onChange={(e) => {
                 const store = useGameStore.getState();
                 store.setPref('hintsEnabled', e.target.checked);
-                store.announce(e.target.checked ? 'Aide progressive activée.' : 'Aide progressive désactivée.');
+                store.announce(
+                  e.target.checked ? 'Aide progressive activée.' : 'Aide progressive désactivée.',
+                );
               }}
             />
             <span>Aide progressive</span>
           </label>
           <p id={hintsHintId} className="field-hint">
-            Après plusieurs actions refusées, une piste propose la contradiction à examiner. Jamais la solution.
+            Après plusieurs actions refusées, une piste propose la contradiction à examiner. Jamais
+            la solution.
           </p>
           <label className="settings-option">
             <input
@@ -131,7 +140,9 @@ function SettingsBody(): React.JSX.Element {
 
       <section className="settings-group" aria-labelledby={shortcutsId}>
         <h3 id={shortcutsId}>Raccourcis clavier</h3>
-        <p className="field-hint">Inactifs dans un champ de saisie ou quand un dialogue est ouvert.</p>
+        <p className="field-hint">
+          Inactifs dans un champ de saisie ou quand un dialogue est ouvert.
+        </p>
         <ShortcutList />
       </section>
     </div>

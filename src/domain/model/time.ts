@@ -8,9 +8,13 @@ export interface Interval {
 
 export const sec = (n: number): Second => n as Second;
 
-export const interval = (start: number, end: number): Interval => ({ start: sec(start), end: sec(end) });
+export const interval = (start: number, end: number): Interval => ({
+  start: sec(start),
+  end: sec(end),
+});
 
-export const intervalsOverlap = (a: Interval, b: Interval): boolean => a.start < b.end && b.start < a.end;
+export const intervalsOverlap = (a: Interval, b: Interval): boolean =>
+  a.start < b.end && b.start < a.end;
 
 export const intervalContains = (outer: Interval, inner: Interval): boolean =>
   outer.start <= inner.start && inner.end <= outer.end;

@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { formatClock, formatClockFr, interval, intersectIntervals, intervalContains, intervalContainsTime, intervalDuration, intervalsOverlap, parseClockToSeconds } from './time';
+import {
+  formatClock,
+  formatClockFr,
+  interval,
+  intersectIntervals,
+  intervalContains,
+  intervalContainsTime,
+  intervalDuration,
+  intervalsOverlap,
+  parseClockToSeconds,
+} from './time';
 
 describe('temps simulé', () => {
   it('formate les horloges à partir de 20:49:00', () => {

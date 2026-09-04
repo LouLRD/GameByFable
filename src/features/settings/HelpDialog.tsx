@@ -23,24 +23,24 @@ export function HelpDialog(): React.JSX.Element {
           <h3 id={loopId}>La boucle</h3>
           <ol className="help-loop">
             <li>
-              <strong>Observer</strong> — parcourez le dossier : pièces, déclarations, fiches. Sélectionner un élément
-              place le curseur et met en évidence le plan.
+              <strong>Observer</strong> — parcourez le dossier : pièces, déclarations, fiches.
+              Sélectionner un élément place le curseur et met en évidence le plan.
             </li>
             <li>
-              <strong>Formuler</strong> — posez une hypothèse dans un emplacement du canevas de version. Le moteur en
-              déduit les conséquences.
+              <strong>Formuler</strong> — posez une hypothèse dans un emplacement du canevas de
+              version. Le moteur en déduit les conséquences.
             </li>
             <li>
-              <strong>Rejouer</strong> — déplacez le curseur ou lancez la relecture : qui pouvait être où, voir ou
-              entendre quoi.
+              <strong>Rejouer</strong> — déplacez le curseur ou lancez la relecture : qui pouvait
+              être où, voir ou entendre quoi.
             </li>
             <li>
-              <strong>Confronter</strong> — opposez une déclaration à la pièce qui la contredit. L’approche (neutre,
-              empathique, directe) joue surtout sur la confiance.
+              <strong>Confronter</strong> — opposez une déclaration à la pièce qui la contredit.
+              L’approche (neutre, empathique, directe) joue surtout sur la confiance.
             </li>
             <li>
-              <strong>Réviser</strong> — une contradiction explique son raisonnement étape par étape ; corrigez la
-              version plutôt que d’insister.
+              <strong>Réviser</strong> — une contradiction explique son raisonnement étape par étape
+              ; corrigez la version plutôt que d’insister.
             </li>
           </ol>
         </section>
@@ -87,20 +87,23 @@ export function HelpDialog(): React.JSX.Element {
           <h3 id={resourcesId}>Pression, confiance, table ronde</h3>
           <ul className="help-list">
             <li>
-              <strong>Pression</strong> (0 à 6) : une confrontation forte en consomme ; une observation nouvelle ou
-              une contradiction critique résolue en rend. Une confrontation irrecevable ne coûte rien.
+              <strong>Pression</strong> (0 à 6) : une confrontation forte en consomme ; une
+              observation nouvelle ou une contradiction critique résolue en rend. Une confrontation
+              irrecevable ne coûte rien.
             </li>
             <li>
-              <strong>Confiance</strong> : chaque personne est <em>fermée</em>, <em>prudente</em>, <em>disponible</em>{' '}
-              ou <em>engagée</em>. Elle influence ce qu’elle précise, admet ou signe.
+              <strong>Confiance</strong> : chaque personne est <em>fermée</em>, <em>prudente</em>,{' '}
+              <em>disponible</em> ou <em>engagée</em>. Elle influence ce qu’elle précise, admet ou
+              signe.
             </li>
             <li>
-              <strong>Table ronde</strong> : après deux révélations structurantes, chaque personne réagit à la version,
-              signe, refuse ou demande un changement. Vous pouvez retravailler tant que le rapport n’est pas scellé.
+              <strong>Table ronde</strong> : après deux révélations structurantes, chaque personne
+              réagit à la version, signe, refuse ou demande un changement. Vous pouvez retravailler
+              tant que le rapport n’est pas scellé.
             </li>
             <li>
-              <strong>Sceller le rapport</strong> est définitif : l’épilogue compare alors la version signée aux faits
-              révélés.
+              <strong>Sceller le rapport</strong> est définitif : l’épilogue compare alors la
+              version signée aux faits révélés.
             </li>
           </ul>
         </section>

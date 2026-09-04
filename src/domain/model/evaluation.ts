@@ -16,7 +16,8 @@ export interface SignatureDecision {
   conflictingPropositionIds: PropositionId[];
 }
 
-export type CoherenceStatus = 'incomplete' | 'impossible' | 'contradicted' | 'unsupported' | 'coherent';
+export type CoherenceStatus =
+  'incomplete' | 'impossible' | 'contradicted' | 'unsupported' | 'coherent';
 
 export interface SlotEvaluation {
   slotId: ClaimSlotId;

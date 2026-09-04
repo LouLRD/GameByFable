@@ -19,8 +19,8 @@ export function ScenarioErrorScreen({ issues }: ScenarioErrorScreenProps): React
       {import.meta.env.DEV ? (
         <>
           <p>
-            Le scénario embarqué n’a pas passé la validation : {errors} erreur(s), {warnings} avertissement(s).
-            Diagnostic affiché en mode développement uniquement.
+            Le scénario embarqué n’a pas passé la validation : {errors} erreur(s), {warnings}{' '}
+            avertissement(s). Diagnostic affiché en mode développement uniquement.
           </p>
           <div className="issues-wrap">
             <table className="issues">
@@ -48,8 +48,8 @@ export function ScenarioErrorScreen({ issues }: ScenarioErrorScreenProps): React
         </>
       ) : (
         <p>
-          Les données du jeu sont indisponibles ou altérées. Rechargez la page ; si le problème persiste,
-          réinstallez l’application.
+          Les données du jeu sont indisponibles ou altérées. Rechargez la page ; si le problème
+          persiste, réinstallez l’application.
         </p>
       )}
       <div>

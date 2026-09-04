@@ -37,12 +37,23 @@ describe('chargement du scénario La Veilleuse', () => {
     broken.canonicalFacts[0]!.interval.end = 99_999;
     const result = loadScenario(broken, laVeilleuseExtension);
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.issues.some((i) => i.code === 'interval-out-of-window')).toBe(true);
+    if (!result.ok)
+      expect(result.issues.some((i) => i.code === 'interval-out-of-window')).toBe(true);
   });
 
   it('refuse une zone déconnectée', () => {
     const broken = structuredClone(rawScenario);
-    broken.zones.push({ id: 'island', label: 'Île', polygon: [[0, 0], [1, 0], [1, 1]], light: 0.5, acousticAbsorption: 0.1 });
+    broken.zones.push({
+      id: 'island',
+      label: 'Île',
+      polygon: [
+        [0, 0],
+        [1, 0],
+        [1, 1],
+      ],
+      light: 0.5,
+      acousticAbsorption: 0.1,
+    });
     const result = loadScenario(broken, laVeilleuseExtension);
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.issues.some((i) => i.code === 'disconnected-zone')).toBe(true);

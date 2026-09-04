@@ -22,7 +22,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   override componentDidCatch(error: unknown, info: ErrorInfo): void {
     if (import.meta.env.DEV) {
-      console.error('[La Version Acceptable] erreur d’interface interceptée', error, info.componentStack);
+      console.error(
+        '[La Version Acceptable] erreur d’interface interceptée',
+        error,
+        info.componentStack,
+      );
     }
   }
 
@@ -39,8 +43,8 @@ export function TechnicalErrorScreen({ error }: { error: Error }): React.JSX.Ele
       <p className="screen-kicker">Message technique — ceci n’est pas une réponse du jeu</p>
       <h1>L’interface a rencontré une erreur</h1>
       <p>
-        Votre progression est sauvegardée automatiquement après chaque action : rechargez la page pour
-        reprendre le dossier là où vous l’aviez laissé.
+        Votre progression est sauvegardée automatiquement après chaque action : rechargez la page
+        pour reprendre le dossier là où vous l’aviez laissé.
       </p>
       <div>
         <button type="button" className="btn btn-primary" onClick={() => window.location.reload()}>

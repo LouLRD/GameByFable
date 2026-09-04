@@ -17,7 +17,13 @@ describe('performance de l’évaluation', () => {
         const h = candidates[(i + j) % candidates.length];
         if (!h) throw new Error('slot vide');
         const actor = scenario.data.characters[(i + j) % 6];
-        return claim(slot.id, h.id, h.requiresActor && actor ? { actorId: actor.id, interval: interval(400 + i * 10, 460 + i * 10) } : {});
+        return claim(
+          slot.id,
+          h.id,
+          h.requiresActor && actor
+            ? { actorId: actor.id, interval: interval(400 + i * 10, 460 + i * 10) }
+            : {},
+        );
       });
       return run(actions, base);
     });
@@ -32,7 +38,9 @@ describe('performance de l’évaluation', () => {
     samples.sort((a, b) => a - b);
     const median = samples[Math.floor(samples.length / 2)] ?? 0;
     const p95 = samples[Math.floor(samples.length * 0.95)] ?? 0;
-    console.info(`[bench] évaluation complète : médiane ${median.toFixed(2)} ms, p95 ${p95.toFixed(2)} ms (1 000 échantillons, 20 versions distinctes)`);
+    console.info(
+      `[bench] évaluation complète : médiane ${median.toFixed(2)} ms, p95 ${p95.toFixed(2)} ms (1 000 échantillons, 20 versions distinctes)`,
+    );
     expect(median).toBeLessThan(20);
   });
 

@@ -16,7 +16,8 @@ export interface RenderedStep {
 export function renderStep(step: ExplanationStep, scenario: LoadedScenario): RenderedStep {
   const start = scenario.data.scenario.timeline.startClock;
   const clock = (t: number) => formatClockFr(start, t);
-  const range = (i: Interval) => (i.start === i.end ? `à ${clock(i.start)}` : `de ${clock(i.start)} à ${clock(i.end)}`);
+  const range = (i: Interval) =>
+    i.start === i.end ? `à ${clock(i.start)}` : `de ${clock(i.start)} à ${clock(i.end)}`;
   const name = (id: string) => scenario.index.characters.get(id as never)?.name ?? id;
   const zone = (id: string) => scenario.index.zones.get(id as never)?.label ?? id;
   const prop = (id: string) => scenario.index.propositions.get(id as never)?.label ?? id;
@@ -29,7 +30,11 @@ export function renderStep(step: ExplanationStep, scenario: LoadedScenario): Ren
     statement: 'déclaration',
     claim: 'hypothèse',
   };
-  const pieceLabel = (id: string) => scenario.index.evidence.get(id as never)?.label ?? scenario.index.statements.get(id as never)?.publicText ?? scenario.index.hypotheses.get(id as never)?.label ?? id;
+  const pieceLabel = (id: string) =>
+    scenario.index.evidence.get(id as never)?.label ??
+    scenario.index.statements.get(id as never)?.publicText ??
+    scenario.index.hypotheses.get(id as never)?.label ??
+    id;
 
   switch (step.type) {
     case 'claim': {
@@ -37,14 +42,27 @@ export function renderStep(step: ExplanationStep, scenario: LoadedScenario): Ren
       if (step.actorId) parts.push(`acteur : ${name(step.actorId)}`);
       if (step.zoneId) parts.push(`lieu : ${zone(step.zoneId)}`);
       if (step.interval) parts.push(range(step.interval));
-      return { text: parts.join(' — '), refIds: [step.hypothesisId, ...(step.actorId ? [step.actorId] : [])], zoneIds: step.zoneId ? [step.zoneId] : [], ...(step.interval ? { at: step.interval.start } : {}) };
+      return {
+        text: parts.join(' — '),
+        refIds: [step.hypothesisId, ...(step.actorId ? [step.actorId] : [])],
+        zoneIds: step.zoneId ? [step.zoneId] : [],
+        ...(step.interval ? { at: step.interval.start } : {}),
+      };
     }
     case 'statement': {
       const s = scenario.index.statements.get(step.statementId as never);
-      return { text: `${name(step.speakerId)} déclare : « ${s?.publicText ?? step.statementId} »`, refIds: [step.statementId, step.speakerId], zoneIds: [] };
+      return {
+        text: `${name(step.speakerId)} déclare : « ${s?.publicText ?? step.statementId} »`,
+        refIds: [step.statementId, step.speakerId],
+        zoneIds: [],
+      };
     }
     case 'evidence':
-      return { text: `Pièce : « ${evidence(step.evidenceId)} »`, refIds: [step.evidenceId], zoneIds: [] };
+      return {
+        text: `Pièce : « ${evidence(step.evidenceId)} »`,
+        refIds: [step.evidenceId],
+        zoneIds: [],
+      };
     case 'position':
       return {
         text: `${name(step.characterId)} se trouve à ${zone(step.zoneId)} ${range(step.interval)} (${sourceLabel[step.source]}).`,
@@ -61,7 +79,9 @@ export function renderStep(step: ExplanationStep, scenario: LoadedScenario): Ren
       };
     case 'travel': {
       const via = step.via.length > 2 ? ` via ${step.via.slice(1, -1).map(zone).join(', ')}` : '';
-      const secs = Number.isFinite(step.seconds) ? `${Math.round(step.seconds * 10) / 10} s` : 'impossible';
+      const secs = Number.isFinite(step.seconds)
+        ? `${Math.round(step.seconds * 10) / 10} s`
+        : 'impossible';
       return {
         text: `Trajet ${zone(step.from)} → ${zone(step.to)} en partant à ${clock(step.departure)} : ${secs}${via}${step.obstructed ? ' (passage encombré)' : ''}.`,
         refIds: [step.characterId],
@@ -92,9 +112,14 @@ export function renderStep(step: ExplanationStep, scenario: LoadedScenario): Ren
       };
     case 'sight': {
       const q = Math.round(step.quality * 100);
-      const via = step.via.length > 2 ? ` en passant par ${step.via.slice(1, -1).map(zone).join(', ')}` : '';
-      const occlZone = step.occludedBy ? scenario.index.obstructions.get(step.occludedBy as never)?.zoneId : undefined;
-      const occl = step.occludedBy ? ` ; une obstruction (${occlZone ? zone(occlZone) : step.occludedBy}) dégrade la vue` : '';
+      const via =
+        step.via.length > 2 ? ` en passant par ${step.via.slice(1, -1).map(zone).join(', ')}` : '';
+      const occlZone = step.occludedBy
+        ? scenario.index.obstructions.get(step.occludedBy as never)?.zoneId
+        : undefined;
+      const occl = step.occludedBy
+        ? ` ; une obstruction (${occlZone ? zone(occlZone) : step.occludedBy}) dégrade la vue`
+        : '';
       return {
         text: `Depuis ${zone(step.from)}, la vue vers ${zone(step.to)} à ${clock(step.at)} est ${q === 0 ? 'nulle' : `de qualité ${q} %`}${via}${occl}.`,
         refIds: [step.observer],
@@ -130,7 +155,11 @@ export function renderStep(step: ExplanationStep, scenario: LoadedScenario): Ren
         zoneIds: [],
       };
     case 'excludes':
-      return { text: `« ${pieceLabel(step.sourceId)} » exclut : ${prop(step.propositionId)}.`, refIds: [step.sourceId], zoneIds: [] };
+      return {
+        text: `« ${pieceLabel(step.sourceId)} » exclut : ${prop(step.propositionId)}.`,
+        refIds: [step.sourceId],
+        zoneIds: [],
+      };
     case 'proposition-conflict':
       return {
         text:
@@ -152,12 +181,18 @@ export function renderStep(step: ExplanationStep, scenario: LoadedScenario): Ren
         zoneIds: [],
       };
     case 'discredited':
-      return { text: `Cette déclaration est déjà contredite par : ${step.byIds.map(pieceLabel).join(', ')}.`, refIds: [step.statementId, ...step.byIds], zoneIds: [] };
+      return {
+        text: `Cette déclaration est déjà contredite par : ${step.byIds.map(pieceLabel).join(', ')}.`,
+        refIds: [step.statementId, ...step.byIds],
+        zoneIds: [],
+      };
     case 'text':
     case 'conclusion':
       return { text: step.text, refIds: [], zoneIds: [] };
   }
 }
 
-export const renderExplanation = (steps: readonly ExplanationStep[], scenario: LoadedScenario): RenderedStep[] =>
-  steps.map((s) => renderStep(s, scenario));
+export const renderExplanation = (
+  steps: readonly ExplanationStep[],
+  scenario: LoadedScenario,
+): RenderedStep[] => steps.map((s) => renderStep(s, scenario));

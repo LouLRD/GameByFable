@@ -6,7 +6,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createAmbience, type Ambience, type AudioCue } from '@/audio';
 import { useGameStore } from '@/state';
-import { AmbienceContext, SUBTITLE_DURATION_MS, useAmbience, type AmbienceContextValue, type Subtitle } from './ambienceContext';
+import {
+  AmbienceContext,
+  SUBTITLE_DURATION_MS,
+  useAmbience,
+  type AmbienceContextValue,
+  type Subtitle,
+} from './ambienceContext';
 
 export function AmbienceProvider({ children }: { children: ReactNode }): React.JSX.Element {
   const instance = useRef<Ambience | null>(null);
@@ -65,7 +71,10 @@ export function AmbienceProvider({ children }: { children: ReactNode }): React.J
     [getAmbience],
   );
 
-  const toggle = useCallback(() => setEnabled(!getAmbience().isEnabled()), [setEnabled, getAmbience]);
+  const toggle = useCallback(
+    () => setEnabled(!getAmbience().isEnabled()),
+    [setEnabled, getAmbience],
+  );
   const playCue = useCallback((cue: AudioCue) => getAmbience().playCue(cue), [getAmbience]);
 
   const value = useMemo<AmbienceContextValue>(
@@ -79,7 +88,13 @@ export function AmbienceProvider({ children }: { children: ReactNode }): React.J
 export function Subtitles(): React.JSX.Element {
   const { subtitle } = useAmbience();
   return (
-    <div className="subtitles" role="status" aria-live="polite" aria-atomic="true" aria-label="Sous-titres des sons">
+    <div
+      className="subtitles"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      aria-label="Sous-titres des sons"
+    >
       {subtitle ? <span className="subtitles-text">{subtitle.text}</span> : null}
     </div>
   );
