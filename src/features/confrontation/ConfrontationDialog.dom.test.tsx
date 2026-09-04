@@ -3,7 +3,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { statementId } from '@/domain/model/ids';
+import { characterId, statementId } from '@/domain/model/ids';
 import { useGameStore, type ConfrontationDraft, type GameStore } from '@/state';
 import { ConfrontationDialog } from './ConfrontationDialog';
 
@@ -45,15 +45,13 @@ function submitButton(name: 'Confronter' | 'Sonder'): HTMLButtonElement {
 }
 
 describe('<ConfrontationDialog />', () => {
-  const originalDispatch = useGameStore.getState().dispatch;
-
   beforeEach(() => {
     resetGame();
   });
 
   afterEach(() => {
-    useGameStore.setState({ dispatch: originalDispatch });
-    useGameStore.getState().closeDialog();
+    // Restaure l'état initial (dont les actions d'origine si l'une a été remplacée).
+    useGameStore.setState(useGameStore.getInitialState());
   });
 
   it('affiche le coût et active « Confronter » pour un brouillon recevable (Malik + déclaration + journal vidéo)', () => {
@@ -155,7 +153,7 @@ describe('<ConfrontationDialog />', () => {
   it('indique qu’un protagoniste a déjà répondu sur un point résolu', () => {
     const first = useGameStore.getState().dispatch({
       type: 'confront',
-      characterId: DRAFT_MALIK.characterId as never,
+      characterId: characterId('malik'),
       targetId: 's_malik_initial',
       supportId: 'e_camera_gap',
       approach: 'neutral',

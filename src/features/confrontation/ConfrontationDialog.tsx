@@ -6,8 +6,11 @@
  * par `dispatch` ; une erreur du moteur est affichée comme telle (jamais comme une réponse du jeu) ;
  * un succès affiche `ConfrontationResult`. Le brouillon vit dans le store (`confrontationDraft`)
  * et survit à la fermeture.
+ *
+ * Les actions du store sont stables : elles sont lues via `useGameStore.getState()` au moment
+ * du geste, ce qui évite de détacher une méthode de son objet.
  */
-import { useEffect, useId, useMemo, useRef, useState, type FormEvent, type RefObject } from 'react';
+import { useEffect, useId, useMemo, useRef, useState, type RefObject, type SubmitEvent } from 'react';
 import { Portrait } from '@/components/portrait';
 import { DegreeBadge, Dialog } from '@/components/ui';
 import { trustState } from '@/domain/endings/signatures';
@@ -18,13 +21,19 @@ import {
   type HypothesisView,
 } from '@/domain/selectors/playerView';
 import { useGameStore, usePlayerView } from '@/state';
-import { APPROACH_LABELS, ApproachPicker } from './ApproachPicker';
+import { APPROACH_LABELS } from './approaches';
+import { ApproachPicker } from './ApproachPicker';
 import { ConfrontationResult, type ResultPiece } from './ConfrontationResult';
 import { TRUST_PORTRAIT, trustBelow, type TrustLabel } from './trust';
 import { TrustMark } from './TrustMark';
 import './confrontation.css';
 
 const HYPOTHESIS_RADIO_VALUE = '__hypothesis__';
+
+/** Fermeture stable (référence constante pour le piège de focus du Dialog). */
+const closeDialog = (): void => {
+  useGameStore.getState().closeDialog();
+};
 
 interface ResultData {
   mode: 'confrontation' | 'probe';
@@ -58,7 +67,6 @@ function shorten(text: string, max = 72): string {
 /** Dialogue « Confrontation », piloté par `dialog === 'confrontation'` dans le store. */
 export function ConfrontationDialog(): React.JSX.Element {
   const open = useGameStore((s) => s.dialog === 'confrontation');
-  const closeDialog = useGameStore((s) => s.closeDialog);
   /** Combinaisons invalides déjà comptées comme impasses (une seule fois chacune). */
   const seenImpasses = useRef<Set<string>>(new Set());
   return (
@@ -83,13 +91,6 @@ function ConfrontationBody({ seenImpasses }: BodyProps): React.JSX.Element {
   const scenario = useGameStore((s) => s.scenario);
   const game = useGameStore((s) => s.game);
   const draft = useGameStore((s) => s.confrontationDraft);
-  const setConfrontationDraft = useGameStore((s) => s.setConfrontationDraft);
-  const closeDialog = useGameStore((s) => s.closeDialog);
-  const dispatch = useGameStore((s) => s.dispatch);
-  const announce = useGameStore((s) => s.announce);
-  const select = useGameStore((s) => s.select);
-  const highlight = useGameStore((s) => s.highlight);
-  const noteImpasse = useGameStore((s) => s.noteImpasse);
 
   const ids = useId();
   const [probeChosen, setProbeChosen] = useState(false);
@@ -203,8 +204,8 @@ function ConfrontationBody({ seenImpasses }: BodyProps): React.JSX.Element {
     const seen = seenImpasses.current;
     if (seen.has(comboKey)) return;
     seen.add(comboKey);
-    noteImpasse();
-  }, [impasse, comboKey, noteImpasse, seenImpasses]);
+    useGameStore.getState().noteImpasse();
+  }, [impasse, comboKey, seenImpasses]);
 
   // Retour au formulaire après « Autre confrontation » : focus sur l'étape Cible.
   useEffect(() => {
@@ -221,7 +222,7 @@ function ConfrontationBody({ seenImpasses }: BodyProps): React.JSX.Element {
         c.statementIds.some((id) => id === draft.targetId));
     const supportIsOwn =
       draft.supportId !== null && c.statementIds.some((id) => id === draft.supportId);
-    setConfrontationDraft({
+    useGameStore.getState().setConfrontationDraft({
       characterId: c.id,
       targetId: keepTarget ? draft.targetId : null,
       supportId: supportIsOwn ? null : draft.supportId,
@@ -230,30 +231,34 @@ function ConfrontationBody({ seenImpasses }: BodyProps): React.JSX.Element {
   };
   const pickStatement = (id: string) => {
     setProbeChosen(false);
-    setConfrontationDraft({ targetId: id });
+    useGameStore.getState().setConfrontationDraft({ targetId: id });
     setSubmitError(null);
   };
   const pickProbe = () => {
     setProbeChosen(true);
-    setConfrontationDraft({ targetId: hypothesisPick ?? targetHypothesis?.id ?? null });
+    useGameStore
+      .getState()
+      .setConfrontationDraft({ targetId: hypothesisPick ?? targetHypothesis?.id ?? null });
     setSubmitError(null);
   };
   const pickHypothesis = (raw: string) => {
     const id = raw === '' ? null : raw;
     setHypothesisPick(id);
     setProbeChosen(true);
-    setConfrontationDraft({ targetId: id });
+    useGameStore.getState().setConfrontationDraft({ targetId: id });
     setSubmitError(null);
   };
   const pickSupport = (raw: string) => {
-    setConfrontationDraft({ supportId: raw === '' ? null : raw });
+    useGameStore.getState().setConfrontationDraft({ supportId: raw === '' ? null : raw });
     setSubmitError(null);
   };
   const pickApproach = (approach: Approach) => {
-    setConfrontationDraft({ approach });
+    useGameStore.getState().setConfrontationDraft({ approach });
   };
   const another = () => {
-    setConfrontationDraft({ targetId: null, supportId: null, approach: 'neutral' });
+    useGameStore
+      .getState()
+      .setConfrontationDraft({ targetId: null, supportId: null, approach: 'neutral' });
     setProbeChosen(false);
     setHypothesisPick(null);
     setResult(null);
@@ -261,17 +266,18 @@ function ConfrontationBody({ seenImpasses }: BodyProps): React.JSX.Element {
     refocusTarget.current = true;
   };
   const openEvidence = (id: string) => {
-    select('evidence', id, { space: 'casefile' });
+    useGameStore.getState().select('evidence', id, { space: 'casefile' });
     closeDialog();
   };
   const openStatement = (id: string) => {
-    select('statement', id, { space: 'casefile' });
+    useGameStore.getState().select('statement', id, { space: 'casefile' });
     closeDialog();
   };
 
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const onSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!view || !character || draft.targetId === null || !canSubmit) return;
+    const store = useGameStore.getState();
     const base = {
       characterId: character.id,
       approach: draft.approach,
@@ -279,7 +285,7 @@ function ConfrontationBody({ seenImpasses }: BodyProps): React.JSX.Element {
       pressureBefore: view.pressure,
     };
     if (probeMode) {
-      const r = dispatch({
+      const r = store.dispatch({
         type: 'probe',
         characterId: character.id,
         targetId: draft.targetId,
@@ -299,10 +305,10 @@ function ConfrontationBody({ seenImpasses }: BodyProps): React.JSX.Element {
         unlockedEvidenceIds: [],
         unlockedStatementIds: [],
       });
-      highlight([character.id]);
-      announce(`${character.name} réagit au sondage : ${text}`);
+      store.highlight([character.id]);
+      store.announce(`${character.name} réagit au sondage : ${text}`);
     } else {
-      const r = dispatch({
+      const r = store.dispatch({
         type: 'confront',
         characterId: character.id,
         targetId: draft.targetId,
@@ -324,13 +330,13 @@ function ConfrontationBody({ seenImpasses }: BodyProps): React.JSX.Element {
         unlockedEvidenceIds,
         unlockedStatementIds,
       });
-      highlight([character.id, ...unlockedEvidenceIds]);
+      store.highlight([character.id, ...unlockedEvidenceIds]);
       const trustAfter = trustState(r.state.characters[character.id]?.trust ?? 0);
       const trustPart =
         trustAfter === character.trustState
           ? `confiance inchangée (${trustAfter})`
           : `confiance ${character.trustState} → ${trustAfter}`;
-      announce(
+      store.announce(
         `${character.name} répond (approche ${APPROACH_LABELS[draft.approach]}) : ${unlockedEvidenceIds.length} nouvelle(s) pièce(s), ${unlockedStatementIds.length} précision(s), ${trustPart}, pression restante ${r.state.pressure}/${view.pressureMax}.`,
       );
     }
@@ -432,12 +438,10 @@ function ConfrontationBody({ seenImpasses }: BodyProps): React.JSX.Element {
                   state={TRUST_PORTRAIT[c.trustState]}
                 />
               </span>
-              <span className="confrontation-choice-body">
-                <span className="confrontation-choice-title">{c.name}</span>
-                <span className="confrontation-choice-meta">
-                  <span>{c.role}</span>
-                  <TrustMark trust={c.trustState} prefix="Confiance :" />
-                </span>
+              <span className="confrontation-choice-title">{c.name}</span>
+              <span className="confrontation-choice-meta">
+                <span>{c.role}</span>
+                <TrustMark trust={c.trustState} prefix="Confiance :" />
               </span>
             </label>
           ))}
@@ -486,18 +490,16 @@ function ConfrontationBody({ seenImpasses }: BodyProps): React.JSX.Element {
                       onChange={() => pickStatement(s.id)}
                       aria-describedby={retracted ? retractedId : undefined}
                     />
-                    <span className="confrontation-choice-body">
-                      <span className="confrontation-choice-title">
-                        <DegreeBadge degree={s.degree} />
-                        {retracted ? (
-                          <span className="tag" id={retractedId}>
-                            rétractée
-                          </span>
-                        ) : null}
-                      </span>
-                      <span className="confrontation-quote">« {s.text} »</span>
-                      <span className="confrontation-choice-meta">{s.propositionLabel}</span>
+                    <span className="confrontation-choice-title">
+                      <DegreeBadge degree={s.degree} />
+                      {retracted ? (
+                        <span className="tag" id={retractedId}>
+                          rétractée
+                        </span>
+                      ) : null}
                     </span>
+                    <span className="confrontation-quote">« {s.text} »</span>
+                    <span className="confrontation-choice-meta">{s.propositionLabel}</span>
                   </label>
                 );
               })}
@@ -510,13 +512,11 @@ function ConfrontationBody({ seenImpasses }: BodyProps): React.JSX.Element {
                     checked
                     onChange={() => pickStatement(targetEvidence.id)}
                   />
-                  <span className="confrontation-choice-body">
-                    <span className="confrontation-choice-title">
-                      <DegreeBadge degree={targetEvidence.degree} />
-                      Trace : {targetEvidence.label}
-                    </span>
-                    <span className="confrontation-choice-meta">{targetEvidence.playerText}</span>
+                  <span className="confrontation-choice-title">
+                    <DegreeBadge degree={targetEvidence.degree} />
+                    Trace : {targetEvidence.label}
                   </span>
+                  <span className="confrontation-choice-meta">{targetEvidence.playerText}</span>
                 </label>
               ) : null}
               <label className="confrontation-choice">
@@ -527,14 +527,12 @@ function ConfrontationBody({ seenImpasses }: BodyProps): React.JSX.Element {
                   checked={probeMode}
                   onChange={pickProbe}
                 />
-                <span className="confrontation-choice-body">
-                  <span className="confrontation-choice-title">
-                    Hypothèse <span className="tag">sondage</span>
-                  </span>
-                  <span className="confrontation-choice-meta">
-                    Soumettre une hypothèse à {character.name} pour recueillir sa réaction, sans
-                    pièce d’appui ni coût de pression.
-                  </span>
+                <span className="confrontation-choice-title">
+                  Hypothèse <span className="tag">sondage</span>
+                </span>
+                <span className="confrontation-choice-meta">
+                  Soumettre une hypothèse à {character.name} pour recueillir sa réaction, sans pièce
+                  d’appui ni coût de pression.
                 </span>
               </label>
             </div>
