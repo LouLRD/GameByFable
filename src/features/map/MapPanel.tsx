@@ -200,18 +200,25 @@ function LegendItems({ extended }: { extended: boolean }): React.JSX.Element {
 }
 
 interface TrayProps {
+  compact?: boolean;
   characters: CharacterView[];
   clock: string;
   selectedId: string | null;
   onSelectCharacter: (characterId: string) => void;
 }
 
-function OffScreenTray({ characters, clock, selectedId, onSelectCharacter }: TrayProps) {
+function OffScreenTray({
+  characters,
+  clock,
+  selectedId,
+  onSelectCharacter,
+  compact = false,
+}: TrayProps) {
   const titleId = useId();
   return (
     <div className="map-tray" role="group" aria-labelledby={titleId}>
       <span id={titleId} className="map-tray-title">
-        Hors champ à cet instant ({characters.length})
+        {compact ? 'Hors champ' : 'Hors champ à cet instant'} ({characters.length})
       </span>
       {characters.length === 0 ? (
         <span className="muted map-tray-empty">Tout le monde a une position connue à {clock}.</span>
@@ -412,44 +419,44 @@ export function MapPanel({ compact = false }: MapPanelProps = {}): React.JSX.Ele
         <MapViewport compact onAnnounce={announce}>
           {storeMap}
         </MapViewport>
-        <div className="map-toolbar">
-          <span className="map-clock mono">
-            <span className="visually-hidden">Heure simulée </span>
-            {frame.clock}
-          </span>
-          <button
-            type="button"
-            className="btn btn-ghost map-legend-toggle"
-            aria-haspopup="dialog"
-            aria-expanded={legendOpen}
-            onClick={() => setLegendOpen(true)}
-          >
-            Légende
-          </button>
-          <button
-            type="button"
-            className="btn map-sheet-open"
-            disabled={selectionKey === null}
-            aria-haspopup="dialog"
-            aria-expanded={sheetOpen}
-            aria-label={
-              selectionKey === null
-                ? 'Ouvrir la fiche (aucune sélection)'
-                : `Ouvrir la fiche — ${sheetTitle}`
-            }
-            onClick={() => {
-              if (selectionKey !== null) setSheetFor(selectionKey);
-            }}
-          >
-            Fiche
-          </button>
+        <div className="map-compact-row">
+          <div className="map-toolbar" role="group" aria-label="Outils du plan">
+            <span className="map-clock mono visually-hidden">Heure simulée {frame.clock}</span>
+            <button
+              type="button"
+              className="btn btn-ghost map-legend-toggle"
+              aria-haspopup="dialog"
+              aria-expanded={legendOpen}
+              onClick={() => setLegendOpen(true)}
+            >
+              Légende
+            </button>
+            <button
+              type="button"
+              className="btn map-sheet-open"
+              disabled={selectionKey === null}
+              aria-haspopup="dialog"
+              aria-expanded={sheetOpen}
+              aria-label={
+                selectionKey === null
+                  ? 'Ouvrir la fiche (aucune sélection)'
+                  : `Ouvrir la fiche — ${sheetTitle}`
+              }
+              onClick={() => {
+                if (selectionKey !== null) setSheetFor(selectionKey);
+              }}
+            >
+              Fiche
+            </button>
+          </div>
+          <OffScreenTray
+            compact
+            characters={frame.offScreen}
+            clock={frame.clock}
+            selectedId={selectedCharacterId}
+            onSelectCharacter={handleSelectCharacter}
+          />
         </div>
-        <OffScreenTray
-          characters={frame.offScreen}
-          clock={frame.clock}
-          selectedId={selectedCharacterId}
-          onSelectCharacter={handleSelectCharacter}
-        />
 
         <Dialog
           open={legendOpen}

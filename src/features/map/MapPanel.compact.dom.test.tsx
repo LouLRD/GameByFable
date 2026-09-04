@@ -105,8 +105,8 @@ describe('<MapPanel compact /> — coquille mobile (390 px)', () => {
     expect(
       screen.getByRole('button', { name: 'Ouvrir la fiche (aucune sélection)' }),
     ).toBeDisabled();
-    expect(screen.getByRole('group', { name: /Hors champ à cet instant/ })).toBeInTheDocument();
-    expect(screen.getByText('20:49:00')).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: /^Hors champ/ })).toBeInTheDocument();
+    expect(screen.getByText(/Heure simulée 20:49:00/)).toBeInTheDocument();
 
     // La fiche n'est pas rendue sous le plan : pas de double défilement.
     expect(screen.queryByText('Sélectionnez une zone ou un jeton.')).toBeNull();
@@ -191,7 +191,7 @@ describe('<MapPanel compact /> — coquille mobile (390 px)', () => {
     render(<MapPanel compact />);
     act(() => useGameStore.getState().setCursor(100));
 
-    const tray = screen.getByRole('group', { name: /Hors champ à cet instant \(2\)/ });
+    const tray = screen.getByRole('group', { name: /^Hors champ \(2\)/ });
     await user.click(within(tray).getByRole('button', { name: /Noé Rami/ }));
     expect(useGameStore.getState().selection).toEqual({ kind: 'character', id: 'noe' });
     const sheet = screen.getByRole('dialog', { name: 'Noé Rami' });

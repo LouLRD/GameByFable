@@ -371,10 +371,17 @@
   min-height: 0;
 }
 
-/* Carré : toute la largeur, hauteur bornée par la place restante (unités de conteneur),
- * déduction faite de la rangée de zoom placée sous le plan. */
+/* Carré : toute la largeur ; en portrait, hauteur bornée par la fenêtre (en-tête 48, bandeau temporel
+ * 52, navigation 56, rangée de zoom 52, rangée d'outils 56, marges ≈ 290 px), plancher 180 px.
+ * Le plan et ses rangées sont ancrés en haut ; l'espace restant tombe en bas du panneau. */
+.map-panel[data-compact='true'] .map-viewport {
+  position: relative;
+  flex: 0 0 auto;
+  justify-content: flex-start;
+}
+
 .map-panel[data-compact='true'] .map-viewport-stage {
-  width: 100%;
+  width: min(100%, max(calc(100dvh - 290px), 180px));
   max-width: 100%;
   aspect-ratio: 1;
   margin: 0;
@@ -382,22 +389,32 @@
   background: var(--bg-sunken);
 }
 
-@supports (width: 1cqh) {
-  .map-panel[data-compact='true'] .map-viewport {
-    container-type: size;
-  }
-
-  .map-panel[data-compact='true'] .map-viewport-stage {
-    width: min(100cqw, max(calc(100cqh - 60px), 180px));
-  }
-}
-
-/* Contrôles de zoom : sous le plan (rien n'est recouvert), alignés côté pouce. */
+/* Contrôles de zoom : rangée sous le plan, côté pouce (rien n'est recouvert). */
 .map-panel[data-compact='true'] .map-zoom {
   position: static;
   flex-direction: row;
   align-self: flex-end;
   box-shadow: none;
+}
+
+/* Rangée compacte : outils (Légende, Fiche) + hors champ, sur une seule ligne défilante. */
+.map-compact-row {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.map-compact-row .map-toolbar {
+  flex: 0 0 auto;
+  padding: 0;
+  overflow: visible;
+}
+
+.map-compact-row .map-tray {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .map-panel[data-compact='true'] .map-svg {
@@ -496,18 +513,24 @@
 
 /* Paysage bas (téléphone couché) : le plan à gauche, outils et tray empilés à droite. */
 @media (max-width: 1023px) and (orientation: landscape) and (max-height: 520px) {
+  /* Paysage : plan carré à gauche (toute la hauteur disponible), zoom en colonne, outils + hors champ
+   * en colonne à droite. Hauteur disponible ≈ 100dvh − en-tête 40 − bandeau temporel 44 − navigation 44 − marges 24. */
   .map-panel[data-compact='true'] {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(200px, 38%);
-    grid-template-rows: auto minmax(0, 1fr);
-    column-gap: var(--space-3);
+    flex-direction: row;
+    align-items: stretch;
+    gap: var(--space-3);
   }
 
-  /* Plan à gauche, colonne de zoom à sa droite : toute la hauteur pour le plan. */
   .map-panel[data-compact='true'] .map-viewport {
-    grid-row: 1 / 3;
-    grid-column: 1;
+    flex: 0 0 auto;
     flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .map-panel[data-compact='true'] .map-viewport-stage {
+    width: max(180px, calc(100dvh - 152px));
+    max-width: 60vw;
   }
 
   .map-panel[data-compact='true'] .map-zoom {
@@ -515,26 +538,21 @@
     align-self: center;
   }
 
-  @supports (width: 1cqh) {
-    .map-panel[data-compact='true'] .map-viewport-stage {
-      width: min(calc(100cqw - 64px), max(100cqh, 180px));
-    }
-  }
-
-  .map-panel[data-compact='true'] .map-toolbar {
-    grid-row: 1;
-    grid-column: 2;
-    flex-wrap: wrap;
-    overflow: visible;
-  }
-
-  .map-panel[data-compact='true'] .map-tray {
-    grid-row: 2;
-    grid-column: 2;
+  .map-panel[data-compact='true'] .map-compact-row {
+    flex: 1 1 auto;
     flex-direction: column;
     align-items: stretch;
     min-height: 0;
     overflow-y: auto;
+  }
+
+  .map-panel[data-compact='true'] .map-compact-row .map-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .map-panel[data-compact='true'] .map-compact-row .map-tray {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .map-panel[data-compact='true'] .map-tray-title {
