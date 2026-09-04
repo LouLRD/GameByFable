@@ -203,7 +203,8 @@ Interface attendue :
 ```ts
 interface Contradiction {
   id: string;
-  kind: 'physical' | 'temporal' | 'sensory' | 'material' | 'epistemic' | 'discursive' | 'motivational';
+  kind:
+    'physical' | 'temporal' | 'sensory' | 'material' | 'epistemic' | 'discursive' | 'motivational';
   severity: 'notice' | 'major' | 'critical';
   involvedIds: string[];
   explanation: ExplanationStep[];
@@ -353,4 +354,3 @@ La cible de 20 ms est indicative : si elle n'est pas atteinte dans l'environneme
 - tests qui vérifient seulement que des composants se rendent ;
 - secrets rendus avec `display: none` ;
 - interface mobile réduite par simple zoom.
-

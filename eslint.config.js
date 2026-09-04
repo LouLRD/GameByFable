@@ -7,7 +7,16 @@ import jsxA11y from 'eslint-plugin-jsx-a11y';
 import prettier from 'eslint-config-prettier';
 
 export default tseslint.config(
-  { ignores: ['dist', 'coverage', 'playwright-report', 'test-results', 'node_modules', 'eslint.config.js'] },
+  {
+    ignores: [
+      'dist',
+      'coverage',
+      'playwright-report',
+      'test-results',
+      'node_modules',
+      'eslint.config.js',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
@@ -26,7 +35,10 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
       '@typescript-eslint/no-unnecessary-condition': 'off',
-      '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true, allowBoolean: true }],
+      '@typescript-eslint/restrict-template-expressions': [
+        'error',
+        { allowNumber: true, allowBoolean: true },
+      ],
       '@typescript-eslint/no-confusing-void-expression': 'off',
       '@typescript-eslint/prefer-nullish-coalescing': 'off',
       '@typescript-eslint/no-non-null-assertion': 'error',
@@ -66,12 +78,23 @@ export default tseslint.config(
       ],
       'no-restricted-properties': [
         'error',
-        { object: 'Math', property: 'random', message: 'Déterminisme : pas de Math.random dans le domaine.' },
-        { object: 'Date', property: 'now', message: 'Déterminisme : pas d\'horloge système dans le domaine.' },
+        {
+          object: 'Math',
+          property: 'random',
+          message: 'Déterminisme : pas de Math.random dans le domaine.',
+        },
+        {
+          object: 'Date',
+          property: 'now',
+          message: "Déterminisme : pas d'horloge système dans le domaine.",
+        },
       ],
       'no-restricted-syntax': [
         'error',
-        { selector: "NewExpression[callee.name='Date']", message: 'Déterminisme : pas de Date dans le domaine.' },
+        {
+          selector: "NewExpression[callee.name='Date']",
+          message: 'Déterminisme : pas de Date dans le domaine.',
+        },
       ],
     },
   },

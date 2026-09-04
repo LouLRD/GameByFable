@@ -16,13 +16,11 @@ function topbarClock(): string | null {
 
 function dispatchFirstClaim(): void {
   const a = firstClaimAction();
-  const r = useGameStore
-    .getState()
-    .dispatch({
-      type: 'set-claim',
-      slotId: a.slotId as ClaimSlotId,
-      hypothesisId: a.hypothesisId as HypothesisId,
-    });
+  const r = useGameStore.getState().dispatch({
+    type: 'set-claim',
+    slotId: a.slotId as ClaimSlotId,
+    hypothesisId: a.hypothesisId as HypothesisId,
+  });
   expect(r.ok).toBe(true);
 }
 

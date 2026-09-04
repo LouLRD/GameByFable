@@ -34,7 +34,6 @@ test.describe('Parcours 1 — onboarding au clavier et première contradiction',
     await expect(dialog).toBeHidden();
 
     await page.getByRole('tab', { name: 'Contradictions' }).click();
-    const inspector = page.getByRole('region', { name: /Version|Contradictions/ }).first();
     await expect(
       page
         .locator('.space[data-space="inspector"]')
@@ -59,7 +58,6 @@ test.describe('Parcours 1 — onboarding au clavier et première contradiction',
         .getByText(/caméra/)
         .first(),
     ).toBeVisible();
-    inspector;
 
     // Correction : Ana (au bureau, hors champ) rend l'hypothèse possible → la contradiction disparaît.
     await placeClaim(page, 'Interruption vidéo', 'Débranchement volontaire', {

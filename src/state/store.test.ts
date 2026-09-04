@@ -21,13 +21,11 @@ describe('store : adaptation moteur ↔ interface', () => {
       scenarioVersion: 1,
     });
     expect(repo.read('auto').ok).toBe(true);
-    const r = store
-      .getState()
-      .dispatch({
-        type: 'set-claim',
-        slotId: 'cash_origin' as never,
-        hypothesisId: 'h_counting_error' as never,
-      });
+    const r = store.getState().dispatch({
+      type: 'set-claim',
+      slotId: 'cash_origin' as never,
+      hypothesisId: 'h_counting_error' as never,
+    });
     expect(r.ok).toBe(true);
     const auto = repo.read('auto');
     expect(auto.ok && auto.save.actions.length).toBe(1);
@@ -38,14 +36,12 @@ describe('store : adaptation moteur ↔ interface', () => {
   it('une action refusée laisse l’état intact et compte une impasse', () => {
     const { store } = make();
     const before = semanticHash(store.getState().game);
-    const r = store
-      .getState()
-      .dispatch({
-        type: 'confront',
-        characterId: 'noe' as never,
-        targetId: 's_noe_initial',
-        approach: 'neutral',
-      });
+    const r = store.getState().dispatch({
+      type: 'confront',
+      characterId: 'noe' as never,
+      targetId: 's_noe_initial',
+      approach: 'neutral',
+    });
     expect(r.ok).toBe(false);
     expect(semanticHash(store.getState().game)).toBe(before);
     expect(store.getState().lastError?.code).toBe('no-matching-confrontation');
@@ -55,23 +51,19 @@ describe('store : adaptation moteur ↔ interface', () => {
 
   it('restaure la sauvegarde automatique au redémarrage (état équivalent, curseur conservé)', () => {
     const { adapter, store } = make();
-    store
-      .getState()
-      .dispatch({
-        type: 'confront',
-        characterId: 'jo' as never,
-        targetId: 's_jo_initial',
-        supportId: 'e_camera_gap',
-        approach: 'neutral',
-      });
+    store.getState().dispatch({
+      type: 'confront',
+      characterId: 'jo' as never,
+      targetId: 's_jo_initial',
+      supportId: 'e_camera_gap',
+      approach: 'neutral',
+    });
     store.getState().setCursor(533);
-    store
-      .getState()
-      .dispatch({
-        type: 'set-claim',
-        slotId: 'cash_origin' as never,
-        hypothesisId: 'h_malik_theft' as never,
-      });
+    store.getState().dispatch({
+      type: 'set-claim',
+      slotId: 'cash_origin' as never,
+      hypothesisId: 'h_malik_theft' as never,
+    });
     const h = semanticHash(store.getState().game);
     const second = createGameStore({ adapter, now: fixedNow });
     second.getState().bootstrap();
@@ -83,13 +75,11 @@ describe('store : adaptation moteur ↔ interface', () => {
 
   it('trois emplacements manuels : sauvegarder, lister, charger, effacer', () => {
     const { store } = make();
-    store
-      .getState()
-      .dispatch({
-        type: 'set-claim',
-        slotId: 'cash_origin' as never,
-        hypothesisId: 'h_counting_error' as never,
-      });
+    store.getState().dispatch({
+      type: 'set-claim',
+      slotId: 'cash_origin' as never,
+      hypothesisId: 'h_counting_error' as never,
+    });
     expect(store.getState().saveToSlot('slot-2', 'Avant la table ronde').ok).toBe(true);
     const slots = store.getState().listSlots();
     expect(slots.map((s) => s.slotId)).toEqual(['auto', 'slot-1', 'slot-2', 'slot-3']);
@@ -110,22 +100,18 @@ describe('store : adaptation moteur ↔ interface', () => {
 
   it('export puis import : état sémantiquement équivalent ; import invalide non destructif', () => {
     const { store } = make();
-    store
-      .getState()
-      .dispatch({
-        type: 'confront',
-        characterId: 'malik' as never,
-        targetId: 's_malik_initial',
-        supportId: 'e_camera_gap',
-        approach: 'empathetic',
-      });
-    store
-      .getState()
-      .dispatch({
-        type: 'set-claim',
-        slotId: 'noise_source' as never,
-        hypothesisId: 'h_bottle_noise' as never,
-      });
+    store.getState().dispatch({
+      type: 'confront',
+      characterId: 'malik' as never,
+      targetId: 's_malik_initial',
+      supportId: 'e_camera_gap',
+      approach: 'empathetic',
+    });
+    store.getState().dispatch({
+      type: 'set-claim',
+      slotId: 'noise_source' as never,
+      hypothesisId: 'h_bottle_noise' as never,
+    });
     const h = semanticHash(store.getState().game);
     const exported = store.getState().exportSave();
     expect(exported.ok).toBe(true);
@@ -167,13 +153,11 @@ describe('store : adaptation moteur ↔ interface', () => {
     expect(store.getState().storageAvailable).toBe(false);
     expect(store.getState().game).not.toBeNull();
     expect(
-      store
-        .getState()
-        .dispatch({
-          type: 'set-claim',
-          slotId: 'cash_origin' as never,
-          hypothesisId: 'h_counting_error' as never,
-        }).ok,
+      store.getState().dispatch({
+        type: 'set-claim',
+        slotId: 'cash_origin' as never,
+        hypothesisId: 'h_counting_error' as never,
+      }).ok,
     ).toBe(true);
   });
 });

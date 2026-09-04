@@ -114,29 +114,29 @@ Preuve : `src/styles/tokens.test.ts` (ratios ≥ 4,5), `src/styles/motion.css`, 
 
 ## Invariants automatisables (§4)
 
-| # | Invariant | Test |
-| --- | --- | --- |
-| 1 | Deux replays identiques sont profondément égaux | `reducer.test.ts` |
-| 2 | Une action refusée ne modifie pas le hash sémantique | `reducer.test.ts` |
-| 3 | Aucune connaissance sans provenance | `knowledge.test.ts` |
-| 4 | Pas deux zones incompatibles au même instant | `positions.test.ts` (canOccupy, checkPairCompatibility) |
-| 5 | Trajet proposé ≥ plus court chemin ouvert | `positions.test.ts` « un trajet proposé ne peut être plus court… » |
-| 6 | Une obstruction active modifie un chemin ou une ligne de vue | `spatial.test.ts`, `positions.test.ts` |
-| 7 | Perception auditive décroissante avec la perte cumulée | `spatial.test.ts` |
-| 8 | Une déclaration mensongère ne remplace pas la croyance | `knowledge.test.ts` |
-| 9 | Contradiction motivationnelle non bloquante | `detectors.test.ts` |
-| 10 | Retirer une claim supprime ses contradictions | `detectors.test.ts` |
-| 11 | Aucune information canonical-only non révélée dans les sélecteurs UI | `playerView.test.ts` |
-| 12 | Import invalide laisse la sauvegarde intacte | `integration.test.ts`, `store.test.ts` |
-| 13 | Conclusion verrouillée non modifiable | `reducer.test.ts` |
-| 14 | Vérité canonique → `ending_transparent` | `detectors.test.ts`, `signatures.test.ts` |
-| 15 | `ending_protective` ne révèle pas le justificatif | `signatures.test.ts` |
+| #   | Invariant                                                            | Test                                                               |
+| --- | -------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| 1   | Deux replays identiques sont profondément égaux                      | `reducer.test.ts`                                                  |
+| 2   | Une action refusée ne modifie pas le hash sémantique                 | `reducer.test.ts`                                                  |
+| 3   | Aucune connaissance sans provenance                                  | `knowledge.test.ts`                                                |
+| 4   | Pas deux zones incompatibles au même instant                         | `positions.test.ts` (canOccupy, checkPairCompatibility)            |
+| 5   | Trajet proposé ≥ plus court chemin ouvert                            | `positions.test.ts` « un trajet proposé ne peut être plus court… » |
+| 6   | Une obstruction active modifie un chemin ou une ligne de vue         | `spatial.test.ts`, `positions.test.ts`                             |
+| 7   | Perception auditive décroissante avec la perte cumulée               | `spatial.test.ts`                                                  |
+| 8   | Une déclaration mensongère ne remplace pas la croyance               | `knowledge.test.ts`                                                |
+| 9   | Contradiction motivationnelle non bloquante                          | `detectors.test.ts`                                                |
+| 10  | Retirer une claim supprime ses contradictions                        | `detectors.test.ts`                                                |
+| 11  | Aucune information canonical-only non révélée dans les sélecteurs UI | `playerView.test.ts`                                               |
+| 12  | Import invalide laisse la sauvegarde intacte                         | `integration.test.ts`, `store.test.ts`                             |
+| 13  | Conclusion verrouillée non modifiable                                | `reducer.test.ts`                                                  |
+| 14  | Vérité canonique → `ending_transparent`                              | `detectors.test.ts`, `signatures.test.ts`                          |
+| 15  | `ending_protective` ne révèle pas le justificatif                    | `signatures.test.ts`                                               |
 
 ## Parcours manuels (§5)
 
 Chaque parcours est rejoué automatiquement par un test Playwright ; la procédure manuelle équivalente est donnée pour `npm run dev`.
 
-- **Parcours 1 — Première contradiction** : `e2e/onboarding-first-claim.spec.ts`. Manuel : Nouvelle partie → Tab jusqu'à « Ouvrir le dossier », Entrée ; « Compris » sur chaque repère ; « Choisir une hypothèse pour « Interruption vidéo » » → « Débranchement volontaire », acteur Malik → « Placer dans la version » ; onglet Contradictions : « Malik Bensaïd ne peut pas être à deux endroits » (critique) explique la position caméra au Rayon 2 et le chevauchement ; « Modifier » → acteur Ana → la contradiction disparaît, l'emplacement passe à « inconnu ». Variante : garder Malik et déplacer l'intervalle à 20:57:23–20:57:33 → contradiction *physique* (trajet Rayon 2 → Bureau 16 s) ; à 20:57:40–20:58:00 → possible.
+- **Parcours 1 — Première contradiction** : `e2e/onboarding-first-claim.spec.ts`. Manuel : Nouvelle partie → Tab jusqu'à « Ouvrir le dossier », Entrée ; « Compris » sur chaque repère ; « Choisir une hypothèse pour « Interruption vidéo » » → « Débranchement volontaire », acteur Malik → « Placer dans la version » ; onglet Contradictions : « Malik Bensaïd ne peut pas être à deux endroits » (critique) explique la position caméra au Rayon 2 et le chevauchement ; « Modifier » → acteur Ana → la contradiction disparaît, l'emplacement passe à « inconnu ». Variante : garder Malik et déplacer l'intervalle à 20:57:23–20:57:33 → contradiction _physique_ (trajet Rayon 2 → Bureau 16 s) ; à 20:57:40–20:58:00 → possible.
 - **Parcours 2 — Une perception n'est pas un fait** : `e2e/noe-perception.spec.ts`. Manuel : Déclarations → fiche de Noé ; « Aller à la coupure » puis +10 s ×3 ; Personnes → Jo → Confronter (sa déclaration, appui Journal vidéo) ; Personnes → Noé → Confronter (appui Scan de la palette) ; la fiche de Noé montre la précision, l'ancienne déclaration « rétractée » et ses perceptions (silhouette, métal).
 - **Parcours 3 — Persistance** : `e2e/persistence.spec.ts`. Manuel : trois hypothèses + une confrontation ; Sauvegardes → « Sauvegarder ici (Emplacement 1) » ; recharger ; vérifier version, pression, confiance, curseur ; Exporter ; Nouvelle partie ; Importer (fichier ou JSON collé) ; état équivalent.
 - **Parcours 4 — Deux fins** : `e2e/endings.spec.ts` (transparente puis protectrice, plus « Classer l'écart »). Manuel : voir `npm run walkthroughs` pour la liste exacte des actions de chaque parcours.
@@ -149,6 +149,7 @@ Aucun plafond ne s'applique : le projet se lance avec les commandes du README, t
 Score revendiqué : **91 / 100** — A 25, B 15, C 15, D 13, E 15, F 10, G 5 ; les deux points retirés en D tiennent à la densité de l'espace de travail sur des écrans intermédiaires (1024–1200 px) où les trois colonnes restent lisibles mais serrées, et au fait que les portraits SVG restent abstraits.
 
 Trois risques principaux qui subsistent :
+
 1. **Économie de pression serrée** : l'ensemble des neuf confrontations coûte 11 points pour un budget de 4 + 7 récompenses ; le chemin vers « Tout écrire » exige 8 points et donc au moins quatre des sept récompenses. C'est voulu (le GDD refuse le test exhaustif), mais un joueur qui dépense tout en approches directes peut devoir se rabattre sur une fin protectrice ou procédurale.
 2. **Tolérances spatiales** (12 s bord de zone, 3 s trajet) : elles rendent la vérité canonique jouable sans retoucher le JSON, mais un intervalle de claim « presque » impossible (dépassement ≤ 12 s d'une absence caméra) passe pour possible ; la valeur est documentée et testée (`positions.test.ts`).
 3. **Poids du bundle** (≈ 200 ko gzip, un seul chunk) : acceptable pour un site statique, mais sans découpage par route ; l'épilogue et les dialogues pourraient être chargés à la demande.

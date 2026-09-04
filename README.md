@@ -1,6 +1,6 @@
 # LA VERSION ACCEPTABLE
 
-Jeu d'enquête systémique court, entièrement local, en français. Un écart de caisse de 300 € est découvert après la fermeture du magasin **La Veilleuse**. Le joueur assemble une *version* des événements sur un canevas à cinq emplacements, la rejoue sur un plan et une frise, lit les contradictions calculées par le moteur, confronte les six protagonistes, puis demande une table ronde et scelle un rapport. Plusieurs fins sont distinguées par les données : vérité, consensus, accusation, classement, rejet.
+Jeu d'enquête systémique court, entièrement local, en français. Un écart de caisse de 300 € est découvert après la fermeture du magasin **La Veilleuse**. Le joueur assemble une _version_ des événements sur un canevas à cinq emplacements, la rejoue sur un plan et une frise, lit les contradictions calculées par le moteur, confronte les six protagonistes, puis demande une table ronde et scelle un rapport. Plusieurs fins sont distinguées par les données : vérité, consensus, accusation, classement, rejet.
 
 Aucun backend, aucun compte, aucune API distante, aucun appel à un LLM, aucune télémétrie.
 
@@ -12,20 +12,20 @@ Prérequis : Node.js ≥ 20.19 (testé avec Node 22) et npm.
 npm ci
 ```
 
-| Commande | Effet |
-| --- | --- |
-| `npm run dev` | serveur de développement Vite (http://localhost:5173) |
-| `npm run build` | vérification TypeScript puis build statique dans `dist/` |
-| `npm run preview` | sert `dist/` sur http://localhost:4173 |
-| `npm run typecheck` | `tsc -b --noEmit` |
-| `npm run lint` | ESLint (config plate, règles typées, a11y, frontières du domaine) |
-| `npm run format:check` / `npm run format` | Prettier |
-| `npm test` | tests unitaires et d'intégration (Vitest, dont le benchmark d'évaluation) |
-| `npm run test:coverage` | idem avec couverture V8 du domaine, du scénario, de la persistance et de l'état |
-| `npm run test:e2e` | parcours Playwright (desktop 1440 px et mobile 390 px) — construit et sert `dist/` automatiquement |
-| `npm run validate:scenario` | valide le scénario embarqué et affiche les avertissements |
-| `npm run walkthroughs` | rejoue quatre parcours complets depuis la graine et affiche contradictions, adhésion et fin atteinte |
-| `npm run check` | typecheck + lint + tests + build |
+| Commande                                  | Effet                                                                                                                                                                                                                                                                                                      |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`                             | serveur de développement Vite (http://localhost:5173)                                                                                                                                                                                                                                                      |
+| `npm run build`                           | vérification TypeScript puis build statique dans `dist/`                                                                                                                                                                                                                                                   |
+| `npm run preview`                         | sert `dist/` sur http://localhost:4173                                                                                                                                                                                                                                                                     |
+| `npm run typecheck`                       | `tsc -b --noEmit`                                                                                                                                                                                                                                                                                          |
+| `npm run lint`                            | ESLint (config plate, règles typées, a11y, frontières du domaine)                                                                                                                                                                                                                                          |
+| `npm run format:check` / `npm run format` | Prettier                                                                                                                                                                                                                                                                                                   |
+| `npm test`                                | tests unitaires et d'intégration (Vitest, dont le benchmark d'évaluation)                                                                                                                                                                                                                                  |
+| `npm run test:coverage`                   | idem avec couverture V8 du domaine, du scénario, de la persistance et de l'état                                                                                                                                                                                                                            |
+| `npm run test:e2e`                        | parcours Playwright : projet `desktop` (1440 × 900 : onboarding et première contradiction, perception de Noé, trois fins, persistance, secrets, raccourcis) et projet `mobile` (390 × 844 : pièce, temps, hypothèse, contradiction, confrontation, sauvegarde) — construit et sert `dist/` automatiquement |
+| `npm run validate:scenario`               | valide le scénario embarqué et affiche les avertissements                                                                                                                                                                                                                                                  |
+| `npm run walkthroughs`                    | rejoue quatre parcours complets depuis la graine et affiche contradictions, adhésion et fin atteinte                                                                                                                                                                                                       |
+| `npm run check`                           | typecheck + lint + tests + build                                                                                                                                                                                                                                                                           |
 
 Première exécution des tests end-to-end : `npx playwright install chromium`.
 
@@ -37,7 +37,7 @@ Le fichier `.npmrc` active `legacy-peer-deps` : sans lui, npm 9/10 échoue sur u
 
 ## Comment jouer
 
-- **Dossier** (colonne gauche) : pièces, déclarations, personnes, faits, hypothèses, contradictions, journal. Chaque élément porte son degré — *établi*, *rapporté*, *déduit*, *proposé* — par icône, libellé et texture.
+- **Dossier** (colonne gauche) : pièces, déclarations, personnes, faits, hypothèses, contradictions, journal. Chaque élément porte son degré — _établi_, _rapporté_, _déduit_, _proposé_ — par icône, libellé et texture.
 - **Plan** : les zones du magasin, les passages (durées, visibilité, obstruction), les jetons des personnes à l'instant du curseur (plein = établi par la caméra, pointillé = rapporté, losange = proposé). Les personnes hors champ sont listées à part.
 - **Frise** : le curseur temporel unique (20:49 → 21:15), les pistes par personne, les pièces et faits, les intervalles de la version, la coupure vidéo. Lecture, pause, pas de 1 s / 10 s, saut d'événement.
 - **Version** : cinq emplacements à remplir avec des hypothèses paramétrables (acteur, lieu, intervalle). Trois axes séparés : cohérence, dévoilement, adhésion. L'onglet **Contradictions** explique chaque conflit étape par étape et propose quoi examiner.
@@ -86,17 +86,17 @@ L'état de partie est intégralement dérivable de `{ seed, actions }` : deux re
 
 ### Cinq couches jamais fusionnées
 
-| Couche | Où | Qui la voit |
-| --- | --- | --- |
-| Fait canonique | `canonicalFacts` | le moteur ; le joueur seulement une fois révélé (pièce) ou rapporté (déclaration) |
-| Perception | `perceptions` + calculs `canSee` / `hearSignal` | le moteur ; le joueur quand le personnage la révèle |
-| Croyance / connaissance | `characters[].knowledge` avec provenance | le moteur (signatures, sondages) |
-| Déclaration | `statements` (honnête, embellie, omission, mensonge) | le joueur, avec statut debout / rétractée |
-| Version proposée | `claims` | le joueur ; évaluée par le moteur |
+| Couche                  | Où                                                   | Qui la voit                                                                       |
+| ----------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Fait canonique          | `canonicalFacts`                                     | le moteur ; le joueur seulement une fois révélé (pièce) ou rapporté (déclaration) |
+| Perception              | `perceptions` + calculs `canSee` / `hearSignal`      | le moteur ; le joueur quand le personnage la révèle                               |
+| Croyance / connaissance | `characters[].knowledge` avec provenance             | le moteur (signatures, sondages)                                                  |
+| Déclaration             | `statements` (honnête, embellie, omission, mensonge) | le joueur, avec statut debout / rétractée                                         |
+| Version proposée        | `claims`                                             | le joueur ; évaluée par le moteur                                                 |
 
 ## Choix notables
 
-Voir [DECISIONS.md](DECISIONS.md) pour la liste complète. Les plus structurants : les positions ne sont *établies* que par la caméra des zones centrales et les pièces ; la palette n'affecte le monde proposé qu'une fois connue ; une personne qui sait la version fausse mais à qui la vérité coûterait quelque chose signe en silence ; les contradictions matérielles portent sur les pièces *jointes* au rapport, une pièce retirée devenant une omission visible.
+Voir [DECISIONS.md](DECISIONS.md) pour la liste complète. Les plus structurants : les positions ne sont _établies_ que par la caméra des zones centrales et les pièces ; la palette n'affecte le monde proposé qu'une fois connue ; une personne qui sait la version fausse mais à qui la vérité coûterait quelque chose signe en silence ; les contradictions matérielles portent sur les pièces _jointes_ au rapport, une pièce retirée devenant une omission visible.
 
 ## Vérification
 

@@ -90,13 +90,11 @@ describe('<HintCallout /> — aide progressive', () => {
     // Trois actions refusées (hypothèse inconnue) : le moteur compte les impasses.
     act(() => {
       for (let i = 0; i < 3; i++) {
-        const r = useGameStore
-          .getState()
-          .dispatch({
-            type: 'set-claim',
-            slotId: 'cash_origin' as never,
-            hypothesisId: 'h_inexistante' as never,
-          });
+        const r = useGameStore.getState().dispatch({
+          type: 'set-claim',
+          slotId: 'cash_origin' as never,
+          hypothesisId: 'h_inexistante' as never,
+        });
         expect(r.ok).toBe(false);
       }
     });

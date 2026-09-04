@@ -164,4 +164,3 @@ Limite connue : uniquement si nécessaire.
 ```
 
 Terminer par le score honnêtement revendiqué, les plafonds éventuels et les trois risques principaux qui subsistent.
-
