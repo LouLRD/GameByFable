@@ -54,7 +54,7 @@
 
 .mobile-clock {
   flex: 0 0 auto;
-  min-height: var(--tap-min);
+  min-height: 44px;
   padding: 0 var(--space-2);
   border: 0;
   border-radius: var(--radius-1);
@@ -101,8 +101,8 @@
   flex: 0 0 auto;
   align-items: center;
   gap: var(--space-1);
-  min-width: var(--tap-min);
-  min-height: var(--tap-min);
+  min-width: 44px;
+  min-height: 44px;
   padding: 0 var(--space-2);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-1);
@@ -177,7 +177,7 @@
 
 .mobile-segment {
   flex: 1 1 0;
-  min-height: var(--tap-min);
+  min-height: 44px;
   padding: 0 var(--space-2);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-1);
@@ -215,8 +215,8 @@
 
 .mobile-time-btn {
   flex: 0 0 auto;
-  min-width: var(--tap-min);
-  min-height: var(--tap-min);
+  min-width: 44px;
+  min-height: 44px;
   padding: 0 var(--space-1);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-1);
@@ -329,7 +329,7 @@
 }
 
 .guide-strip-actions .btn {
-  min-height: var(--tap-min);
+  min-height: 44px;
 }
 
 /* Navigation ---------------------------------------------------------------- */

@@ -683,3 +683,25 @@
 .epi-journal .hand-note {
   max-width: none;
 }
+
+/* Pied de la table ronde : sur mobile (feuille de fond), les décisions restent visibles sans défiler. */
+@media (max-width: 767px) {
+  .rt-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    margin: 0 calc(-1 * var(--space-4));
+    padding: var(--space-2) var(--space-4) var(--space-2);
+    border-top: 1px dashed var(--border-strong);
+    background: var(--bg-elevated);
+  }
+
+  .rt-footer .rt-actions {
+    flex-wrap: wrap;
+  }
+
+  .rt-footer .rt-actions .btn {
+    flex: 1 1 45%;
+    min-height: 44px;
+  }
+}

@@ -150,69 +150,71 @@ function RoundTableBody({ view }: { view: PlayerView }): JSX.Element {
         </ul>
       </section>
 
-      <p className="rt-summary">
-        <span className="rt-count">
-          {count} {plural(count, 'signature', 'signatures')} sur {total}
-        </span>
-        <span className="rt-coherence">
-          {coherence}
-          {blocking > 0
-            ? ` (${blocking} ${plural(blocking, 'contradiction bloquante', 'contradictions bloquantes')})`
-            : ''}
-        </span>
-      </p>
-
-      {error ? (
-        <p className="rt-error" role="alert">
-          <span className="rt-error-kicker">Action non appliquée</span>
-          {error}
+      <div className="rt-footer">
+        <p className="rt-summary">
+          <span className="rt-count">
+            {count} {plural(count, 'signature', 'signatures')} sur {total}
+          </span>
+          <span className="rt-coherence">
+            {coherence}
+            {blocking > 0
+              ? ` (${blocking} ${plural(blocking, 'contradiction bloquante', 'contradictions bloquantes')})`
+              : ''}
+          </span>
         </p>
-      ) : null}
 
-      <div className="rt-actions">
-        <button type="button" className="btn" onClick={onRework}>
-          Retravailler la version
-        </button>
-        <button
-          ref={sealToggleRef}
-          type="button"
-          className="btn btn-primary"
-          onClick={() => setConfirming((c) => !c)}
-          aria-expanded={confirming}
-          aria-controls={confirmId}
-        >
-          Sceller le rapport
-        </button>
-      </div>
-
-      {confirming ? (
-        <div
-          id={confirmId}
-          className="rt-confirm"
-          role="group"
-          aria-labelledby={`${confirmId}-text`}
-        >
-          <p id={`${confirmId}-text`}>
-            <strong>Le rapport ne pourra plus être modifié.</strong> La table ronde se termine sur
-            cette version, avec {count} {plural(count, 'signature', 'signatures')} sur {total}.
+        {error ? (
+          <p className="rt-error" role="alert">
+            <span className="rt-error-kicker">Action non appliquée</span>
+            {error}
           </p>
-          <div className="rt-actions">
-            <button
-              type="button"
-              className="btn"
-              onClick={() => {
-                setConfirming(false);
-                sealToggleRef.current?.focus();
-              }}
-            >
-              Annuler
-            </button>
-            <button ref={focusOnMount} type="button" className="btn btn-danger" onClick={onSeal}>
-              Sceller définitivement
-            </button>
-          </div>
+        ) : null}
+
+        <div className="rt-actions">
+          <button type="button" className="btn" onClick={onRework}>
+            Retravailler la version
+          </button>
+          <button
+            ref={sealToggleRef}
+            type="button"
+            className="btn btn-primary"
+            onClick={() => setConfirming((c) => !c)}
+            aria-expanded={confirming}
+            aria-controls={confirmId}
+          >
+            Sceller le rapport
+          </button>
         </div>
-      ) : null}
+
+        {confirming ? (
+          <div
+            id={confirmId}
+            className="rt-confirm"
+            role="group"
+            aria-labelledby={`${confirmId}-text`}
+          >
+            <p id={`${confirmId}-text`}>
+              <strong>Le rapport ne pourra plus être modifié.</strong> La table ronde se termine sur
+              cette version, avec {count} {plural(count, 'signature', 'signatures')} sur {total}.
+            </p>
+            <div className="rt-actions">
+              <button
+                type="button"
+                className="btn"
+                onClick={() => {
+                  setConfirming(false);
+                  sealToggleRef.current?.focus();
+                }}
+              >
+                Annuler
+              </button>
+              <button ref={focusOnMount} type="button" className="btn btn-danger" onClick={onSeal}>
+                Sceller définitivement
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

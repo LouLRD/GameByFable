@@ -493,3 +493,20 @@
     flex: 1 1 auto;
   }
 }
+
+/* Feuille de fond mobile : les décisions (Confronter / Sonder) restent visibles sans défiler. */
+@media (max-width: 767px) {
+  .confrontation-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    margin: 0 calc(-1 * var(--space-4));
+    padding: var(--space-2) var(--space-4);
+    border-top: 1px dashed var(--border-strong);
+    background: var(--bg-elevated);
+  }
+
+  .confrontation-actions .btn {
+    min-height: 44px;
+  }
+}
