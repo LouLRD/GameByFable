@@ -36,7 +36,9 @@ export function ContradictionCard({
 
       <SheetSection title="Emplacements concernés">
         {slots.length === 0 ? (
-          <p className="muted">Aucun emplacement du canevas : la contradiction oppose des éléments du dossier.</p>
+          <p className="muted">
+            Aucun emplacement du canevas : la contradiction oppose des éléments du dossier.
+          </p>
         ) : (
           <ul className="casefile-bullets">
             {slots.map((label) => (

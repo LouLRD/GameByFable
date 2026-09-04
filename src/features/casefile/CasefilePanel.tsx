@@ -30,7 +30,8 @@ import './casefile.css';
 const EMPTY_SET: ReadonlySet<string> = new Set<string>();
 
 function onFilterKeyDown(e: KeyboardEvent<HTMLButtonElement>): void {
-  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' && e.key !== 'Home' && e.key !== 'End') return;
+  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' && e.key !== 'Home' && e.key !== 'End')
+    return;
   const toolbar = e.currentTarget.closest('[role="toolbar"]');
   if (!toolbar) return;
   const buttons = [...toolbar.querySelectorAll<HTMLButtonElement>('button')];
@@ -62,13 +63,21 @@ export function CasefilePanel(): React.JSX.Element {
   const listId = useId();
   const sheetTitleId = useId();
 
-  const items = useMemo(() => (view ? buildCasefileItems(view, zoneLabels) : []), [view, zoneLabels]);
+  const items = useMemo(
+    () => (view ? buildCasefileItems(view, zoneLabels) : []),
+    [view, zoneLabels],
+  );
 
   // Première consultation : tout ce qui est déjà là est « vu » ; seuls les ajouts ultérieurs
   // seront marqués « nouveau ». L'élément sélectionné est toujours considéré comme vu.
   if (seen === null && view) {
     setSeen(new Set(items.map((i) => i.id)));
-  } else if (seen && selection && !seen.has(selection.id) && items.some((i) => i.id === selection.id)) {
+  } else if (
+    seen &&
+    selection &&
+    !seen.has(selection.id) &&
+    items.some((i) => i.id === selection.id)
+  ) {
     setSeen(new Set([...seen, selection.id]));
   }
 
@@ -81,7 +90,8 @@ export function CasefilePanel(): React.JSX.Element {
       ? view.journal.filter((j) => normalizeText(j.text).includes(normalizedQuery))
       : view.journal
     : [];
-  const visible = filter === 'all' ? searched : searched.filter((i) => KIND_TO_FILTER[i.kind] === filter);
+  const visible =
+    filter === 'all' ? searched : searched.filter((i) => KIND_TO_FILTER[i.kind] === filter);
   const counts: Record<CasefileFilter, number> = {
     all: searched.length,
     evidence: 0,
@@ -150,13 +160,24 @@ export function CasefilePanel(): React.JSX.Element {
       case 'evidence': {
         const evidence = view.evidence.find((e) => e.id === item.id);
         return evidence ? (
-          <EvidenceSheet evidence={evidence} view={view} zoneLabels={zoneLabels} titleId={sheetTitleId} />
+          <EvidenceSheet
+            key={evidence.id}
+            evidence={evidence}
+            view={view}
+            zoneLabels={zoneLabels}
+            titleId={sheetTitleId}
+          />
         ) : null;
       }
       case 'statement': {
         const statement = view.statements.find((s) => s.id === item.id);
         return statement ? (
-          <StatementSheet statement={statement} view={view} titleId={sheetTitleId} onNavigate={navigate} />
+          <StatementSheet
+            statement={statement}
+            view={view}
+            titleId={sheetTitleId}
+            onNavigate={navigate}
+          />
         ) : null;
       }
       case 'character': {
@@ -174,7 +195,13 @@ export function CasefilePanel(): React.JSX.Element {
       case 'fact': {
         const fact = view.facts.find((f) => f.id === item.id);
         return fact ? (
-          <FactSheet fact={fact} view={view} zoneLabels={zoneLabels} titleId={sheetTitleId} onNavigate={navigate} />
+          <FactSheet
+            fact={fact}
+            view={view}
+            zoneLabels={zoneLabels}
+            titleId={sheetTitleId}
+            onNavigate={navigate}
+          />
         ) : null;
       }
       case 'hypothesis': {
@@ -190,7 +217,9 @@ export function CasefilePanel(): React.JSX.Element {
         ) : null;
       }
       case 'contradiction': {
-        const contradiction = [...view.contradictions, ...view.motivational].find((c) => c.id === item.id);
+        const contradiction = [...view.contradictions, ...view.motivational].find(
+          (c) => c.id === item.id,
+        );
         return contradiction ? (
           <ContradictionCard
             contradiction={contradiction}
@@ -264,7 +293,12 @@ export function CasefilePanel(): React.JSX.Element {
             </div>
           )}
           {filter === 'journal' ? (
-            <JournalList entries={journalEntries} view={view} onNavigate={navigate} emptyMessage={emptyMessage} />
+            <JournalList
+              entries={journalEntries}
+              view={view}
+              onNavigate={navigate}
+              emptyMessage={emptyMessage}
+            />
           ) : (
             <CasefileList
               items={visible}

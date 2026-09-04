@@ -64,7 +64,14 @@ export function Dialog({ open, title, onClose, children, width = 560, blocking =
 
   if (!open) return null;
   return (
-    <div className="dialog-backdrop" onMouseDown={(e) => { if (!blocking && e.target === e.currentTarget) onClose(); }} data-testid="dialog-backdrop">
+    <div
+      className="dialog-backdrop"
+      role="presentation"
+      onMouseDown={(e) => {
+        if (!blocking && e.target === e.currentTarget) onClose();
+      }}
+      data-testid="dialog-backdrop"
+    >
       <div
         ref={panelRef}
         role="dialog"

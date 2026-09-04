@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { scenario, run, confront, claim } from '@/test/helpers';
+import { scenario, run, confront } from '@/test/helpers';
+import type { PlayerAction } from '../model/actions';
 import { createInitialState } from '../replay/reducer';
 import { findConfrontation, probe, resolveConfrontation } from './confrontation';
 import { characterId } from '../model/ids';
@@ -106,7 +107,8 @@ describe('sondages', () => {
 
   it('un sondage ne consomme pas de pression et ne débloque rien', () => {
     const before = createInitialState(scenario);
-    const after = run([{ type: 'probe', characterId: C('mina'), targetId: 'h_mina_theft', approach: 'neutral' }, claim('cash_origin', 'h_counting_error')].slice(0, 1), before);
+    const probeAction: PlayerAction = { type: 'probe', characterId: C('mina'), targetId: 'h_mina_theft', approach: 'neutral' };
+    const after = run([probeAction], before);
     expect(after.pressure).toBe(before.pressure);
     expect(after.unlockedEvidenceIds).toEqual(before.unlockedEvidenceIds);
   });

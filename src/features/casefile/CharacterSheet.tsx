@@ -2,7 +2,7 @@
  * Fiche d'un protagoniste : portrait, confiance, déclarations (debout puis historiques),
  * perceptions révélées, aveux publics, confrontation et sondage par hypothèse.
  */
-import { useId, useState, type FormEvent } from 'react';
+import { useId, useState, type SubmitEvent } from 'react';
 import { Portrait } from '@/components/portrait';
 import type { Approach } from '@/domain/model/scenario';
 import type { CharacterView, PlayerView, StatementView } from '@/domain/selectors/playerView';
@@ -82,7 +82,9 @@ export function CharacterSheet({
     .filter((s): s is StatementView => s !== undefined);
   const standing = statements.filter((s) => s.standing);
   const historic = statements.filter((s) => !s.standing);
-  const slotLabel = new Map<string, string>(view.slots.map((s): [string, string] => [s.id, s.label]));
+  const slotLabel = new Map<string, string>(
+    view.slots.map((s): [string, string] => [s.id, s.label]),
+  );
   const hypothesesBySlot = view.slots
     .map((slot) => ({ slot, list: view.hypotheses.filter((h) => h.slotId === slot.id) }))
     .filter((g) => g.list.length > 0);
@@ -93,7 +95,11 @@ export function CharacterSheet({
   const sealedHint = 'Le rapport est scellé : plus aucune confrontation ni sondage.';
   const noHypothesisHint = 'Aucune hypothèse formulable pour l’instant.';
   const probeDisabled = view.isSealed || view.hypotheses.length === 0;
-  const probeHint = view.isSealed ? sealedHint : view.hypotheses.length === 0 ? noHypothesisHint : null;
+  const probeHint = view.isSealed
+    ? sealedHint
+    : view.hypotheses.length === 0
+      ? noHypothesisHint
+      : null;
 
   // Les actions du store sont stables : on les lit sans abonnement au moment de l'interaction.
   const onConfront = (): void => {
@@ -102,7 +108,7 @@ export function CharacterSheet({
     store.openDialog('confrontation');
   };
 
-  const onProbe = (e: FormEvent<HTMLFormElement>): void => {
+  const onProbe = (e: SubmitEvent<HTMLFormElement>): void => {
     e.preventDefault();
     if (!effectiveHypothesisId) return;
     const store = useGameStore.getState();
@@ -153,7 +159,9 @@ export function CharacterSheet({
           <span className="muted">
             {' '}
             · {character.confrontationsResolved}{' '}
-            {character.confrontationsResolved === 1 ? 'confrontation résolue' : 'confrontations résolues'}
+            {character.confrontationsResolved === 1
+              ? 'confrontation résolue'
+              : 'confrontations résolues'}
           </span>
         </p>
       </SheetHeader>
@@ -179,12 +187,16 @@ export function CharacterSheet({
         ) : (
           <ul className="casefile-perceptions">
             {character.perceptions.map((p) => {
-              const fact = p.factLabel ? view.facts.find((f) => f.label === p.factLabel) : undefined;
+              const fact = p.factLabel
+                ? view.facts.find((f) => f.label === p.factLabel)
+                : undefined;
               return (
                 <li key={p.id} className="casefile-perception">
                   <span className="casefile-badges">
                     <span className="tag">{MODALITY_LABELS[p.modality] ?? p.modality}</span>
-                    <span className="tag">fidélité {FIDELITY_LABELS[p.fidelity] ?? p.fidelity}</span>
+                    <span className="tag">
+                      fidélité {FIDELITY_LABELS[p.fidelity] ?? p.fidelity}
+                    </span>
                   </span>
                   {p.perceivedTags.length > 0 && (
                     <span className="casefile-chips">

@@ -1,0 +1,275 @@
+/*
+ * LA VERSION ACCEPTABLE — dialogues Options, Sauvegardes, Aide, Nouvelle partie.
+ */
+
+.settings,
+.saves,
+.help,
+.new-game {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.settings-group {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.settings-group > legend,
+.settings-group > h3,
+.help h3 {
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.settings-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.settings-options-column {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.settings-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2);
+  cursor: pointer;
+}
+
+.settings-option:hover {
+  background: var(--bg-hover);
+}
+
+/* Option retenue : bordure pleine plus marquée, en plus de la coche native. */
+.settings-option:has(input:checked) {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.settings-option:has(input:disabled) {
+  border-style: dashed;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.shortcut-list {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.shortcut-row {
+  display: contents;
+}
+
+.shortcut-list dt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.shortcut-sep {
+  color: var(--fg-subtle);
+  font-size: var(--text-xs);
+}
+
+.shortcut-list dd {
+  margin: 0;
+  color: var(--fg-muted);
+}
+
+@media (max-width: 479px) {
+  .shortcut-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Sauvegardes
+ * ------------------------------------------------------------------------- */
+
+.saves-warning {
+  padding: var(--space-2) var(--space-3);
+  border: 1px dashed var(--warning);
+  color: var(--fg);
+  font-size: var(--text-sm);
+}
+
+.saves-warning::before {
+  content: '⚠ ';
+  content: '⚠ ' / '';
+}
+
+.saves-message-zone {
+  min-height: 0;
+}
+
+.saves-message {
+  font-size: var(--text-sm);
+}
+
+.saves-message:empty {
+  display: none;
+}
+
+.saves-message[data-tone='error'] {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.saves-message[data-tone='error']::before {
+  content: '✕ ';
+  content: '✕ ' / '';
+}
+
+.saves-message[data-tone='success']::before {
+  content: '✓ ';
+  content: '✓ ' / '';
+}
+
+.saves-slots {
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.slot {
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2);
+  background: var(--bg);
+}
+
+.slot[data-empty='true'] {
+  border-style: dashed;
+}
+
+.slot-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.slot-name {
+  margin: 0;
+  font-size: var(--text-md);
+}
+
+.slot-meta {
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+}
+
+.slot-label {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.slot-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.slot-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px dashed var(--warning);
+}
+
+.slot-confirm p {
+  flex: 1 1 100%;
+  font-size: var(--text-sm);
+}
+
+.saves-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.saves-row .field-hint {
+  flex: 1 1 16rem;
+}
+
+.saves-import {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ---------------------------------------------------------------------------
+ * Aide
+ * ------------------------------------------------------------------------- */
+
+.help {
+  font-size: var(--text-sm);
+}
+
+.help-loop,
+.help-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-left: 1.4em;
+}
+
+.help-degrees {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--space-2) var(--space-3);
+  margin: 0;
+}
+
+.help-degrees > div {
+  display: contents;
+}
+
+.help-degrees dd {
+  margin: 0;
+  color: var(--fg-muted);
+}
+
+@media (max-width: 479px) {
+  .help-degrees {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Nouvelle partie
+ * ------------------------------------------------------------------------- */
+
+.new-game-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}

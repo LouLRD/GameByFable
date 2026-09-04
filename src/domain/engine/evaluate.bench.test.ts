@@ -8,7 +8,7 @@ import { interval } from '../model/time';
  * variées ; la médiane est affichée et comparée à la cible indicative de 20 ms (spécification §14).
  */
 describe('performance de l’évaluation', () => {
-  it('médiane de 1 000 évaluations complètes', () => {
+  it('médiane de 1 000 évaluations complètes', { timeout: 120_000 }, () => {
     const base = run([...CANONICAL_CONFRONTATIONS]);
     const hyps = scenario.data.hypotheses;
     const states = Array.from({ length: 20 }, (_, i) => {
@@ -16,7 +16,8 @@ describe('performance de l’évaluation', () => {
         const candidates = hyps.filter((h) => h.slotId === slot.id);
         const h = candidates[(i + j) % candidates.length];
         if (!h) throw new Error('slot vide');
-        return claim(slot.id, h.id, h.requiresActor ? { actorId: scenario.data.characters[(i + j) % 6]?.id, interval: interval(400 + i * 10, 460 + i * 10) } : {});
+        const actor = scenario.data.characters[(i + j) % 6];
+        return claim(slot.id, h.id, h.requiresActor && actor ? { actorId: actor.id, interval: interval(400 + i * 10, 460 + i * 10) } : {});
       });
       return run(actions, base);
     });

@@ -47,14 +47,20 @@ export function EvidenceSheet({
   // Les actions du store sont stables : on les lit sans abonnement au moment de l'interaction.
   const onToggleAttached = (attached: boolean): void => {
     const store = useGameStore.getState();
-    const result = store.dispatch({ type: 'set-evidence-attached', evidenceId: evidence.id, attached });
+    const result = store.dispatch({
+      type: 'set-evidence-attached',
+      evidenceId: evidence.id,
+      attached,
+    });
     if (!result.ok) {
       setNotice(result.error.message);
       return;
     }
     setNotice(null);
     store.announce(
-      attached ? `« ${evidence.label} » jointe au rapport.` : `« ${evidence.label} » retirée du rapport.`,
+      attached
+        ? `« ${evidence.label} » jointe au rapport.`
+        : `« ${evidence.label} » retirée du rapport.`,
     );
   };
 
@@ -180,7 +186,9 @@ export function EvidenceSheet({
           Utiliser dans une confrontation
         </button>
       </div>
-      {view.isSealed && <p className="field-hint">Le rapport est scellé : plus aucune confrontation.</p>}
+      {view.isSealed && (
+        <p className="field-hint">Le rapport est scellé : plus aucune confrontation.</p>
+      )}
     </article>
   );
 }

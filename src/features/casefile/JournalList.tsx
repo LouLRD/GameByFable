@@ -18,7 +18,12 @@ export interface JournalListProps {
   emptyMessage: string;
 }
 
-export function JournalList({ entries, view, onNavigate, emptyMessage }: JournalListProps): React.JSX.Element {
+export function JournalList({
+  entries,
+  view,
+  onNavigate,
+  emptyMessage,
+}: JournalListProps): React.JSX.Element {
   if (entries.length === 0) {
     return (
       <p className="casefile-empty" role="status">
@@ -31,7 +36,10 @@ export function JournalList({ entries, view, onNavigate, emptyMessage }: Journal
       {entries.map((entry, index) => {
         const refs = entry.refIds
           .map((id) => ({ id, ref: resolveRef(view, id) }))
-          .filter((r): r is { id: string; ref: NonNullable<ReturnType<typeof resolveRef>> } => r.ref !== null);
+          .filter(
+            (r): r is { id: string; ref: NonNullable<ReturnType<typeof resolveRef>> } =>
+              r.ref !== null,
+          );
         return (
           <li
             key={entry.id}

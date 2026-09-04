@@ -693,3 +693,110 @@
     margin-bottom: var(--space-1);
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Compléments : listes sans puces, fil causal, pièces, inspecteur, formulaire
+ * ------------------------------------------------------------------------- */
+
+/* Liste sans puces (le rôle liste implicite reste exposé). */
+.vb-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vb-completeness {
+  flex: 1 0 100%;
+  font-family: var(--font-mono);
+}
+
+.vb-thread-text {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.vb-evidence-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.vb-evidence-row input[type='checkbox'] {
+  flex: 0 0 auto;
+  width: 1.375rem;
+  height: 1.375rem;
+  margin: 0;
+}
+
+.vb-evidence-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Pièce retirée : le libellé est barré ET l'étiquette « omission » est écrite. */
+.vb-evidence-row[data-attached='false'] .vb-evidence-label {
+  text-decoration: line-through;
+  text-decoration-style: wavy;
+  color: var(--fg-muted);
+}
+
+.vb-omission {
+  border-style: solid;
+  border-color: var(--warning);
+  color: var(--warning);
+}
+
+.vb-counter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.ci-empty {
+  padding: var(--space-3);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-2);
+  color: var(--fg-muted);
+}
+
+.ci-empty p {
+  margin: 0;
+}
+
+.ci-empty p + p {
+  margin-top: var(--space-1);
+}
+
+.ci-detail-slot {
+  min-width: 0;
+}
+
+.claim-form-fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-2);
+}
+
+.claim-form-fieldset > legend {
+  padding: 0 var(--space-1);
+}
+
+.claim-form .field-hint,
+.claim-form .field-error {
+  margin: 0;
+}
+
+/* Boutons à libellé long (zones, emplacement demandé) : retour à la ligne autorisé à 390 px. */
+.vb .btn,
+.ci .btn,
+.claim-form .btn {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+}

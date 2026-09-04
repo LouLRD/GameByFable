@@ -13,12 +13,7 @@ import type { JournalEntry } from '@/domain/model/state';
 import { useGameStore, type CasefileFilter } from '@/state';
 
 export type CasefileItemKind =
-  | 'evidence'
-  | 'statement'
-  | 'character'
-  | 'fact'
-  | 'hypothesis'
-  | 'contradiction';
+  'evidence' | 'statement' | 'character' | 'fact' | 'hypothesis' | 'contradiction';
 
 export interface CasefileItem {
   kind: CasefileItemKind;
@@ -192,7 +187,10 @@ export function isCompactViewport(): boolean {
 export function useZoneLabels(): ReadonlyMap<string, string> {
   const scenario = useGameStore((s) => s.scenario);
   return useMemo(
-    () => new Map<string, string>((scenario?.data.zones ?? []).map((z): [string, string] => [z.id, z.label])),
+    () =>
+      new Map<string, string>(
+        (scenario?.data.zones ?? []).map((z): [string, string] => [z.id, z.label]),
+      ),
     [scenario],
   );
 }
@@ -214,7 +212,13 @@ export function buildCasefileItems(
       degree: e.degree,
       provenance,
       haystack: normalizeText(
-        [e.label, e.playerText, e.marker?.label ?? '', ...e.supportsLabels, ...e.excludesLabels].join(' '),
+        [
+          e.label,
+          e.playerText,
+          e.marker?.label ?? '',
+          ...e.supportsLabels,
+          ...e.excludesLabels,
+        ].join(' '),
       ),
     });
   }
@@ -257,7 +261,9 @@ export function buildCasefileItems(
     });
   }
 
-  const slotLabel = new Map<string, string>(view.slots.map((s): [string, string] => [s.id, s.label]));
+  const slotLabel = new Map<string, string>(
+    view.slots.map((s): [string, string] => [s.id, s.label]),
+  );
   for (const h of view.hypotheses) {
     const slot = slotLabel.get(h.slotId) ?? h.slotId;
     items.push({
@@ -291,7 +297,10 @@ export function buildCasefileItems(
 }
 
 /** Résout un identifiant de référence (journal) vers un élément du dossier, s'il est visible. */
-export function resolveRef(view: PlayerView, id: string): { kind: CasefileItemKind; label: string } | null {
+export function resolveRef(
+  view: PlayerView,
+  id: string,
+): { kind: CasefileItemKind; label: string } | null {
   const e = view.evidence.find((x) => x.id === id);
   if (e) return { kind: 'evidence', label: e.label };
   const s = view.statements.find((x) => x.id === id);

@@ -54,7 +54,8 @@ export function HypothesisSheet({
         {current && !placed && (
           <p className="field-hint">
             Cet emplacement contient déjà «{' '}
-            {view.hypotheses.find((h) => h.id === current.hypothesisId)?.label ?? current.hypothesisId}{' '}
+            {view.hypotheses.find((h) => h.id === current.hypothesisId)?.label ??
+              current.hypothesisId}{' '}
             » ; l’ajouter remplacera cette hypothèse.
           </p>
         )}

@@ -15,7 +15,13 @@ export interface FactSheetProps {
   onNavigate: (kind: 'character', id: string) => void;
 }
 
-export function FactSheet({ fact, view, zoneLabels, titleId, onNavigate }: FactSheetProps): React.JSX.Element {
+export function FactSheet({
+  fact,
+  view,
+  zoneLabels,
+  titleId,
+  onNavigate,
+}: FactSheetProps): React.JSX.Element {
   const place = fact.zoneId ? (zoneLabels.get(fact.zoneId) ?? fact.zoneId) : null;
   const participants = fact.participantIds.map((id) => ({
     id,

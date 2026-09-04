@@ -122,11 +122,11 @@ const tokens = parseRootTokens(css.tokens);
 // ---------------------------------------------------------------------------
 
 describe('styles/index.css', () => {
-  it('importe les cinq feuilles dans l’ordre jetons → base → degrés → mouvement → layout', () => {
+  it('importe les six feuilles dans l’ordre jetons → base → degrés → mouvement → dialogue → layout', () => {
     const imports = [...css.index.matchAll(/@import\s+['"]\.\/([\w-]+\.css)['"]\s*;/g)].map(
       (m) => m[1],
     );
-    expect(imports).toEqual(['tokens.css', 'base.css', 'degrees.css', 'motion.css', 'layout.css']);
+    expect(imports).toEqual(['tokens.css', 'base.css', 'degrees.css', 'motion.css', 'dialog.css', 'layout.css']);
   });
 });
 

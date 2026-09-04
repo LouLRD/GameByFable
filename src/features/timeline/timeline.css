@@ -1,0 +1,772 @@
+/*
+ * LA VERSION ACCEPTABLE — frise et relecture (src/features/timeline).
+ * Dépend des jetons (tokens.css), des classes de base (.btn, .chip, .mono, .muted,
+ * .visually-hidden) et des animations globales (.anim-propagate, .anim-crack).
+ *
+ * Aucun sens porté par la couleur seule :
+ *   établi    plein               bordure gauche pleine
+ *   rapporté  hachures            bordure gauche double
+ *   proposé   trame ambre         bordure tiretée
+ *   inconnu   « ? » + pointillés  bordure pointillée
+ *   transit   glyphe ◇
+ *   pièce ◆ · fait établi ■ · fait rapporté ▤ · contradiction ⚠ (i / ! / !!)
+ *
+ * Responsive : la colonne des libellés est collante, les pistes s'étirent avec --tl-zoom
+ * dans un conteneur en défilement horizontal ; rien ne déborde du panneau (390 px compris).
+ */
+
+.tl {
+  --tl-label-w: 132px;
+  --tl-row-h: 26px;
+  --tl-zoom: 1;
+
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+@media (max-width: 767px) {
+  .tl {
+    --tl-label-w: 96px;
+  }
+}
+
+.tl-empty-panel {
+  padding: var(--space-4);
+}
+
+/* ---------------------------------------------------------------------------
+ * En-tête
+ * ------------------------------------------------------------------------- */
+
+.tl-header {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  min-width: 0;
+  min-height: var(--tap-comfortable);
+  padding: var(--space-1) var(--space-3);
+  border-bottom: 1px dashed var(--border-strong);
+  background: var(--bg-elevated);
+}
+
+.tl-title {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tl-clock {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tl-legend {
+  position: relative;
+  margin-left: auto;
+}
+
+.tl-legend-toggle {
+  list-style: none;
+}
+
+.tl-legend-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.tl-legend[open] .tl-legend-toggle {
+  border-color: var(--accent);
+}
+
+.tl-legend-list {
+  position: absolute;
+  margin: 0;
+  list-style: none;
+  top: calc(100% + var(--space-1));
+  right: 0;
+  z-index: var(--z-raised);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 14rem;
+  max-width: min(22rem, 90vw);
+  padding: var(--space-2) var(--space-3);
+  padding-left: var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-2);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-2);
+  font-size: var(--text-sm);
+}
+
+.tl-legend-list li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.tl-swatch {
+  display: inline-grid;
+  flex: 0 0 auto;
+  width: 1.75rem;
+  height: 0.9rem;
+  place-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-1);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1;
+}
+
+.tl-swatch-glyph {
+  border-color: transparent;
+  font-size: var(--text-sm);
+}
+
+.tl-swatch-absence {
+  height: 4px;
+  border: 0;
+  border-bottom: 3px dotted var(--fg-subtle);
+}
+
+.tl-zoom-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.tl-zoom-group + .tl-legend {
+  margin-left: 0;
+}
+
+/* ---------------------------------------------------------------------------
+ * Commandes : navigation temporelle + relecture, sur une rangée qui replie
+ * ------------------------------------------------------------------------- */
+
+.tl-controls {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  min-width: 0;
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.tl-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.tl-toolbar .btn,
+.tl-playback .btn {
+  padding-right: var(--space-3);
+  padding-left: var(--space-3);
+}
+
+.tl-toolbar-sep {
+  align-self: stretch;
+  width: 1px;
+  margin: var(--space-1) var(--space-1);
+  background: var(--border-strong);
+}
+
+.tl-nudge {
+  font-family: var(--font-mono);
+  text-transform: none;
+}
+
+.tl-zoom-level {
+  min-width: 2.5em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------------
+ * Zone défilante et canevas
+ * ------------------------------------------------------------------------- */
+
+.tl-scroll {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  scrollbar-gutter: stable;
+  background: var(--bg-sunken);
+}
+
+.tl-canvas {
+  position: relative;
+  min-width: 100%;
+  width: calc(var(--tl-label-w) + (100% - var(--tl-label-w)) * var(--tl-zoom));
+}
+
+/* ---------------------------------------------------------------------------
+ * Pistes
+ * ------------------------------------------------------------------------- */
+
+.tl-lane {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.tl-lane:last-of-type {
+  border-bottom: 0;
+}
+
+.tl-lane-label {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  flex: 0 0 var(--tl-label-w);
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: 0 var(--space-2);
+  overflow: hidden;
+  border-right: 1px solid var(--border-strong);
+  background: var(--bg-elevated);
+  color: var(--fg-muted);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tl-lane-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tl-portrait {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.tl-lane-track {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: calc(var(--tl-rows, 1) * var(--tl-row-h) + 8px);
+  cursor: crosshair;
+}
+
+.tl-lane-character[data-selected='true'] .tl-lane-label {
+  color: var(--fg);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.tl-empty {
+  position: absolute;
+  top: 50%;
+  left: var(--space-2);
+  transform: translateY(-50%);
+  font-size: var(--text-xs);
+  font-style: italic;
+  white-space: nowrap;
+}
+
+/* Règle graduée et curseur : collés en haut pendant le défilement vertical. */
+.tl-lane-ruler,
+.tl-lane-cursor {
+  position: sticky;
+  z-index: 4;
+  background: var(--bg-sunken);
+}
+
+.tl-lane-ruler {
+  top: 0;
+}
+
+.tl-lane-cursor {
+  top: 23px;
+}
+
+.tl-lane-ruler .tl-lane-track {
+  height: 22px;
+  cursor: default;
+}
+
+.tl-tick {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 6px;
+  background: var(--border-strong);
+}
+
+.tl-tick-labelled {
+  height: 10px;
+  background: var(--fg-muted);
+}
+
+.tl-tick-label {
+  position: absolute;
+  top: 8px;
+  left: 3px;
+  color: var(--fg-muted);
+  font-size: var(--text-xs);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* Curseur : range natif sur toute la piste. */
+.tl-lane-cursor .tl-lane-track {
+  display: flex;
+  align-items: center;
+  height: var(--tap-min);
+  cursor: default;
+}
+
+/* Ligne du curseur et repère : au-dessus des pistes mais sous la règle collante. */
+.tl-lane-ruler .tl-lane-label,
+.tl-lane-cursor .tl-lane-label {
+  z-index: 5;
+}
+
+.tl-lane-cursor .tl-lane-label {
+  cursor: pointer;
+}
+
+.tl-range {
+  width: 100%;
+  height: var(--tap-min);
+  margin: 0;
+  background: transparent;
+  cursor: ew-resize;
+}
+
+/* ---------------------------------------------------------------------------
+ * Segments (intervalles) et marques (instants)
+ * ------------------------------------------------------------------------- */
+
+.tl-seg,
+.tl-mark {
+  --tl-seg-color: var(--fg-muted);
+
+  position: absolute;
+  top: calc(4px + var(--tl-row, 0) * var(--tl-row-h));
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: calc(var(--tl-row-h) - 4px);
+  padding: 0 var(--space-1);
+  overflow: hidden;
+  border: 1px solid var(--tl-seg-color);
+  border-left-width: 3px;
+  border-radius: var(--radius-1);
+  background-color: var(--bg-elevated);
+  background-repeat: repeat;
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* Zone de toucher ≥ 40 px, centrée, même pour un intervalle très court. */
+.tl-seg::before,
+.tl-mark::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: min(0px, calc((100% - var(--tap-min)) / 2));
+  right: min(0px, calc((100% - var(--tap-min)) / 2));
+}
+
+.tl-seg {
+  min-width: 6px;
+}
+
+/* Un intervalle très court reste repérable : largeur minimale suffisante pour le glyphe. */
+.tl-seg-event,
+.tl-seg[data-status='proposed'] {
+  min-width: 12px;
+}
+
+.tl-seg-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tl-seg-glyph {
+  flex: 0 0 auto;
+  font-weight: 700;
+}
+
+.tl-mark {
+  width: var(--tl-row-h);
+  padding: 0;
+  justify-content: center;
+  transform: translateX(-50%);
+  border-left-width: 1px;
+}
+
+.tl-seg:hover,
+.tl-mark:hover {
+  border-color: var(--fg);
+  z-index: 2;
+}
+
+.tl-seg[aria-current='true'],
+.tl-mark[aria-current='true'] {
+  z-index: 2;
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* Établi : plein. */
+.tl-seg[data-status='established'],
+.tl-mark[data-status='established'],
+.tl-swatch[data-status='established'] {
+  --tl-seg-color: var(--success);
+
+  border-left-style: solid;
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--tl-seg-color) 32%, transparent),
+    color-mix(in srgb, var(--tl-seg-color) 32%, transparent)
+  );
+}
+
+/* Rapporté : hachures. */
+.tl-seg[data-status='reported'],
+.tl-mark[data-status='reported'],
+.tl-swatch[data-status='reported'] {
+  --tl-seg-color: var(--info);
+
+  border-left-style: double;
+  background-image: repeating-linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--tl-seg-color) 38%, transparent) 0 2px,
+    transparent 2px 7px
+  );
+}
+
+/* Proposé : trame ambre, bordure tiretée. */
+.tl-seg[data-status='proposed'],
+.tl-mark[data-status='proposed'],
+.tl-seg[data-kind='claim'],
+.tl-swatch[data-status='proposed'] {
+  --tl-seg-color: var(--warning);
+
+  border-style: dashed;
+  border-left-style: dashed;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--tl-seg-color) 30%, transparent) 1px, transparent 1px),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--tl-seg-color) 30%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      color-mix(in srgb, var(--tl-seg-color) 14%, transparent),
+      color-mix(in srgb, var(--tl-seg-color) 14%, transparent)
+    );
+  background-size:
+    8px 8px,
+    8px 8px,
+    auto;
+}
+
+/* Inconnu : « ? » sur pointillés fins, non interactif. */
+.tl-seg-unknown,
+.tl-swatch[data-status='unknown'] {
+  --tl-seg-color: var(--fg-subtle);
+
+  top: 4px;
+  justify-content: center;
+  border-style: dotted;
+  border-left-width: 1px;
+  background-color: transparent;
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--tl-seg-color) 40%, transparent) 0.8px,
+    transparent 1.2px
+  );
+  background-size: 6px 6px;
+  color: var(--fg-subtle);
+  cursor: default;
+}
+
+.tl-seg-unknown {
+  height: calc(var(--tl-row-h) - 4px);
+}
+
+/* Transit : glyphe ◇ sur une marque étroite. */
+.tl-mark-transit {
+  width: 18px;
+  border-radius: 50%;
+  font-size: var(--text-sm);
+}
+
+/* Absence caméra : filet pointillé au bas de la piste. */
+.tl-absence {
+  position: absolute;
+  bottom: 1px;
+  height: 0;
+  border-bottom: 3px dotted var(--fg-subtle);
+}
+
+/* Pièces et faits : glyphe + libellé ; degré via le style de bordure. */
+.tl-seg[data-kind='evidence'],
+.tl-mark[data-kind='evidence'] {
+  --tl-seg-color: var(--success);
+}
+
+.tl-seg[data-kind='evidence'][data-degree='deduced'],
+.tl-mark[data-kind='evidence'][data-degree='deduced'] {
+  --tl-seg-color: var(--warning);
+
+  border-left-style: dotted;
+}
+
+.tl-seg[data-kind='fact'][data-degree='established'] {
+  --tl-seg-color: var(--success);
+
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--tl-seg-color) 22%, transparent),
+    color-mix(in srgb, var(--tl-seg-color) 22%, transparent)
+  );
+}
+
+.tl-seg[data-kind='fact'][data-degree='reported'] {
+  --tl-seg-color: var(--info);
+
+  border-left-style: double;
+  background-image: repeating-linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--tl-seg-color) 30%, transparent) 0 2px,
+    transparent 2px 7px
+  );
+}
+
+/* Contradictions : ⚠ + sévérité en forme (cercle fin / carré tireté / losange épais). */
+.tl-mark[data-kind='contradiction'] {
+  width: calc(var(--tl-row-h) + 6px);
+  gap: 1px;
+}
+
+.tl-mark[data-kind='contradiction'][data-severity='notice'] {
+  --tl-seg-color: var(--info);
+
+  border-width: 1px;
+  border-radius: 50%;
+}
+
+.tl-mark[data-kind='contradiction'][data-severity='major'] {
+  --tl-seg-color: var(--warning);
+
+  border-width: 2px;
+  border-style: dashed;
+  border-radius: 0;
+}
+
+.tl-mark[data-kind='contradiction'][data-severity='critical'] {
+  --tl-seg-color: var(--danger);
+
+  border-width: 3px;
+  border-style: double;
+  border-radius: 0;
+  background-image: repeating-linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--tl-seg-color) 24%, transparent) 0 2px,
+    transparent 2px 6px
+  );
+}
+
+.tl-sev {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--tl-seg-color);
+}
+
+/* Bandes : coupure vidéo (bleu caméra, barres verticales) et obstruction (ambre, hachures). */
+.tl-lane-band .tl-lane-track {
+  height: calc(var(--tl-row-h) + 4px);
+}
+
+.tl-band-seg {
+  top: 2px;
+  height: var(--tl-row-h);
+  border-radius: 0;
+}
+
+.tl-band-seg[data-band='outage'] {
+  --tl-seg-color: var(--info);
+
+  border-style: solid;
+  background-image: repeating-linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--tl-seg-color) 40%, transparent) 0 3px,
+    transparent 3px 6px
+  );
+}
+
+.tl-band-seg[data-band='obstruction'] {
+  --tl-seg-color: var(--warning);
+
+  border-style: dashed;
+  background-image: repeating-linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--tl-seg-color) 40%, transparent) 0 2px,
+    transparent 2px 6px
+  );
+}
+
+/* Retour visuel : la piste Version pulse (couleur ambre) quand une hypothèse est posée. */
+.tl-lane-version {
+  --anim-color: var(--warning);
+}
+
+.tl-mark.anim-crack,
+.tl-seg.anim-crack {
+  --anim-color: var(--danger);
+
+  z-index: 2;
+}
+
+/* ---------------------------------------------------------------------------
+ * Ligne du curseur et repère du comptage (traversent toutes les pistes)
+ * ------------------------------------------------------------------------- */
+
+.tl-cursor-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--tl-label-w) + (100% - var(--tl-label-w)) * var(--tl-cursor, 0));
+  z-index: 2;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--warning);
+  pointer-events: none;
+  transition: left var(--duration-fast) linear;
+}
+
+.tl-cursor-line::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -5px;
+  border-top: 8px solid var(--warning);
+  border-right: 6px solid transparent;
+  border-left: 6px solid transparent;
+}
+
+/* Mouvement réduit : pas d'interpolation du curseur entre deux secondes. */
+.tl[data-reduced-motion='true'] .tl-cursor-line {
+  transition: none;
+}
+
+.tl-incident {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--tl-label-w) + (100% - var(--tl-label-w)) * var(--tl-at, 0));
+  z-index: 1;
+  width: 0;
+  border-left: 2px dashed var(--danger);
+  pointer-events: none;
+}
+
+.tl-incident-label {
+  position: absolute;
+  top: 0;
+  left: 4px;
+  padding: 0 3px;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-1);
+  background: var(--bg);
+  color: var(--danger);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+ * Relecture
+ * ------------------------------------------------------------------------- */
+
+.tl-playback {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  min-width: 0;
+}
+
+.tl-play-glyph {
+  display: inline-block;
+  min-width: 1.2em;
+  text-align: center;
+}
+
+.tl-speed {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.tl-speed-caption {
+  color: var(--fg-muted);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.tl-speed-option {
+  min-height: var(--tap-min);
+  gap: var(--space-1);
+  font-family: var(--font-mono);
+}
+
+.tl-speed-option:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--bg-hover);
+  font-weight: 700;
+}
+
+.tl-speed-option input {
+  margin: 0;
+}
+
+@media (pointer: coarse) {
+  .tl-speed-option {
+    min-height: var(--tap-comfortable);
+  }
+}

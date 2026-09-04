@@ -4,30 +4,40 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import type { PlayerAction } from '@/domain/model/actions';
+import { characterId, claimSlotId, hypothesisId } from '@/domain/model/ids';
 import { useGameStore } from '@/state';
 
 import { RoundTableDialog } from './RoundTableDialog';
 
+/** Séquence menant à la table ronde (deux révélations structurantes, cinq emplacements remplis). */
 const ROUND_TABLE_ACTIONS: PlayerAction[] = [
   {
     type: 'confront',
-    characterId: 'jo',
+    characterId: characterId('jo'),
     targetId: 's_jo_initial',
     supportId: 'e_camera_gap',
     approach: 'neutral',
   },
   {
     type: 'confront',
-    characterId: 'ines',
+    characterId: characterId('ines'),
     targetId: 's_ines_initial',
     supportId: 'e_pallet_scan',
     approach: 'empathetic',
   },
-  { type: 'set-claim', slotId: 'cash_origin', hypothesisId: 'h_counting_error' },
-  { type: 'set-claim', slotId: 'video_outage', hypothesisId: 'h_scheduled_reboot' },
-  { type: 'set-claim', slotId: 'receipt_path', hypothesisId: 'h_no_receipt' },
-  { type: 'set-claim', slotId: 'noise_source', hypothesisId: 'h_freezer_alarm' },
-  { type: 'set-claim', slotId: 'manager_knowledge', hypothesisId: 'h_ana_unaware' },
+  ...(
+    [
+      ['cash_origin', 'h_counting_error'],
+      ['video_outage', 'h_scheduled_reboot'],
+      ['receipt_path', 'h_no_receipt'],
+      ['noise_source', 'h_freezer_alarm'],
+      ['manager_knowledge', 'h_ana_unaware'],
+    ] as const
+  ).map(([slot, hypothesis]): PlayerAction => ({
+    type: 'set-claim',
+    slotId: claimSlotId(slot),
+    hypothesisId: hypothesisId(hypothesis),
+  })),
   { type: 'request-round-table' },
 ];
 
@@ -148,8 +158,9 @@ describe('<RoundTableDialog />', () => {
     const buttons = screen.getAllByRole('button', {
       name: /Voir l’emplacement « Interruption vidéo »/,
     });
-    expect(buttons.length).toBeGreaterThan(0);
-    await user.click(buttons[0] as HTMLElement);
+    const first = buttons[0];
+    if (!first) throw new Error('Aucun bouton « Voir l’emplacement » rendu.');
+    await user.click(first);
 
     const state = useGameStore.getState();
     expect(state.dialog).toBeNull();

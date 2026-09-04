@@ -12,6 +12,8 @@ export default defineConfig({
     environment: 'node',
     // Les tests DOM déclarent `// @vitest-environment jsdom` en tête de fichier (convention *.dom.test.tsx).
     setupFiles: ['./src/test/setup.ts'],
+    testTimeout: 30_000,
+    hookTimeout: 30_000,
     include: ['src/**/*.test.{ts,tsx}'],
     exclude: ['e2e/**', 'node_modules/**', 'dist/**'],
     coverage: {

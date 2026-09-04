@@ -1,0 +1,114 @@
+/*
+ * LA VERSION ACCEPTABLE — repères d'onboarding, piste d'aide progressive, carte de bienvenue.
+ * Glyphe + style de bordure distinguent repère et piste (jamais la couleur seule).
+ */
+
+.callout {
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-left: 4px solid var(--warning);
+  border-radius: var(--radius-2);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-2);
+}
+
+.callout-hint {
+  border-left-style: double;
+  border-left-color: var(--info);
+}
+
+.callout-kicker {
+  margin-bottom: var(--space-1);
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.callout-onboarding .callout-kicker::before {
+  content: '◆ ';
+  content: '◆ ' / '';
+}
+
+.callout-hint .callout-kicker::before {
+  content: 'i ';
+  content: 'i ' / '';
+}
+
+.callout-target {
+  color: var(--fg-subtle);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.callout-text {
+  font-size: var(--text-sm);
+  line-height: 1.45;
+}
+
+.callout-text + .callout-text {
+  margin-top: var(--space-1);
+}
+
+.callout-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.callout-actions .btn {
+  min-width: auto;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
+}
+
+.callout-foot {
+  margin-top: var(--space-2);
+  font-size: var(--text-xs);
+}
+
+/* ---------------------------------------------------------------------------
+ * Carte de bienvenue (tête du dossier)
+ * ------------------------------------------------------------------------- */
+
+.intro-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-3);
+  border-left: 4px solid var(--accent);
+}
+
+.intro-kicker {
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.intro-card h2 {
+  font-size: var(--text-xl);
+}
+
+.intro-premise {
+  font-size: var(--text-md);
+  line-height: 1.5;
+}
+
+.intro-loop {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-left: 1.2em;
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  list-style: square;
+}
+
+.intro-note {
+  font-size: var(--text-sm);
+}
