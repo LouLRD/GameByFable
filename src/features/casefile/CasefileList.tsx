@@ -126,7 +126,7 @@ export function CasefileList({
               <span className="casefile-group-count">({group.items.length})</span>
             </h3>
           )}
-          <ul role="list" className="casefile-items">
+          <ul className="casefile-items">
             {group.items.map((item) => (
               <li key={`${item.kind}:${item.id}`}>
                 <ItemButton

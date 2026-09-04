@@ -22,21 +22,22 @@ export function StatementSheet({
   titleId,
   onNavigate,
 }: StatementSheetProps): React.JSX.Element {
-  const setConfrontationDraft = useGameStore((s) => s.setConfrontationDraft);
-  const openDialog = useGameStore((s) => s.openDialog);
   const speaker = view.characters.find((c) => c.id === statement.speakerId);
   const successor = statement.supersededById
     ? view.statements.find((s) => s.id === statement.supersededById)
     : undefined;
   const sealedHint = 'Le rapport est scellé : plus aucune confrontation.';
 
+  // Les actions du store sont stables : on les lit sans abonnement au moment du clic.
   const onConfront = (): void => {
-    setConfrontationDraft({ characterId: statement.speakerId, targetId: statement.id });
-    openDialog('confrontation');
+    const store = useGameStore.getState();
+    store.setConfrontationDraft({ characterId: statement.speakerId, targetId: statement.id });
+    store.openDialog('confrontation');
   };
   const onUseAsSupport = (): void => {
-    setConfrontationDraft({ supportId: statement.id });
-    openDialog('confrontation');
+    const store = useGameStore.getState();
+    store.setConfrontationDraft({ supportId: statement.id });
+    store.openDialog('confrontation');
   };
 
   return (

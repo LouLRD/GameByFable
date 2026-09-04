@@ -22,13 +22,6 @@ export function EvidenceSheet({
   zoneLabels,
   titleId,
 }: EvidenceSheetProps): React.JSX.Element {
-  const dispatch = useGameStore((s) => s.dispatch);
-  const select = useGameStore((s) => s.select);
-  const setCursor = useGameStore((s) => s.setCursor);
-  const highlight = useGameStore((s) => s.highlight);
-  const setConfrontationDraft = useGameStore((s) => s.setConfrontationDraft);
-  const openDialog = useGameStore((s) => s.openDialog);
-  const announce = useGameStore((s) => s.announce);
   const [notice, setNotice] = useState<string | null>(null);
   const hintId = useId();
 
@@ -51,29 +44,36 @@ export function EvidenceSheet({
       : 'Une pièce retirée du rapport n’est plus partagée à la table ronde ni comptée dans le dévoilement.';
   const attachDisabled = evidence.mandatory || view.isSealed;
 
+  // Les actions du store sont stables : on les lit sans abonnement au moment de l'interaction.
   const onToggleAttached = (attached: boolean): void => {
-    const result = dispatch({ type: 'set-evidence-attached', evidenceId: evidence.id, attached });
+    const store = useGameStore.getState();
+    const result = store.dispatch({ type: 'set-evidence-attached', evidenceId: evidence.id, attached });
     if (!result.ok) {
       setNotice(result.error.message);
       return;
     }
     setNotice(null);
-    announce(attached ? `« ${evidence.label} » jointe au rapport.` : `« ${evidence.label} » retirée du rapport.`);
+    store.announce(
+      attached ? `« ${evidence.label} » jointe au rapport.` : `« ${evidence.label} » retirée du rapport.`,
+    );
   };
 
   const onLocate = (): void => {
-    if (markerTime !== null) setCursor(markerTime);
-    select('evidence', evidence.id, isCompactViewport() ? { space: 'map' } : {});
-    if (marker?.zoneId) highlight([marker.zoneId]);
-    const parts = [markerPlace ? `plan : ${markerPlace}` : null, markerTime !== null ? `frise : ${view.clock(markerTime)}` : null].filter(
-      (p): p is string => p !== null,
-    );
-    announce(`« ${evidence.label} » repérée (${parts.join(', ')}).`);
+    const store = useGameStore.getState();
+    if (markerTime !== null) store.setCursor(markerTime);
+    store.select('evidence', evidence.id, isCompactViewport() ? { space: 'map' } : {});
+    if (marker?.zoneId) store.highlight([marker.zoneId]);
+    const parts = [
+      markerPlace ? `plan : ${markerPlace}` : null,
+      markerTime !== null ? `frise : ${view.clock(markerTime)}` : null,
+    ].filter((p): p is string => p !== null);
+    store.announce(`« ${evidence.label} » repérée (${parts.join(', ')}).`);
   };
 
   const onUseAsSupport = (): void => {
-    setConfrontationDraft({ supportId: evidence.id });
-    openDialog('confrontation');
+    const store = useGameStore.getState();
+    store.setConfrontationDraft({ supportId: evidence.id });
+    store.openDialog('confrontation');
   };
 
   return (

@@ -97,7 +97,7 @@ function RoundTableBody({ view }: { view: PlayerView }): JSX.Element {
         <h3 id={versionId} className="rt-heading">
           Version proposée
         </h3>
-        <ol className="rt-version list-plain">
+        <ol className="rt-version list-plain" aria-labelledby={versionId}>
           {view.slots.map((slot) => {
             const claim = view.version.claims[slot.id];
             const hypothesis = claim
@@ -124,7 +124,7 @@ function RoundTableBody({ view }: { view: PlayerView }): JSX.Element {
         <h3 id={signaturesId} className="rt-heading">
           Réactions
         </h3>
-        <ul className="sig-list list-plain">
+        <ul className="sig-list list-plain" aria-labelledby={signaturesId}>
           {view.version.adhesion.map((adhesion) => {
             const character = view.characters.find((c) => c.id === adhesion.characterId);
             if (!character) return null;

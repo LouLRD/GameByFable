@@ -63,8 +63,7 @@ export function EpilogueScreen(): JSX.Element | null {
                 {signatures} {plural(signatures, 'signature', 'signatures')} sur {total}
               </span>
               <span className="badge">
-                {epilogue.shadowCount} {plural(epilogue.shadowCount, 'fait', 'faits')} dans
-                l’ombre
+                {epilogue.shadowCount} {plural(epilogue.shadowCount, 'fait', 'faits')} dans l’ombre
               </span>
             </p>
             <div className="ticket">
@@ -82,7 +81,7 @@ export function EpilogueScreen(): JSX.Element | null {
           <h2 id={signaturesId} className="epi-section-title">
             Signatures
           </h2>
-          <ul className="sig-list list-plain">
+          <ul className="sig-list list-plain" aria-labelledby={signaturesId}>
             {epilogue.characters.map((person) => {
               const character = view.characters.find((c) => c.id === person.characterId);
               return (
@@ -112,7 +111,7 @@ export function EpilogueScreen(): JSX.Element | null {
           <h2 id={factsId} className="epi-section-title">
             Ce que la soirée contenait
           </h2>
-          <ol className="epi-facts list-plain">
+          <ol className="epi-facts list-plain" aria-labelledby={factsId}>
             {epilogue.facts.map((fact) =>
               fact.revealed ? (
                 <li key={fact.id} className="epi-fact degree-established" data-revealed="true">
@@ -180,7 +179,7 @@ export function EpilogueScreen(): JSX.Element | null {
             <h2 id={endingsId} className="epi-section-title">
               Autres fins
             </h2>
-            <ul className="epi-endings list-plain">
+            <ul className="epi-endings list-plain" aria-labelledby={endingsId}>
               {epilogue.otherEndings.map((ending) => (
                 <li key={ending.id} className="card">
                   <h3 className="epi-ending-title">{ending.title}</h3>

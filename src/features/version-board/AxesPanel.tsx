@@ -35,7 +35,7 @@ export function AxesPanel({
   const slotLabel = (id: string) => slots.find((s) => s.id === id)?.label ?? id;
 
   return (
-    <div className="axes" aria-label="Trois axes d’évaluation" role="group">
+    <div className="axes" role="group" aria-label="Trois axes d’évaluation">
       <section className="axis" data-axis="coherence" aria-labelledby={`${baseId}-coh`}>
         <h3 id={`${baseId}-coh`} className="axis-title">
           Cohérence
@@ -77,7 +77,7 @@ export function AxesPanel({
         {unexplained.length > 0 ? (
           <div className="vb-section">
             <p className="vb-note">Non expliquées par la version :</p>
-            <ul className="axis-list" role="list">
+            <ul className="vb-list axis-list">
               {unexplained.map((id) => (
                 <li key={id}>
                   <button
@@ -97,7 +97,11 @@ export function AxesPanel({
             </ul>
           </div>
         ) : (
-          <p className="vb-note">Toutes les pièces établies sont expliquées.</p>
+          <p className="vb-note">
+            {total === 0
+              ? 'Aucune pièce à expliquer pour l’instant.'
+              : 'Toutes les pièces établies sont expliquées.'}
+          </p>
         )}
       </section>
 
@@ -108,7 +112,7 @@ export function AxesPanel({
         <p className="axis-value">
           {version.signatureCount}/{version.adhesion.length} signeraient
         </p>
-        <ul className="axis-list" role="list">
+        <ul className="vb-list axis-list">
           {version.adhesion.map((a) => {
             const verdict = VERDICT_DISPLAY[a.verdict];
             return (
@@ -122,8 +126,8 @@ export function AxesPanel({
                 </span>
                 {a.publicReasons.length > 0 ? (
                   <ul className="adhesion-reasons">
-                    {a.publicReasons.map((r) => (
-                      <li key={r}>{r}</li>
+                    {a.publicReasons.map((r, i) => (
+                      <li key={`${i}-${r}`}>{r}</li>
                     ))}
                   </ul>
                 ) : null}

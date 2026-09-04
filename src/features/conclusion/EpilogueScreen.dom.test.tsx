@@ -9,8 +9,20 @@ import { useGameStore } from '@/state';
 import { EpilogueScreen } from './EpilogueScreen';
 
 const ROUND_TABLE_ACTIONS: PlayerAction[] = [
-  { type: 'confront', characterId: 'jo', targetId: 's_jo_initial', supportId: 'e_camera_gap', approach: 'neutral' },
-  { type: 'confront', characterId: 'ines', targetId: 's_ines_initial', supportId: 'e_pallet_scan', approach: 'empathetic' },
+  {
+    type: 'confront',
+    characterId: 'jo',
+    targetId: 's_jo_initial',
+    supportId: 'e_camera_gap',
+    approach: 'neutral',
+  },
+  {
+    type: 'confront',
+    characterId: 'ines',
+    targetId: 's_ines_initial',
+    supportId: 'e_pallet_scan',
+    approach: 'empathetic',
+  },
   { type: 'set-claim', slotId: 'cash_origin', hypothesisId: 'h_counting_error' },
   { type: 'set-claim', slotId: 'video_outage', hypothesisId: 'h_scheduled_reboot' },
   { type: 'set-claim', slotId: 'receipt_path', hypothesisId: 'h_no_receipt' },
@@ -23,10 +35,13 @@ function prepare(seal: boolean): void {
   const store = useGameStore.getState();
   store.bootstrap();
   store.newGame();
-  const actions = seal ? [...ROUND_TABLE_ACTIONS, { type: 'seal-report' } as const] : ROUND_TABLE_ACTIONS;
+  const actions = seal
+    ? [...ROUND_TABLE_ACTIONS, { type: 'seal-report' } as const]
+    : ROUND_TABLE_ACTIONS;
   for (const action of actions) {
     const result = useGameStore.getState().dispatch(action);
-    if (!result.ok) throw new Error(`Préparation impossible (${action.type}) : ${result.error.message}`);
+    if (!result.ok)
+      throw new Error(`Préparation impossible (${action.type}) : ${result.error.message}`);
   }
 }
 
@@ -50,13 +65,17 @@ describe('<EpilogueScreen />', () => {
     it('affiche le sceau : titre de la fin, famille traduite, épilogue et signatures', () => {
       render(<EpilogueScreen />);
       const main = screen.getByRole('main');
-      expect(within(main).getByRole('heading', { level: 1, name: 'Personne ne signe' })).toBeInTheDocument();
+      expect(
+        within(main).getByRole('heading', { level: 1, name: 'Personne ne signe' }),
+      ).toBeInTheDocument();
       expect(within(main).getByText(/famille : Rejet/)).toBeInTheDocument();
       expect(within(main).getByText(/La table ronde se défait/)).toBeInTheDocument();
       expect(within(main).getByText('0 signature sur 6')).toBeInTheDocument();
 
       const signatures = within(main).getByRole('list', { name: 'Signatures' });
-      const rows = within(signatures).getAllByRole('listitem').filter((li) => li.classList.contains('sig-row'));
+      const rows = within(signatures)
+        .getAllByRole('listitem')
+        .filter((li) => li.classList.contains('sig-row'));
       expect(rows).toHaveLength(6);
       expect(within(signatures).getByText(/Changez ça, et on en reparle/)).toBeInTheDocument();
       expect(within(signatures).getAllByText('demande une modification')).toHaveLength(6);
@@ -65,7 +84,9 @@ describe('<EpilogueScreen />', () => {
     it('compare la version signée aux faits dans un tableau à en-têtes, 5 lignes et un total', () => {
       render(<EpilogueScreen />);
       const table = screen.getByRole('table');
-      const headers = within(table).getAllByRole('columnheader').map((th) => th.textContent);
+      const headers = within(table)
+        .getAllByRole('columnheader')
+        .map((th) => th.textContent);
       expect(headers).toEqual(['Emplacement', 'Version signée', 'Faits', 'Accord']);
 
       const body = table.querySelector('tbody');
@@ -90,12 +111,16 @@ describe('<EpilogueScreen />', () => {
       expect(revealed).not.toBeNull();
       expect(revealed).toHaveAttribute('data-revealed', 'true');
       expect(within(revealed as HTMLElement).getByText('Caisses')).toBeInTheDocument();
-      expect(within(revealed as HTMLElement).getByText(/Ana Sorel, Malik Bensaïd/)).toBeInTheDocument();
+      expect(
+        within(revealed as HTMLElement).getByText(/Ana Sorel, Malik Bensaïd/),
+      ).toBeInTheDocument();
       expect(within(revealed as HTMLElement).getByText(/21:09:40 – 21:12:00/)).toBeInTheDocument();
 
       const shadow = screen.getAllByText(/fait non élucidé/);
       expect(shadow.length).toBeGreaterThan(0);
-      expect(screen.getByText(/fait non élucidé — lié à « Parcours du justificatif »/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/fait non élucidé — lié à « Parcours du justificatif »/),
+      ).toBeInTheDocument();
       const shadowItems = document.querySelectorAll('li[data-revealed="false"]');
       expect(shadowItems).toHaveLength(11);
       for (const item of Array.from(shadowItems)) {
@@ -113,7 +138,8 @@ describe('<EpilogueScreen />', () => {
       expect(range).toHaveAttribute('aria-valuetext', '20:49:00');
 
       const tokenAt = (id: string): string | null =>
-        container.querySelector(`.traj-token[data-character="${id}"]`)?.getAttribute('data-zone') ?? null;
+        container.querySelector(`.traj-token[data-character="${id}"]`)?.getAttribute('data-zone') ??
+        null;
       const listed = (id: string): string =>
         container.querySelector(`.traj-list li[data-character="${id}"]`)?.textContent ?? '';
 
@@ -155,8 +181,15 @@ describe('<EpilogueScreen />', () => {
     it('liste les autres fins avec un indice, sans la fin obtenue ni ses conditions', () => {
       render(<EpilogueScreen />);
       const list = screen.getByRole('list', { name: 'Autres fins' });
-      const titles = within(list).getAllByRole('heading', { level: 3 }).map((h) => h.textContent);
-      expect(titles).toEqual(['Tout écrire', 'Réparer sans exposer', 'Une histoire simple', "Classer l'écart"]);
+      const titles = within(list)
+        .getAllByRole('heading', { level: 3 })
+        .map((h) => h.textContent);
+      expect(titles).toEqual([
+        'Tout écrire',
+        'Réparer sans exposer',
+        'Une histoire simple',
+        "Classer l'écart",
+      ]);
       expect(titles).not.toContain('Personne ne signe');
       expect(within(list).getByText(/sans inventer de coupable/)).toBeInTheDocument();
       expect(within(list).queryByText(/signatures? minimum|requiert|condition/i)).toBeNull();
@@ -166,7 +199,9 @@ describe('<EpilogueScreen />', () => {
       const user = userEvent.setup();
       render(<EpilogueScreen />);
       const names = screen.getAllByRole('button').map((b) => b.textContent ?? '');
-      expect(names.some((n) => /sceller|retravailler|placer|modifier|confront/i.test(n))).toBe(false);
+      expect(names.some((n) => /sceller|retravailler|placer|modifier|confront/i.test(n))).toBe(
+        false,
+      );
 
       await user.click(screen.getByRole('button', { name: 'Nouvelle partie' }));
       expect(useGameStore.getState().dialog).toBe('new-game');

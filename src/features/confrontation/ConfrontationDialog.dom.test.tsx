@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render, screen, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -59,7 +59,7 @@ describe('<ConfrontationDialog />', () => {
     render(<ConfrontationDialog />);
 
     expect(screen.getByRole('dialog', { name: 'Confrontation' })).toBeInTheDocument();
-    expect(screen.getByRole('radio', { name: /Malik Bensaïd/ })).toBeChecked();
+    expect(screen.getByRole('radio', { name: /^Malik Bensaïd/ })).toBeChecked();
     expect(screen.getByRole('radio', { name: /Ana m'a donné une pochette/ })).toBeChecked();
 
     const support = screen.getByLabelText(/Pièce d’appui/);
@@ -115,7 +115,10 @@ describe('<ConfrontationDialog />', () => {
 
     // Un lien de précision ouvre la déclaration dans le dossier et ferme le dialogue
     await user.click(statementLink);
-    expect(useGameStore.getState().selection).toEqual({ kind: 'statement', id: 's_malik_clarified' });
+    expect(useGameStore.getState().selection).toEqual({
+      kind: 'statement',
+      id: 's_malik_clarified',
+    });
     expect(useGameStore.getState().dialog).toBeNull();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
@@ -127,7 +130,9 @@ describe('<ConfrontationDialog />', () => {
     render(<ConfrontationDialog />);
 
     expect(screen.getByText(/Non recevable/)).toBeInTheDocument();
-    expect(screen.getByText(/Sans pièce d’appui, Noé Rami maintient sa version/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Sans pièce d’appui, Noé Rami maintient sa version/),
+    ).toBeInTheDocument();
 
     const button = submitButton('Confronter');
     expect(button).toBeDisabled();
@@ -208,7 +213,7 @@ describe('<ConfrontationDialog />', () => {
     openWith(DRAFT_MALIK);
     render(<ConfrontationDialog />);
 
-    await user.click(screen.getByRole('radio', { name: /Ana Sorel/ }));
+    await user.click(screen.getByRole('radio', { name: /^Ana Sorel/ }));
     expect(useGameStore.getState().confrontationDraft).toEqual({
       characterId: 'ana',
       targetId: null,
@@ -259,7 +264,9 @@ describe('<ConfrontationDialog />', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(useGameStore.getState().confrontationDraft).toEqual(DRAFT_MALIK);
 
-    useGameStore.getState().openDialog('confrontation');
+    act(() => {
+      useGameStore.getState().openDialog('confrontation');
+    });
     await user.click(submitButton('Confronter'));
     expect(screen.getByRole('heading', { name: /Réponse de Malik Bensaïd/ })).toBeInTheDocument();
 
@@ -270,7 +277,7 @@ describe('<ConfrontationDialog />', () => {
       supportId: null,
       approach: 'neutral',
     });
-    expect(screen.getByRole('radio', { name: /Malik Bensaïd/ })).toBeChecked();
+    expect(screen.getByRole('radio', { name: /^Malik Bensaïd/ })).toBeChecked();
     expect(screen.getByText(/À compléter/)).toBeInTheDocument();
     const dialog = screen.getByRole('dialog');
     expect(within(dialog).getByText(/Cible/)).toHaveFocus();

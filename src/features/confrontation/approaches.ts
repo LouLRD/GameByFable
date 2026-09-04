@@ -21,7 +21,8 @@ export const APPROACHES: readonly ApproachOption[] = [
     id: 'empathetic',
     label: 'Empathique',
     glyph: '◠',
-    intent: 'Vous reconnaissez d’abord ce que sa position a de difficile, puis vous posez la question.',
+    intent:
+      'Vous reconnaissez d’abord ce que sa position a de difficile, puis vous posez la question.',
     reminder: 'Empathique : peut ouvrir la personne et obtenir une précision.',
   },
   {

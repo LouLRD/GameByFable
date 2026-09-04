@@ -505,11 +505,7 @@
 .epi-fact-shadow {
   padding-left: calc(var(--space-2) * 2 + 1.25em);
   border-left: 4px dotted var(--fg-subtle);
-  background: repeating-linear-gradient(
-    90deg,
-    rgb(0 0 0 / 45%) 0 18px,
-    transparent 18px 22px
-  );
+  background: repeating-linear-gradient(90deg, rgb(0 0 0 / 45%) 0 18px, transparent 18px 22px);
   color: var(--fg-muted);
   font-family: var(--font-mono);
   font-size: var(--text-sm);

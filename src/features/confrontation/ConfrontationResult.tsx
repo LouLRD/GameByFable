@@ -166,7 +166,11 @@ export function ConfrontationResult({
       {annotations.length > 0 ? (
         <div className="confrontation-annotations">
           {annotations.map((text, i) => (
-            <p key={`${i}-${text.slice(0, 12)}`} className="hand-note" data-tilt={i % 2 ? 'right' : 'left'}>
+            <p
+              key={`${i}-${text.slice(0, 12)}`}
+              className="hand-note"
+              data-tilt={i % 2 ? 'right' : 'left'}
+            >
               {text}
             </p>
           ))}

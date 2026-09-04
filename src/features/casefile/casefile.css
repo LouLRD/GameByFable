@@ -114,6 +114,17 @@
   font-weight: 400;
 }
 
+/* Listes sans puces (le rôle liste reste implicite). */
+.casefile-items,
+.casefile-statements,
+.casefile-perceptions,
+.casefile-inline-list,
+.casefile-journal {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 .casefile-items {
   display: flex;
   flex-direction: column;

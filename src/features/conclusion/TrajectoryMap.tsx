@@ -24,10 +24,7 @@ export interface TrajectoryMapProps {
 }
 
 type Placement =
-  | { kind: 'zone'; zoneId: string }
-  | { kind: 'moving' }
-  | { kind: 'before' }
-  | { kind: 'after' };
+  { kind: 'zone'; zoneId: string } | { kind: 'moving' } | { kind: 'before' } | { kind: 'after' };
 
 /** Décalages (unités du plan 0–100) pour empiler plusieurs jetons dans une même zone. */
 const OFFSETS: readonly [number, number][] = [

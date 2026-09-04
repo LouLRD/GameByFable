@@ -16,21 +16,19 @@ export interface FactSheetProps {
 }
 
 export function FactSheet({ fact, view, zoneLabels, titleId, onNavigate }: FactSheetProps): React.JSX.Element {
-  const setCursor = useGameStore((s) => s.setCursor);
-  const select = useGameStore((s) => s.select);
-  const highlight = useGameStore((s) => s.highlight);
-  const announce = useGameStore((s) => s.announce);
   const place = fact.zoneId ? (zoneLabels.get(fact.zoneId) ?? fact.zoneId) : null;
   const participants = fact.participantIds.map((id) => ({
     id,
     name: view.characters.find((c) => c.id === id)?.name ?? id,
   }));
 
+  // Les actions du store sont stables : on les lit sans abonnement au moment du clic.
   const onReplay = (): void => {
-    setCursor(fact.interval.start);
-    select('fact', fact.id, isCompactViewport() ? { space: 'map' } : {});
-    highlight([...(fact.zoneId ? [fact.zoneId] : []), ...fact.participantIds]);
-    announce(`Relecture à ${view.clock(fact.interval.start)} : ${fact.label}.`);
+    const store = useGameStore.getState();
+    store.setCursor(fact.interval.start);
+    store.select('fact', fact.id, isCompactViewport() ? { space: 'map' } : {});
+    store.highlight([...(fact.zoneId ? [fact.zoneId] : []), ...fact.participantIds]);
+    store.announce(`Relecture à ${view.clock(fact.interval.start)} : ${fact.label}.`);
   };
 
   return (
@@ -56,7 +54,7 @@ export function FactSheet({ fact, view, zoneLabels, titleId, onNavigate }: FactS
         {participants.length === 0 ? (
           <p className="muted">Aucun participant identifié.</p>
         ) : (
-          <ul role="list" className="casefile-inline-list">
+          <ul className="casefile-inline-list">
             {participants.map((p) => (
               <li key={p.id}>
                 <button

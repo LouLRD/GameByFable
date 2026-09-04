@@ -51,12 +51,7 @@ function onFilterKeyDown(e: KeyboardEvent<HTMLButtonElement>): void {
 export function CasefilePanel(): React.JSX.Element {
   const view = usePlayerView();
   const filter = useGameStore((s) => s.casefileFilter);
-  const setCasefileFilter = useGameStore((s) => s.setCasefileFilter);
   const selection = useGameStore((s) => s.selection);
-  const select = useGameStore((s) => s.select);
-  const setInspectorTab = useGameStore((s) => s.setInspectorTab);
-  const setActiveSpace = useGameStore((s) => s.setActiveSpace);
-  const announce = useGameStore((s) => s.announce);
   const zoneLabels = useZoneLabels();
 
   const [query, setQuery] = useState('');
@@ -99,17 +94,23 @@ export function CasefilePanel(): React.JSX.Element {
   };
   for (const item of searched) counts[KIND_TO_FILTER[item.kind]] += 1;
 
+  const newIds: ReadonlySet<string> = seen
+    ? new Set(items.filter((i) => !seen.has(i.id)).map((i) => i.id))
+    : EMPTY_SET;
+
   const selectedItem: CasefileItem | null = selection
     ? (items.find((i) => i.id === selection.id && i.kind === selection.kind) ?? null)
     : null;
   const sheetOpen = selectedItem !== null && closedSheetFor !== selectedItem.id;
 
+  // Les actions du store sont stables : on les lit sans abonnement au moment de l'interaction.
   const openInspector = (id: string): void => {
-    select('contradiction', id);
-    setInspectorTab('contradictions');
-    if (isCompactViewport()) setActiveSpace('inspector');
+    const store = useGameStore.getState();
+    store.select('contradiction', id);
+    store.setInspectorTab('contradictions');
+    if (isCompactViewport()) store.setActiveSpace('inspector');
     const title = items.find((i) => i.id === id)?.label ?? id;
-    announce(`Contradiction « ${title} » ouverte dans l’inspecteur.`);
+    store.announce(`Contradiction « ${title} » ouverte dans l’inspecteur.`);
   };
 
   const navigate = (kind: CasefileItemKind, id: string): void => {
@@ -118,7 +119,7 @@ export function CasefilePanel(): React.JSX.Element {
       openInspector(id);
       return;
     }
-    select(kind, id);
+    useGameStore.getState().select(kind, id);
   };
 
   const onSelectItem = (item: CasefileItem): void => {
@@ -240,7 +241,7 @@ export function CasefilePanel(): React.JSX.Element {
               type="button"
               className="chip"
               aria-pressed={filter === f}
-              onClick={() => setCasefileFilter(f)}
+              onClick={() => useGameStore.getState().setCasefileFilter(f)}
               onKeyDown={onFilterKeyDown}
             >
               {FILTER_LABELS[f]} <span className="casefile-filter-count">({counts[f]})</span>
@@ -269,7 +270,7 @@ export function CasefilePanel(): React.JSX.Element {
               items={visible}
               grouped={filter === 'all'}
               selectedId={selectedItem?.id ?? null}
-              newIds={seen ?? EMPTY_SET}
+              newIds={newIds}
               onSelect={onSelectItem}
               emptyMessage={emptyMessage}
             />

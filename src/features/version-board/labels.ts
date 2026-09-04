@@ -4,8 +4,15 @@
  * Ne lit que la vue joueur et les données publiques du plan (zones).
  */
 import type { Zone } from '@/domain/model/scenario';
-import type { ContradictionView, PlayerView, VersionView } from '@/domain/selectors/playerView';
-import type { SelectionKind } from '@/state';
+import type { PlayerView, VersionView } from '@/domain/selectors/playerView';
+import type { GameStore, SelectionKind } from '@/state';
+import { useGameStore } from '@/state';
+
+/**
+ * Accès aux actions du store hors abonnement React : les actions sont stables et ne
+ * dépendent pas de `this`, on les appelle au moment du geste (`api().select(...)`).
+ */
+export const api = (): GameStore => useGameStore.getState();
 
 export interface CoherenceDisplay {
   label: string;
@@ -34,7 +41,9 @@ export const KIND_ORDER = [
   'discursive',
 ] as const;
 
-export const KIND_GROUP_TITLES: Record<(typeof KIND_ORDER)[number], string> = {
+export type CoherenceKind = (typeof KIND_ORDER)[number];
+
+export const KIND_GROUP_TITLES: Record<CoherenceKind, string> = {
   physical: 'Physiques',
   temporal: 'Temporelles',
   sensory: 'Sensorielles',
@@ -123,9 +132,11 @@ export function formatDuration(seconds: number): string {
   return rest === 0 ? `${min} min` : `${min} min ${rest} s`;
 }
 
-export function isBlockingFor(
-  contradiction: ContradictionView,
-  blockingIds: ReadonlySet<string>,
-): boolean {
-  return blockingIds.has(contradiction.id);
+/** Identifiant DOM stable d'une carte d'emplacement (cible du focus « aller à l'emplacement »). */
+export const slotCardDomId = (slotId: string): string => `slot-card-${slotId}`;
+
+/** Défilement doux vers un élément, neutralisé en mouvement réduit et absent de jsdom. */
+export function scrollTo(el: HTMLElement | null, reducedMotion: boolean): void {
+  if (!el || reducedMotion || typeof el.scrollIntoView !== 'function') return;
+  el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }

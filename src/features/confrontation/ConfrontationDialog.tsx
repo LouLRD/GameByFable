@@ -10,7 +10,15 @@
  * Les actions du store sont stables : elles sont lues via `useGameStore.getState()` au moment
  * du geste, ce qui évite de détacher une méthode de son objet.
  */
-import { useEffect, useId, useMemo, useRef, useState, type RefObject, type SubmitEvent } from 'react';
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type RefObject,
+  type SubmitEvent,
+} from 'react';
 import { Portrait } from '@/components/portrait';
 import { DegreeBadge, Dialog } from '@/components/ui';
 import { trustState } from '@/domain/endings/signatures';

@@ -22,7 +22,6 @@ export function HypothesisSheet({
   titleId,
   onNavigate,
 }: HypothesisSheetProps): React.JSX.Element {
-  const openClaimForm = useGameStore((s) => s.openClaimForm);
   const slot = view.slots.find((s) => s.id === hypothesis.slotId);
   const current = view.version.claims[hypothesis.slotId];
   const placed = current?.hypothesisId === hypothesis.id;
@@ -96,7 +95,7 @@ export function HypothesisSheet({
           className="btn btn-primary"
           disabled={view.isSealed}
           title={view.isSealed ? sealedHint : undefined}
-          onClick={() => openClaimForm(hypothesis.slotId, hypothesis.id)}
+          onClick={() => useGameStore.getState().openClaimForm(hypothesis.slotId, hypothesis.id)}
         >
           {placed ? 'Modifier dans la version' : 'Ajouter à la version'}
         </button>

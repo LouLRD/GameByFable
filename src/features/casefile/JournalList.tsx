@@ -27,7 +27,7 @@ export function JournalList({ entries, view, onNavigate, emptyMessage }: Journal
     );
   }
   return (
-    <ol role="list" className="casefile-journal">
+    <ol className="casefile-journal">
       {entries.map((entry, index) => {
         const refs = entry.refIds
           .map((id) => ({ id, ref: resolveRef(view, id) }))

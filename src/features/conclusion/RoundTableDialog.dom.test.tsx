@@ -9,8 +9,20 @@ import { useGameStore } from '@/state';
 import { RoundTableDialog } from './RoundTableDialog';
 
 const ROUND_TABLE_ACTIONS: PlayerAction[] = [
-  { type: 'confront', characterId: 'jo', targetId: 's_jo_initial', supportId: 'e_camera_gap', approach: 'neutral' },
-  { type: 'confront', characterId: 'ines', targetId: 's_ines_initial', supportId: 'e_pallet_scan', approach: 'empathetic' },
+  {
+    type: 'confront',
+    characterId: 'jo',
+    targetId: 's_jo_initial',
+    supportId: 'e_camera_gap',
+    approach: 'neutral',
+  },
+  {
+    type: 'confront',
+    characterId: 'ines',
+    targetId: 's_ines_initial',
+    supportId: 'e_pallet_scan',
+    approach: 'empathetic',
+  },
   { type: 'set-claim', slotId: 'cash_origin', hypothesisId: 'h_counting_error' },
   { type: 'set-claim', slotId: 'video_outage', hypothesisId: 'h_scheduled_reboot' },
   { type: 'set-claim', slotId: 'receipt_path', hypothesisId: 'h_no_receipt' },
@@ -25,7 +37,8 @@ function prepareRoundTable(): void {
   store.newGame();
   for (const action of ROUND_TABLE_ACTIONS) {
     const result = useGameStore.getState().dispatch(action);
-    if (!result.ok) throw new Error(`Préparation impossible (${action.type}) : ${result.error.message}`);
+    if (!result.ok)
+      throw new Error(`Préparation impossible (${action.type}) : ${result.error.message}`);
   }
   useGameStore.getState().openDialog('round-table');
 }
@@ -48,7 +61,9 @@ describe('<RoundTableDialog />', () => {
     expect(within(version).getByText('Redémarrage programmé')).toBeInTheDocument();
 
     const reactions = within(dialog).getByRole('list', { name: 'Réactions' });
-    const rows = within(reactions).getAllByRole('listitem').filter((li) => li.classList.contains('sig-row'));
+    const rows = within(reactions)
+      .getAllByRole('listitem')
+      .filter((li) => li.classList.contains('sig-row'));
     expect(rows).toHaveLength(6);
     expect(within(reactions).getByText('Ana Sorel')).toBeInTheDocument();
     expect(within(reactions).getAllByText('demande une modification')).toHaveLength(6);
@@ -130,7 +145,9 @@ describe('<RoundTableDialog />', () => {
     const user = userEvent.setup();
     useGameStore.getState().setActiveSpace('casefile');
     render(<RoundTableDialog />);
-    const buttons = screen.getAllByRole('button', { name: /Voir l’emplacement « Interruption vidéo »/ });
+    const buttons = screen.getAllByRole('button', {
+      name: /Voir l’emplacement « Interruption vidéo »/,
+    });
     expect(buttons.length).toBeGreaterThan(0);
     await user.click(buttons[0] as HTMLElement);
 

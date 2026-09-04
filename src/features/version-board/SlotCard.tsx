@@ -14,7 +14,7 @@ import type {
   HypothesisView,
 } from '@/domain/selectors/playerView';
 import { SeverityBadge, StatusBadge } from '@/components/ui';
-import { plural } from './labels';
+import { plural, slotCardDomId } from './labels';
 
 export interface SlotCardProps {
   slot: ClaimSlot;
@@ -22,7 +22,7 @@ export interface SlotCardProps {
   claim: PlayerClaim | undefined;
   hypothesis: HypothesisView | undefined;
   evaluation: SlotEvaluation;
-  /** Contradictions dont `slotIds` contient cet emplacement. */
+  /** Contradictions factuelles dont `slotIds` contient cet emplacement. */
   contradictions: ContradictionView[];
   blockingIds: ReadonlySet<string>;
   characters: CharacterView[];
@@ -71,6 +71,7 @@ export function SlotCard({
 }: SlotCardProps): JSX.Element {
   const cardRef = useRef<HTMLElement>(null);
   const previousKey = useRef<string>(claimKey(claim));
+  const seenNonce = useRef<number>(actionNonce);
   const key = claimKey(claim);
   const hasBlocking = contradictions.some((c) => blockingIds.has(c.id));
   const hasContradiction = evaluation.contradictionIds.length > 0;
@@ -78,14 +79,16 @@ export function SlotCard({
   useEffect(() => {
     const prev = previousKey.current;
     previousKey.current = key;
-    if (actionNonce === 0 || reducedMotion) return;
+    if (seenNonce.current === actionNonce) return;
+    seenNonce.current = actionNonce;
+    if (reducedMotion) return;
     const el = cardRef.current;
     if (!el || !claim) return;
     const cls = hasContradiction ? 'anim-crack' : key !== prev ? 'anim-propagate' : null;
     if (!cls) return;
     for (const c of ANIM_CLASSES) el.classList.remove(c);
-    // Relance l'animation même si la classe était déjà présente.
-    void el.offsetWidth;
+    // Force un recalcul de style pour relancer l'animation même si la classe était présente.
+    el.getBoundingClientRect();
     el.classList.add(cls);
     const stop = () => {
       el.classList.remove(cls);
@@ -99,20 +102,24 @@ export function SlotCard({
   }, [actionNonce, reducedMotion, key, claim, hasContradiction]);
 
   const statusClass = evaluation.status === 'empty' ? '' : ` status-${evaluation.status}`;
-  const headingId = `slot-card-${slot.id}-title`;
-  const promptId = `slot-card-${slot.id}-prompt`;
-  const sealedNoteId = `slot-card-${slot.id}-sealed`;
+  const domId = slotCardDomId(slot.id);
+  const headingId = `${domId}-title`;
+  const promptId = `${domId}-prompt`;
+  const sealedNoteId = `${domId}-sealed`;
   const actorName = claim?.actorId
     ? (characters.find((c) => c.id === claim.actorId)?.name ?? claim.actorId)
     : null;
   const zoneLabel = claim?.zoneId
     ? (zones.find((z) => z.id === claim.zoneId)?.label ?? claim.zoneId)
     : null;
+  const disabledProps = sealed
+    ? { disabled: true, title: 'Le rapport est scellé.', 'aria-describedby': sealedNoteId }
+    : {};
 
   return (
     <article
       ref={cardRef}
-      id={`slot-card-${slot.id}`}
+      id={domId}
       className="card slot-card"
       aria-labelledby={headingId}
       aria-describedby={promptId}
@@ -169,7 +176,7 @@ export function SlotCard({
                 {plural(contradictions.length, 'contradiction liée', 'contradictions liées')}
                 {hasBlocking ? ' — fil causal fissuré' : ''}
               </p>
-              <ul className="vb-linklist" role="list">
+              <ul className="vb-list vb-linklist">
                 {contradictions.slice(0, 4).map((c) => (
                   <li key={c.id}>
                     <button
@@ -185,6 +192,11 @@ export function SlotCard({
                   </li>
                 ))}
               </ul>
+              {contradictions.length > 4 ? (
+                <p className="vb-note">
+                  {contradictions.length - 4} autre(s) dans l’inspecteur de contradictions.
+                </p>
+              ) : null}
             </div>
           ) : null}
           <div className="slot-card-actions">
@@ -192,8 +204,8 @@ export function SlotCard({
               type="button"
               className="btn"
               onClick={onEdit}
-              disabled={sealed}
-              {...(sealed ? { title: 'Le rapport est scellé.', 'aria-describedby': sealedNoteId } : {})}
+              aria-label={`Modifier l’hypothèse de « ${slot.label} »`}
+              {...disabledProps}
             >
               Modifier
             </button>
@@ -201,8 +213,8 @@ export function SlotCard({
               type="button"
               className="btn btn-ghost"
               onClick={onClear}
-              disabled={sealed}
-              {...(sealed ? { title: 'Le rapport est scellé.', 'aria-describedby': sealedNoteId } : {})}
+              aria-label={`Retirer l’hypothèse de « ${slot.label} »`}
+              {...disabledProps}
             >
               Retirer
             </button>
@@ -217,8 +229,8 @@ export function SlotCard({
             type="button"
             className="btn btn-primary"
             onClick={onChoose}
-            disabled={sealed}
-            {...(sealed ? { title: 'Le rapport est scellé.', 'aria-describedby': sealedNoteId } : {})}
+            aria-label={`Choisir une hypothèse pour « ${slot.label} »`}
+            {...disabledProps}
           >
             Choisir
           </button>

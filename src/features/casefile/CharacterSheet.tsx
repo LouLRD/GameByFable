@@ -68,11 +68,6 @@ export function CharacterSheet({
   titleId,
   onNavigate,
 }: CharacterSheetProps): React.JSX.Element {
-  const dispatch = useGameStore((s) => s.dispatch);
-  const setConfrontationDraft = useGameStore((s) => s.setConfrontationDraft);
-  const openDialog = useGameStore((s) => s.openDialog);
-  const announce = useGameStore((s) => s.announce);
-
   const [probeOpen, setProbeOpen] = useState(false);
   const [hypothesisId, setHypothesisId] = useState<string>(view.hypotheses[0]?.id ?? '');
   const [approach, setApproach] = useState<Approach>('neutral');
@@ -100,15 +95,18 @@ export function CharacterSheet({
   const probeDisabled = view.isSealed || view.hypotheses.length === 0;
   const probeHint = view.isSealed ? sealedHint : view.hypotheses.length === 0 ? noHypothesisHint : null;
 
+  // Les actions du store sont stables : on les lit sans abonnement au moment de l'interaction.
   const onConfront = (): void => {
-    setConfrontationDraft({ characterId: character.id, targetId: null });
-    openDialog('confrontation');
+    const store = useGameStore.getState();
+    store.setConfrontationDraft({ characterId: character.id, targetId: null });
+    store.openDialog('confrontation');
   };
 
   const onProbe = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     if (!effectiveHypothesisId) return;
-    const result = dispatch({
+    const store = useGameStore.getState();
+    const result = store.dispatch({
       type: 'probe',
       characterId: character.id,
       targetId: effectiveHypothesisId,
@@ -124,7 +122,7 @@ export function CharacterSheet({
       view.hypotheses.find((h) => h.id === effectiveHypothesisId)?.label ?? effectiveHypothesisId;
     if (last) {
       setReaction({ hypothesisLabel, approach, text: last.text });
-      announce(`${character.name} réagit : ${last.text}`);
+      store.announce(`${character.name} réagit : ${last.text}`);
     }
   };
 
@@ -164,7 +162,7 @@ export function CharacterSheet({
         {statements.length === 0 ? (
           <p className="muted">Aucune déclaration recueillie.</p>
         ) : (
-          <ul role="list" className="casefile-statements">
+          <ul className="casefile-statements">
             {standing.map((s) => (
               <StatementRow key={s.id} statement={s} historic={false} onNavigate={onNavigate} />
             ))}
@@ -179,7 +177,7 @@ export function CharacterSheet({
         {character.perceptions.length === 0 ? (
           <p className="muted">Aucune perception révélée.</p>
         ) : (
-          <ul role="list" className="casefile-perceptions">
+          <ul className="casefile-perceptions">
             {character.perceptions.map((p) => {
               const fact = p.factLabel ? view.facts.find((f) => f.label === p.factLabel) : undefined;
               return (
