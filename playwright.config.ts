@@ -28,5 +28,10 @@ export default defineConfig({
       testMatch: /keyboard-mobile\.spec\.ts/,
       use: { ...devices['Pixel 5'], viewport: { width: 390, height: 844 } },
     },
+    {
+      name: 'tablet',
+      testMatch: /keyboard-mobile\.spec\.ts/,
+      use: { ...devices['Galaxy Tab S4'], viewport: { width: 768, height: 1024 } },
+    },
   ],
 });

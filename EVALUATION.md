@@ -107,7 +107,7 @@ Preuve : E2E `e2e/onboarding-first-claim.spec.ts` (onboarding et première hypot
 Preuve : `:focus-visible` renforcé (`src/styles/base.css`), noms accessibles sur zones, passages, jetons, marqueurs (`MapPanel.dom.test.tsx`, `TimelinePanel.dom.test.tsx`), région `aria-live` alimentée par `announce` (`App.dom.test.tsx` « la région aria-live reflète les annonces du store »), dialogues `role="dialog"` avec piège de focus (`src/components/ui/Dialog.tsx`).
 
 [OK] Mobile 390 px véritablement recomposé.
-Preuve : `src/styles/layout.css` (pile d'espaces + barre persistante à quatre onglets ≤ 1023 px, aucun zoom), `App.dom.test.tsx` (« en mobile (≤ 1023 px), la barre d’espaces change l’espace actif »), E2E projet `mobile` (`e2e/keyboard-mobile.spec.ts`, 390 × 844, vérifie l'absence de débordement horizontal).
+Preuve : `src/styles/layout.css` (pile d'espaces + barre persistante à quatre onglets ≤ 1023 px, aucun zoom), `App.dom.test.tsx` (« en mobile (≤ 1023 px), la barre d’espaces change l’espace actif »), E2E projets `mobile` (390 × 844) et `tablet` (768 × 1024) sur `e2e/keyboard-mobile.spec.ts` (pièce, temps, hypothèse, contradiction, confrontation, sauvegarde ; absence de débordement horizontal vérifiée), projet `desktop` à 1440 × 900 pour tous les autres parcours.
 
 [OK] Contraste, mouvement réduit, son non obligatoire.
 Preuve : `src/styles/tokens.test.ts` (ratios ≥ 4,5), `src/styles/motion.css`, son opt-in uniquement par bouton (`src/app/AmbienceProvider.tsx`), sous-titres toujours publiés (`src/audio/ambience.test.ts` « playCue publie un sous-titre même désactivé »).
