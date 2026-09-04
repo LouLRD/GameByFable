@@ -1,6 +1,8 @@
 export { ConfrontationDialog } from './ConfrontationDialog';
-export { ApproachPicker, APPROACHES, APPROACH_LABELS } from './ApproachPicker';
-export type { ApproachPickerProps, ApproachOption } from './ApproachPicker';
+export { ApproachPicker } from './ApproachPicker';
+export type { ApproachPickerProps } from './ApproachPicker';
+export { APPROACHES, APPROACH_LABELS } from './approaches';
+export type { ApproachOption } from './approaches';
 export { ConfrontationResult } from './ConfrontationResult';
 export type { ConfrontationResultProps, ResultPiece } from './ConfrontationResult';
 export { TrustMark } from './TrustMark';

@@ -92,7 +92,9 @@ export function TrajectoryMap({
   const listId = useId();
 
   const zoneLabel = (id: string): string => zones.find((z) => z.id === id)?.label ?? id;
-  const zoneCentroid = new Map(zones.map((z) => [z.id, centroid(z.polygon)] as const));
+  const zoneCentroid = new Map<string, [number, number]>(
+    zones.map((z) => [z.id, centroid(z.polygon)]),
+  );
 
   const placements = characters.map((character) => ({
     character,

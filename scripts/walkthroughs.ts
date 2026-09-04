@@ -1,3 +1,8 @@
+/**
+ * Parcours reproductibles : rejoue quatre versions de la partie depuis la graine et affiche
+ * l'évaluation (contradictions expliquées, adhésion, fin atteinte).
+ * `npm run walkthroughs` — utile pour la recette (05_RECETTE §5, parcours 1, 2 et 4).
+ */
 
 import { requireBundledScenario } from '@/scenario';
 import { createInitialState, applyAction } from '@/domain/replay/reducer';

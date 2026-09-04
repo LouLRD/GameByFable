@@ -17,6 +17,7 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "validate:scenario": "tsx --tsconfig tsconfig.app.json scripts/validate-scenario.ts",
+    "walkthroughs": "tsx --tsconfig tsconfig.app.json scripts/walkthroughs.ts",
     "check": "npm run typecheck && npm run lint && npm run test && npm run build"
   },
   "dependencies": {

@@ -69,8 +69,9 @@
 .confrontation-choice {
   position: relative;
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: var(--space-2) var(--space-3);
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: repeat(3, auto);
+  gap: 2px var(--space-3);
   align-items: center;
   min-width: 0;
   min-height: var(--tap-min);
@@ -85,7 +86,7 @@
 }
 
 .confrontation-choice[data-with-portrait='true'] {
-  grid-template-columns: auto auto 1fr;
+  grid-template-columns: auto auto minmax(0, 1fr);
 }
 
 .confrontation-choice:hover {
@@ -116,14 +117,19 @@
   cursor: not-allowed;
 }
 
+/* Le bouton radio et le portrait occupent toutes les lignes ; le texte, la dernière colonne. */
 .confrontation-choice > input {
+  grid-row: 1 / -1;
   margin: 0;
 }
 
-.confrontation-choice-body {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.confrontation-portrait {
+  grid-row: 1 / -1;
+  display: block;
+}
+
+.confrontation-choice > :not(input, .confrontation-portrait) {
+  grid-column: -2 / -1;
   min-width: 0;
 }
 

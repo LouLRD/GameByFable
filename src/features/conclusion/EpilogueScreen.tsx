@@ -5,58 +5,20 @@
  */
 import { useId, useState, type JSX } from 'react';
 
-import type { EndingFamily } from '@/domain/model/scenario';
-import type { EpilogueCharacterView } from '@/domain/selectors/epilogue';
-import type { JournalEntry } from '@/domain/model/state';
 import { useEpilogue, useGameStore, usePlayerView } from '@/state';
 
-import { SignatureRow, type SignatureVerdict } from './SignatureRow';
+import { FAMILY_LABELS, JOURNAL_KIND_LABELS, OUTCOME_TO_VERDICT, plural } from './labels';
+import { SignatureRow } from './SignatureRow';
 import { TrajectoryMap } from './TrajectoryMap';
 import { TruthComparison } from './TruthComparison';
 import './conclusion.css';
 
-export const FAMILY_LABELS: Record<EndingFamily, string> = {
-  truth: 'Vérité',
-  consensus: 'Consensus',
-  accusation: 'Accusation',
-  incomplete: 'Classement',
-  rejected: 'Rejet',
-};
-
-const OUTCOME_TO_VERDICT: Record<EpilogueCharacterView['outcome'], SignatureVerdict> = {
-  signed: 'signs',
-  'signed-silently': 'signs-silently',
-  refused: 'refuses',
-  'requested-change': 'requests-change',
-};
-
-const JOURNAL_KIND_LABELS: Record<JournalEntry['kind'], string> = {
-  claim: 'hypothèse',
-  clear: 'retrait',
-  attach: 'pièce',
-  confrontation: 'confrontation',
-  probe: 'sondage',
-  revelation: 'révélation',
-  'round-table': 'table ronde',
-  seal: 'sceau',
-  annotation: 'annotation',
-  pressure: 'pression',
-};
-
 const FALLBACK_ACCENT = '#6d8fa8';
-
-function plural(n: number, singular: string, pluralForm: string): string {
-  return n > 1 ? pluralForm : singular;
-}
 
 export function EpilogueScreen(): JSX.Element | null {
   const view = usePlayerView();
   const epilogue = useEpilogue();
   const scenario = useGameStore((s) => s.scenario);
-  const openDialog = useGameStore((s) => s.openDialog);
-  const exportSave = useGameStore((s) => s.exportSave);
-  const pushToast = useGameStore((s) => s.pushToast);
-  const announce = useGameStore((s) => s.announce);
   const [journalOpen, setJournalOpen] = useState(false);
   const titleId = useId();
   const signaturesId = useId();
@@ -78,9 +40,13 @@ export function EpilogueScreen(): JSX.Element | null {
   const signatures = epilogue.signatureCount;
 
   const onExport = (): void => {
-    const result = exportSave();
-    pushToast(result.message, result.ok ? 'success' : 'error');
-    announce(result.message);
+    const store = useGameStore.getState();
+    const result = store.exportSave();
+    store.pushToast(result.message, result.ok ? 'success' : 'error');
+    store.announce(result.message);
+  };
+  const onNewGame = (): void => {
+    useGameStore.getState().openDialog('new-game');
   };
 
   return (
@@ -227,7 +193,7 @@ export function EpilogueScreen(): JSX.Element | null {
 
         <section className="epi-section" aria-label="Et ensuite">
           <div className="epi-actions">
-            <button type="button" className="btn btn-primary" onClick={() => openDialog('new-game')}>
+            <button type="button" className="btn btn-primary" onClick={onNewGame}>
               Nouvelle partie
             </button>
             <button type="button" className="btn" onClick={onExport}>

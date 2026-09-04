@@ -7,7 +7,7 @@ import { Portrait } from '@/components/portrait';
 import type { Approach } from '@/domain/model/scenario';
 import type { CharacterView } from '@/domain/selectors/playerView';
 import { useReducedMotion } from '@/state';
-import { APPROACH_LABELS } from './ApproachPicker';
+import { APPROACH_LABELS } from './approaches';
 import { TRUST_PORTRAIT, type TrustLabel } from './trust';
 import { TrustMark } from './TrustMark';
 
@@ -115,13 +115,13 @@ export function ConfrontationResult({
       </blockquote>
 
       <h4 className="confrontation-effects-title">Effets</h4>
-      <ul className="confrontation-effects" role="list">
+      <ul className="confrontation-effects">
         <li>{trustLine}</li>
         <li>{pressureLine}</li>
         {newEvidence.length > 0 ? (
           <li>
             Nouvelles pièces au dossier :
-            <ul className="confrontation-links" role="list">
+            <ul className="confrontation-links">
               {newEvidence.map((piece) => (
                 <li key={piece.id}>
                   <button
@@ -141,7 +141,7 @@ export function ConfrontationResult({
         {newStatements.length > 0 ? (
           <li>
             {character.name} précise sa déclaration :
-            <ul className="confrontation-links" role="list">
+            <ul className="confrontation-links">
               {newStatements.map((piece) => (
                 <li key={piece.id}>
                   <button
