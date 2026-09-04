@@ -33,7 +33,7 @@ Le fichier `.npmrc` active `legacy-peer-deps` : sans lui, npm 9/10 échoue sur u
 
 ## Déploiement statique
 
-`npm run build` produit un site statique dans `dist/` (`base: './'`, donc servable depuis n'importe quel sous-dossier). Copiez `dist/` sur n'importe quel hébergement de fichiers (GitHub Pages, Netlify, un serveur nginx, un dossier partagé) ; aucune variable d'environnement ni configuration serveur n'est requise. La sauvegarde utilise `localStorage` du navigateur ; l'export/import JSON permet de transporter une partie.
+`npm run build` produit un site statique dans `dist/` (`base: './'`, donc servable depuis n'importe quel sous-dossier). Le workflow [`.github/workflows/pages.yml`](.github/workflows/pages.yml) construit et déploie `dist/` sur GitHub Pages à chaque push sur `main` (après typecheck, lint et tests) ; il suffit d'activer une fois « Settings → Pages → Source : GitHub Actions ». Le jeu est alors jouable sur téléphone à l'adresse du dépôt Pages, sans installation. Copiez `dist/` sur n'importe quel hébergement de fichiers (GitHub Pages, Netlify, un serveur nginx, un dossier partagé) ; aucune variable d'environnement ni configuration serveur n'est requise. La sauvegarde utilise `localStorage` du navigateur ; l'export/import JSON permet de transporter une partie.
 
 ## Comment jouer
 
