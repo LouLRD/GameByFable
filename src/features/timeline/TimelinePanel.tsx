@@ -6,6 +6,15 @@
  * (`PlaybackControls`). Toutes les données viennent de la vue joueur ; toute mutation passe par
  * le store. Sélectionner un événement déplace le curseur, met en évidence zones et personnes,
  * ouvre sa fiche (sélection partagée) et ne modifie jamais la version.
+ *
+ * Mode compact (`compact`, coquille mobile < 1024 px) : la frise redevient le contenu principal.
+ *   - barre du haut sur une rangée : heure courante, Lecture/Pause, vitesse (`<select>`),
+ *     zoom cyclique ×1 → ×2 → ×4 ; le titre reste présent mais masqué visuellement ;
+ *   - pistes = LA zone défilante du panneau ; un tap hors bouton place le curseur, un pan
+ *     (> 8 px) ne le déplace pas ;
+ *   - pied de panneau au pouce : puces défilantes (coupure, comptage, légende en feuille de
+ *     fond) puis −10 s / −1 s / +1 s / +10 s (appui long = répétition) et événement
+ *     précédent / suivant. Les libellés accessibles sont identiques à ceux du bureau.
  */
 import {
   useCallback,
@@ -17,8 +26,9 @@ import {
   type JSX,
   type KeyboardEvent,
 } from 'react';
+import { Dialog } from '@/components/ui';
 import { useGameStore, usePlayerView, useReducedMotion } from '@/state';
-import { PlaybackControls } from './PlaybackControls';
+import { JumpShortcuts, PlaybackControls } from './PlaybackControls';
 import { TimelineTrack } from './TimelineTrack';
 import {
   buildTimelineEvents,
@@ -29,16 +39,32 @@ import {
   timeFromPointer,
   type TimelineEvent,
 } from './timelineEvents';
+import { useHoldRepeat } from './useHoldRepeat';
 import './timeline.css';
 
 export const TIMELINE_ZOOMS = [1, 2, 4, 8] as const;
+/** Niveaux du bouton de zoom cyclique en mode compact. */
+export const COMPACT_ZOOMS = [1, 2, 4] as const;
+/** Déplacement du pointeur (px) au-delà duquel un appui sur une piste est un défilement. */
+export const PAN_THRESHOLD_PX = 8;
 
-const NUDGES: { delta: number; text: string; label: string }[] = [
+interface Nudge {
+  delta: number;
+  text: string;
+  label: string;
+}
+
+const NUDGES: Nudge[] = [
   { delta: -10, text: '−10 s', label: 'Reculer de 10 secondes' },
   { delta: -1, text: '−1 s', label: 'Reculer d’une seconde' },
   { delta: 1, text: '+1 s', label: 'Avancer d’une seconde' },
   { delta: 10, text: '+10 s', label: 'Avancer de 10 secondes' },
 ];
+
+export interface TimelinePanelProps {
+  /** Rendu par la coquille mobile (< 1024 px) : pleine hauteur, commandes au pouce. */
+  compact?: boolean;
+}
 
 /** Navigation par flèches dans la barre d'outils (motif APG « toolbar »). */
 function onToolbarKeyDown(e: KeyboardEvent<HTMLButtonElement>): void {
@@ -102,15 +128,110 @@ function ClockOutput({
   );
 }
 
+/** Légende des codages (aucun sens porté par la couleur seule). */
+function LegendList(): JSX.Element {
+  return (
+    <ul className="tl-legend-list">
+      <li>
+        <span className="tl-swatch" data-status="established" aria-hidden="true" /> établi (plein)
+      </li>
+      <li>
+        <span className="tl-swatch" data-status="reported" aria-hidden="true" /> rapporté (hachures)
+      </li>
+      <li>
+        <span className="tl-swatch" data-status="proposed" aria-hidden="true" /> proposé (trame
+        ambre)
+      </li>
+      <li>
+        <span className="tl-swatch" data-status="unknown" aria-hidden="true">
+          ?
+        </span>{' '}
+        inconnu
+      </li>
+      <li>
+        <span className="tl-swatch tl-swatch-glyph" aria-hidden="true">
+          ◇
+        </span>{' '}
+        passage (transit)
+      </li>
+      <li>
+        <span className="tl-swatch tl-swatch-absence" aria-hidden="true" /> hors champ caméra
+      </li>
+      <li>
+        <span className="tl-swatch tl-swatch-glyph" aria-hidden="true">
+          ◆
+        </span>{' '}
+        pièce
+      </li>
+      <li>
+        <span className="tl-swatch tl-swatch-glyph" aria-hidden="true">
+          ■
+        </span>{' '}
+        fait établi
+      </li>
+      <li>
+        <span className="tl-swatch tl-swatch-glyph" aria-hidden="true">
+          ▤
+        </span>{' '}
+        fait rapporté
+      </li>
+      <li>
+        <span className="tl-swatch tl-swatch-glyph" aria-hidden="true">
+          ⚠
+        </span>{' '}
+        contradiction (i remarque, ! majeure, !! critique)
+      </li>
+    </ul>
+  );
+}
+
+/**
+ * Bouton −10 s / −1 s / +1 s / +10 s. Avec `hold`, un appui maintenu répète le pas (mode compact) ;
+ * sinon un simple clic (bureau, inchangé).
+ */
+function NudgeButton({
+  nudge,
+  blocked,
+  hold,
+}: {
+  nudge: Nudge;
+  blocked: boolean;
+  hold: boolean;
+}): JSX.Element {
+  const { handlers, stop } = useHoldRepeat(() => useGameStore.getState().nudgeCursor(nudge.delta));
+  // Borne atteinte pendant l'appui : la répétition s'arrête.
+  useEffect(() => {
+    if (blocked) stop();
+  }, [blocked, stop]);
+  return (
+    <button
+      type="button"
+      className="btn tl-nudge"
+      data-delta={nudge.delta}
+      aria-label={nudge.label}
+      disabled={blocked}
+      title={
+        blocked ? (nudge.delta < 0 ? 'Début de la fenêtre' : 'Fin de la fenêtre') : nudge.label
+      }
+      onKeyDown={onToolbarKeyDown}
+      {...(hold ? handlers : { onClick: () => useGameStore.getState().nudgeCursor(nudge.delta) })}
+    >
+      {nudge.text}
+    </button>
+  );
+}
+
 /** Boutons de saut dont l'état dépend du curseur (isolés pour limiter les rendus). */
 function NavButtons({
   events,
   durationSeconds,
   clock,
+  compact,
 }: {
   events: readonly TimelineEvent[];
   durationSeconds: number;
   clock: (t: number) => string;
+  compact: boolean;
 }): JSX.Element {
   const cursor = useGameStore((s) => s.cursor);
   const prevHintId = useId();
@@ -129,7 +250,7 @@ function NavButtons({
     <>
       <button
         type="button"
-        className="btn"
+        className="btn tl-nav-prev"
         disabled={prev === null}
         title={
           prev
@@ -152,7 +273,7 @@ function NavButtons({
       ) : null}
       <button
         type="button"
-        className="btn"
+        className="btn tl-nav-next"
         disabled={next === null}
         title={
           next
@@ -173,29 +294,20 @@ function NavButtons({
           Aucun événement après le curseur.
         </span>
       ) : null}
-      <span className="tl-toolbar-sep" aria-hidden="true" />
-      {NUDGES.map((n) => {
-        const blocked = n.delta < 0 ? cursor <= 0 : cursor >= durationSeconds;
-        return (
-          <button
-            key={n.delta}
-            type="button"
-            className="btn tl-nudge"
-            aria-label={n.label}
-            disabled={blocked}
-            title={blocked ? (n.delta < 0 ? 'Début de la fenêtre' : 'Fin de la fenêtre') : n.label}
-            onKeyDown={onToolbarKeyDown}
-            onClick={() => useGameStore.getState().nudgeCursor(n.delta)}
-          >
-            {n.text}
-          </button>
-        );
-      })}
+      {compact ? null : <span className="tl-toolbar-sep" aria-hidden="true" />}
+      {NUDGES.map((n) => (
+        <NudgeButton
+          key={n.delta}
+          nudge={n}
+          blocked={n.delta < 0 ? cursor <= 0 : cursor >= durationSeconds}
+          hold={compact && Math.abs(n.delta) === 1}
+        />
+      ))}
     </>
   );
 }
 
-export function TimelinePanel(): JSX.Element {
+export function TimelinePanel({ compact = false }: TimelinePanelProps = {}): JSX.Element {
   const view = usePlayerView();
   const zoneLabels = useZoneLabels();
   const selection = useGameStore((s) => s.selection);
@@ -203,8 +315,11 @@ export function TimelinePanel(): JSX.Element {
   const lastActionType = useGameStore((s) => s.lastActionType);
   const reducedMotion = useReducedMotion();
 
-  const [zoomIndex, setZoomIndex] = useState(0);
-  const zoom = TIMELINE_ZOOMS[zoomIndex] ?? 1;
+  const zooms: readonly number[] = compact ? COMPACT_ZOOMS : TIMELINE_ZOOMS;
+  const [rawZoomIndex, setZoomIndex] = useState(0);
+  const zoomIndex = Math.min(rawZoomIndex, zooms.length - 1);
+  const zoom = zooms[zoomIndex] ?? 1;
+  const [legendOpen, setLegendOpen] = useState(false);
 
   const rootRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -250,11 +365,24 @@ export function TimelinePanel(): JSX.Element {
     return () => root.removeEventListener('keydown', onKey);
   }, [events, clock]);
 
-  // Clic sur une piste (hors bouton / range) : le curseur se place à l'instant cliqué.
+  // Tap sur une piste (hors bouton / range) : le curseur se place à l'instant visé.
+  // Un pan (déplacement > PAN_THRESHOLD_PX entre l'appui et le relâchement) est un défilement.
   useEffect(() => {
     const scroller = scrollRef.current;
     if (!scroller || durationSeconds <= 0) return;
+    let pressed: { x: number; y: number } | null = null;
+    const onPointerDown = (e: globalThis.PointerEvent) => {
+      pressed = { x: e.clientX, y: e.clientY };
+    };
     const onClick = (e: globalThis.MouseEvent) => {
+      const start = pressed;
+      pressed = null;
+      if (
+        start &&
+        (Math.abs(e.clientX - start.x) > PAN_THRESHOLD_PX ||
+          Math.abs(e.clientY - start.y) > PAN_THRESHOLD_PX)
+      )
+        return;
       const target = e.target;
       if (!(target instanceof Element)) return;
       if (target.closest('button, input, label, a, [role="img"]')) return;
@@ -264,8 +392,12 @@ export function TimelinePanel(): JSX.Element {
       if (t === null) return;
       useGameStore.getState().setCursor(t);
     };
+    scroller.addEventListener('pointerdown', onPointerDown);
     scroller.addEventListener('click', onClick);
-    return () => scroller.removeEventListener('click', onClick);
+    return () => {
+      scroller.removeEventListener('pointerdown', onPointerDown);
+      scroller.removeEventListener('click', onClick);
+    };
   }, [durationSeconds]);
 
   const onSelectEvent = useCallback(
@@ -319,15 +451,21 @@ export function TimelinePanel(): JSX.Element {
   }, []);
 
   const changeZoom = (delta: 1 | -1) => {
-    const nextIndex = Math.min(TIMELINE_ZOOMS.length - 1, Math.max(0, zoomIndex + delta));
+    const nextIndex = Math.min(zooms.length - 1, Math.max(0, zoomIndex + delta));
     if (nextIndex === zoomIndex) return;
     setZoomIndex(nextIndex);
-    useGameStore.getState().announce(`Zoom ×${TIMELINE_ZOOMS[nextIndex] ?? 1}.`);
+    useGameStore.getState().announce(`Zoom ×${zooms[nextIndex] ?? 1}.`);
+  };
+
+  const cycleZoom = () => {
+    const nextIndex = (zoomIndex + 1) % zooms.length;
+    setZoomIndex(nextIndex);
+    useGameStore.getState().announce(`Zoom ×${zooms[nextIndex] ?? 1}.`);
   };
 
   if (!view) {
     return (
-      <div className="tl" ref={rootRef}>
+      <div className={compact ? 'tl tl-compact' : 'tl'} ref={rootRef}>
         <p className="tl-empty-panel muted">
           Aucune partie en cours : la frise s’affichera à l’ouverture du dossier.
         </p>
@@ -338,6 +476,100 @@ export function TimelinePanel(): JSX.Element {
   const outages = outageSpans(view);
   const outageStart = outages[0]?.start ?? null;
   const title = `Frise — ${view.clock(0).slice(0, 5)} → ${view.clock(view.durationSeconds).slice(0, 5)}`;
+
+  const track = (
+    <div className="tl-scroll" ref={scrollRef}>
+      <TimelineTrack
+        view={view}
+        zoneLabels={zoneLabels}
+        events={events}
+        zoom={zoom}
+        viewportWidth={viewportWidth}
+        reducedMotion={reducedMotion}
+        selection={selection}
+        actionNonce={actionNonce}
+        lastActionType={lastActionType}
+        scrollRef={scrollRef}
+        rangeId={rangeId}
+        onSelectEvent={onSelectEvent}
+        onSelectCharacter={onSelectCharacter}
+        onJump={onJump}
+        compact={compact}
+      />
+    </div>
+  );
+
+  if (compact) {
+    return (
+      <div
+        className="tl tl-compact"
+        ref={rootRef}
+        data-reduced-motion={reducedMotion ? 'true' : 'false'}
+      >
+        <header className="tl-topbar">
+          <h2 className="tl-title visually-hidden" id={titleId}>
+            {title}
+          </h2>
+          <ClockOutput rangeId={rangeId} clock={view.clock} />
+          <PlaybackControls
+            compact
+            durationSeconds={view.durationSeconds}
+            incidentAt={view.incidentAt}
+            outageStart={outageStart}
+            clock={view.clock}
+          />
+          <button
+            type="button"
+            className="btn btn-ghost tl-zoom-cycle"
+            title={`Étirer la frise (×${COMPACT_ZOOMS.join(', ×')}) — actuellement ×${zoom}`}
+            onClick={cycleZoom}
+          >
+            <span className="tl-zoom-word">Zoom</span> <span className="mono">×{zoom}</span>
+          </button>
+        </header>
+
+        {track}
+
+        <div className="tl-footer">
+          <div className="tl-chips" role="group" aria-label="Raccourcis de la frise">
+            <JumpShortcuts
+              variant="chip"
+              incidentAt={view.incidentAt}
+              outageStart={outageStart}
+              clock={view.clock}
+            />
+            <button
+              type="button"
+              className="chip tl-chip"
+              aria-haspopup="dialog"
+              aria-expanded={legendOpen}
+              onClick={() => setLegendOpen(true)}
+            >
+              Légende
+            </button>
+          </div>
+          <div className="tl-thumb-nav" role="toolbar" aria-label="Navigation temporelle">
+            <NavButtons
+              events={events}
+              durationSeconds={view.durationSeconds}
+              clock={view.clock}
+              compact
+            />
+          </div>
+        </div>
+
+        <Dialog
+          open={legendOpen}
+          title="Légende de la frise"
+          onClose={() => setLegendOpen(false)}
+          width={480}
+          className="tl-legend-sheet"
+        >
+          <LegendList />
+        </Dialog>
+      </div>
+    );
+  }
 
   return (
     <div className="tl" ref={rootRef} data-reduced-motion={reducedMotion ? 'true' : 'false'}>
@@ -369,9 +601,9 @@ export function TimelinePanel(): JSX.Element {
             type="button"
             className="btn btn-ghost tl-zoom"
             aria-label="Zoom plus"
-            disabled={zoomIndex === TIMELINE_ZOOMS.length - 1}
+            disabled={zoomIndex === zooms.length - 1}
             title={
-              zoomIndex === TIMELINE_ZOOMS.length - 1
+              zoomIndex === zooms.length - 1
                 ? 'Zoom maximal atteint'
                 : 'Étirer la frise horizontalement'
             }
@@ -382,65 +614,18 @@ export function TimelinePanel(): JSX.Element {
         </div>
         <details className="tl-legend">
           <summary className="btn btn-ghost tl-legend-toggle">Légende</summary>
-          <ul className="tl-legend-list">
-            <li>
-              <span className="tl-swatch" data-status="established" aria-hidden="true" /> établi
-              (plein)
-            </li>
-            <li>
-              <span className="tl-swatch" data-status="reported" aria-hidden="true" /> rapporté
-              (hachures)
-            </li>
-            <li>
-              <span className="tl-swatch" data-status="proposed" aria-hidden="true" /> proposé
-              (trame ambre)
-            </li>
-            <li>
-              <span className="tl-swatch" data-status="unknown" aria-hidden="true">
-                ?
-              </span>{' '}
-              inconnu
-            </li>
-            <li>
-              <span className="tl-swatch tl-swatch-glyph" aria-hidden="true">
-                ◇
-              </span>{' '}
-              passage (transit)
-            </li>
-            <li>
-              <span className="tl-swatch tl-swatch-absence" aria-hidden="true" /> hors champ caméra
-            </li>
-            <li>
-              <span className="tl-swatch tl-swatch-glyph" aria-hidden="true">
-                ◆
-              </span>{' '}
-              pièce
-            </li>
-            <li>
-              <span className="tl-swatch tl-swatch-glyph" aria-hidden="true">
-                ■
-              </span>{' '}
-              fait établi
-            </li>
-            <li>
-              <span className="tl-swatch tl-swatch-glyph" aria-hidden="true">
-                ▤
-              </span>{' '}
-              fait rapporté
-            </li>
-            <li>
-              <span className="tl-swatch tl-swatch-glyph" aria-hidden="true">
-                ⚠
-              </span>{' '}
-              contradiction (i remarque, ! majeure, !! critique)
-            </li>
-          </ul>
+          <LegendList />
         </details>
       </header>
 
       <div className="tl-controls">
         <div className="tl-toolbar" role="toolbar" aria-label="Navigation temporelle">
-          <NavButtons events={events} durationSeconds={view.durationSeconds} clock={view.clock} />
+          <NavButtons
+            events={events}
+            durationSeconds={view.durationSeconds}
+            clock={view.clock}
+            compact={false}
+          />
         </div>
         <PlaybackControls
           durationSeconds={view.durationSeconds}
@@ -450,24 +635,7 @@ export function TimelinePanel(): JSX.Element {
         />
       </div>
 
-      <div className="tl-scroll" ref={scrollRef}>
-        <TimelineTrack
-          view={view}
-          zoneLabels={zoneLabels}
-          events={events}
-          zoom={zoom}
-          viewportWidth={viewportWidth}
-          reducedMotion={reducedMotion}
-          selection={selection}
-          actionNonce={actionNonce}
-          lastActionType={lastActionType}
-          scrollRef={scrollRef}
-          rangeId={rangeId}
-          onSelectEvent={onSelectEvent}
-          onSelectCharacter={onSelectCharacter}
-          onJump={onJump}
-        />
-      </div>
+      {track}
     </div>
   );
 }

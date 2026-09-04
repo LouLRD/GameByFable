@@ -150,6 +150,11 @@ export function visualSpan(at: number, end: number | null, pointSpan: number): S
   return { start: at - pointSpan / 2, end: at + pointSpan / 2 };
 }
 
+/** Prénom court d'un personnage (libellé de piste compact) : premier mot du nom, « Ana Sorel » → « Ana ». */
+export function shortName(name: string): string {
+  return name.trim().split(/\s+/)[0] ?? name;
+}
+
 /** Libellé d'horaire : « 20:57:20 » ou « 20:57:20 → 21:01:40 ». */
 export function formatWhen(clock: (t: number) => string, at: number, end: number | null): string {
   return end !== null && end > at ? `${clock(at)} → ${clock(end)}` : clock(at);

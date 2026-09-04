@@ -13,7 +13,8 @@ export default defineConfig({
     locale: 'fr-FR',
   },
   webServer: {
-    command: 'npm run build && npm run preview',
+    // En CI, le build de production est fourni par le job `check` (artefact dist) : on sert seulement.
+    command: process.env.PLAYWRIGHT_SKIP_BUILD ? 'npm run preview' : 'npm run build && npm run preview',
     url: 'http://localhost:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
@@ -25,13 +26,23 @@ export default defineConfig({
     },
     {
       name: 'mobile',
-      testMatch: /keyboard-mobile\.spec\.ts/,
+      testMatch: /(keyboard-mobile|mobile-terminal)\.spec\.ts/,
       use: { ...devices['Pixel 5'], viewport: { width: 390, height: 844 } },
     },
     {
       name: 'tablet',
-      testMatch: /keyboard-mobile\.spec\.ts/,
+      testMatch: /(keyboard-mobile|mobile-terminal)\.spec\.ts/,
       use: { ...devices['Galaxy Tab S4'], viewport: { width: 768, height: 1024 } },
+    },
+    {
+      name: 'mobile-small',
+      testMatch: /mobile-terminal\.spec\.ts/,
+      use: { ...devices['Pixel 5'], viewport: { width: 320, height: 568 } },
+    },
+    {
+      name: 'mobile-landscape',
+      testMatch: /mobile-terminal\.spec\.ts/,
+      use: { ...devices['Pixel 5'], viewport: { width: 844, height: 390 } },
     },
   ],
 });

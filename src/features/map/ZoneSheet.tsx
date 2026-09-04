@@ -37,6 +37,13 @@ export interface ZoneSheetProps {
   onSelectCharacter: (characterId: string) => void;
   onOpenMarker: (kind: 'evidence' | 'fact', id: string) => void;
   onGoTo: (t: number) => void;
+  /**
+   * `panel` (défaut) : encadré `<aside>` sous le plan, avec son titre visible.
+   * `embedded` : contenu d'une feuille de fond (`Dialog`) qui porte déjà le titre — le nom reste
+   * présent pour la structure mais visuellement masqué, et le repère « Sélectionnez une zone »
+   * laisse place à l'explication de la position inconnue.
+   */
+  variant?: 'panel' | 'embedded';
 }
 
 const PORTRAIT_STATE: Record<CharacterView['trustState'], PortraitState> = {
@@ -64,6 +71,7 @@ interface DetailsProps {
   frame: MapFrame;
   zone: ZoneFrame;
   titleId: string;
+  embedded: boolean;
   selection: Selection | null;
   clock: (t: number) => string;
   onSelectZone: (zoneId: string) => void;
@@ -76,6 +84,7 @@ function ZoneDetails({
   frame,
   zone,
   titleId,
+  embedded,
   selection,
   clock,
   onSelectZone,
@@ -95,7 +104,7 @@ function ZoneDetails({
   return (
     <>
       <header className="map-sheet-header">
-        <h3 id={titleId} className="map-sheet-title">
+        <h3 id={titleId} className={embedded ? 'visually-hidden' : 'map-sheet-title'}>
           {zone.zone.label}
         </h3>
         <div className="map-sheet-meta">
@@ -376,17 +385,25 @@ export function ZoneSheet({
   onSelectCharacter,
   onOpenMarker,
   onGoTo,
+  variant = 'panel',
 }: ZoneSheetProps): React.JSX.Element {
   const titleId = useId();
   const zone = zoneId !== null ? (frame.zoneById.get(zoneId) ?? null) : null;
+  const embedded = variant === 'embedded';
+  const Root = embedded ? 'div' : 'aside';
 
   return (
-    <aside className="map-sheet" aria-labelledby={titleId} data-zone={zone?.zone.id ?? ''}>
+    <Root
+      className={embedded ? 'map-sheet map-sheet-embedded' : 'map-sheet'}
+      {...(embedded ? {} : { 'aria-labelledby': titleId })}
+      data-zone={zone?.zone.id ?? ''}
+    >
       {zone ? (
         <ZoneDetails
           frame={frame}
           zone={zone}
           titleId={titleId}
+          embedded={embedded}
           selection={selection}
           clock={clock}
           onSelectZone={onSelectZone}
@@ -394,9 +411,20 @@ export function ZoneSheet({
           onOpenMarker={onOpenMarker}
           onGoTo={onGoTo}
         />
+      ) : embedded && selectedCharacter ? (
+        <div className="map-sheet-empty">
+          <h3 id={titleId} className="visually-hidden">
+            {selectedCharacter.name}
+          </h3>
+          <p className="map-sheet-empty-lead">Position inconnue à {frame.clock}.</p>
+          <p className="muted">
+            Aucune caméra, pièce, déclaration ni hypothèse ne place {selectedCharacter.name} à cet
+            instant. Déplacez le curseur ou sélectionnez une zone du plan.
+          </p>
+        </div>
       ) : (
         <div className="map-sheet-empty">
-          <h3 id={titleId} className="map-sheet-title">
+          <h3 id={titleId} className={embedded ? 'visually-hidden' : 'map-sheet-title'}>
             Fiche de zone
           </h3>
           <p className="map-sheet-empty-lead">Sélectionnez une zone ou un jeton.</p>
@@ -419,6 +447,6 @@ export function ZoneSheet({
       {frame.sounds.map((s) => (
         <SoundSection key={s.id} frame={frame} sound={s} clock={clock} />
       ))}
-    </aside>
+    </Root>
   );
 }

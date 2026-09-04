@@ -5,6 +5,9 @@
  * nettoie ses temporisateurs à la pause comme au démontage. Le curseur du store est entier :
  * la lecture progresse donc par secondes ; en mouvement réduit, la ligne du curseur n'est pas
  * interpolée (voir timeline.css).
+ *
+ * Mode compact (`compact`) : Lecture/Pause en icône et vitesse en `<select>` sur la barre du haut ;
+ * les raccourcis (`JumpShortcuts`) sont alors rendus par le panneau dans la rangée de puces.
  */
 import { useEffect, useId, useRef, type JSX } from 'react';
 import { useGameStore, useReducedMotion } from '@/state';
@@ -18,6 +21,8 @@ export interface PlaybackControlsProps {
   /** Début de la première coupure vidéo connue, ou null s'il n'y en a pas. */
   outageStart: number | null;
   clock: (t: number) => string;
+  /** Mode mobile : Lecture (icône) + sélecteur de vitesse, sans les raccourcis. */
+  compact?: boolean;
 }
 
 /** Fallback sans requestAnimationFrame : période du setInterval (ms). */
@@ -86,17 +91,76 @@ function usePlaybackLoop(
   }, [playing, durationSeconds]);
 }
 
+export interface JumpShortcutsProps {
+  incidentAt: number;
+  outageStart: number | null;
+  clock: (t: number) => string;
+  /** « button » : boutons du bureau (défaut) ; « chip » : puces de la rangée défilante mobile. */
+  variant?: 'button' | 'chip';
+}
+
+/** Raccourcis « Aller à la coupure » et « Aller au comptage » (libellés accessibles stables). */
+export function JumpShortcuts({
+  incidentAt,
+  outageStart,
+  clock,
+  variant = 'button',
+}: JumpShortcutsProps): JSX.Element {
+  const outageHintId = useId();
+  const className = variant === 'chip' ? 'chip tl-chip' : 'btn';
+
+  const goTo = (t: number, what: string) => {
+    const store = useGameStore.getState();
+    store.setCursor(t);
+    store.announce(`${what}, ${clock(t)}.`);
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        className={className}
+        disabled={outageStart === null}
+        title={
+          outageStart === null
+            ? 'Aucune coupure vidéo connue dans le dossier'
+            : `Placer le curseur au début de la coupure (${clock(outageStart)})`
+        }
+        {...(outageStart === null ? { 'aria-describedby': outageHintId } : {})}
+        onClick={() => {
+          if (outageStart !== null) goTo(outageStart, 'Début de la coupure vidéo');
+        }}
+      >
+        Aller à la coupure
+      </button>
+      {outageStart === null ? (
+        <span id={outageHintId} className="visually-hidden">
+          Aucune coupure vidéo connue dans le dossier.
+        </span>
+      ) : null}
+      <button
+        type="button"
+        className={className}
+        title={`Placer le curseur au comptage (${clock(incidentAt)})`}
+        onClick={() => goTo(incidentAt, 'Comptage de fermeture')}
+      >
+        Aller au comptage
+      </button>
+    </>
+  );
+}
+
 export function PlaybackControls({
   durationSeconds,
   incidentAt,
   outageStart,
   clock,
+  compact = false,
 }: PlaybackControlsProps): JSX.Element {
   const playing = useGameStore((s) => s.playing);
   const speed = useGameStore((s) => s.playbackSpeed);
   const reducedMotion = useReducedMotion();
   const speedName = useId();
-  const outageHintId = useId();
 
   usePlaybackLoop(playing, durationSeconds, clock);
 
@@ -112,11 +176,39 @@ export function PlaybackControls({
     store.announce(`Lecture ×${speed}${reducedMotion ? ', par pas d’une seconde' : ''}.`);
   };
 
-  const goTo = (t: number, what: string) => {
-    const store = useGameStore.getState();
-    store.setCursor(t);
-    store.announce(`${what}, ${clock(t)}.`);
-  };
+  const playTitle = playing ? 'Mettre en pause la relecture' : 'Lancer la relecture';
+
+  if (compact) {
+    return (
+      <div className="tl-playback tl-playback-compact" role="group" aria-label="Relecture">
+        <button
+          type="button"
+          className="btn btn-primary tl-play tl-play-compact"
+          aria-pressed={playing}
+          aria-label="Lecture"
+          title={playTitle}
+          onClick={togglePlay}
+        >
+          <span className="tl-play-glyph" aria-hidden="true">
+            {playing ? '❚❚' : '▶'}
+          </span>
+        </button>
+        <select
+          className="select tl-speed-select mono"
+          aria-label="Vitesse de relecture"
+          title="Vitesse de relecture"
+          value={String(speed)}
+          onChange={(e) => useGameStore.getState().setPlaybackSpeed(Number(e.currentTarget.value))}
+        >
+          {PLAYBACK_SPEEDS.map((s) => (
+            <option key={s} value={String(s)}>
+              ×{s}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  }
 
   return (
     <div className="tl-playback" role="group" aria-label="Relecture">
@@ -124,7 +216,7 @@ export function PlaybackControls({
         type="button"
         className="btn btn-primary tl-play"
         aria-pressed={playing}
-        title={playing ? 'Mettre en pause la relecture' : 'Lancer la relecture'}
+        title={playTitle}
         onClick={togglePlay}
       >
         <span className="tl-play-glyph" aria-hidden="true">
@@ -150,35 +242,7 @@ export function PlaybackControls({
           </label>
         ))}
       </fieldset>
-      <button
-        type="button"
-        className="btn"
-        disabled={outageStart === null}
-        title={
-          outageStart === null
-            ? 'Aucune coupure vidéo connue dans le dossier'
-            : `Placer le curseur au début de la coupure (${clock(outageStart)})`
-        }
-        {...(outageStart === null ? { 'aria-describedby': outageHintId } : {})}
-        onClick={() => {
-          if (outageStart !== null) goTo(outageStart, 'Début de la coupure vidéo');
-        }}
-      >
-        Aller à la coupure
-      </button>
-      {outageStart === null ? (
-        <span id={outageHintId} className="visually-hidden">
-          Aucune coupure vidéo connue dans le dossier.
-        </span>
-      ) : null}
-      <button
-        type="button"
-        className="btn"
-        title={`Placer le curseur au comptage (${clock(incidentAt)})`}
-        onClick={() => goTo(incidentAt, 'Comptage de fermeture')}
-      >
-        Aller au comptage
-      </button>
+      <JumpShortcuts incidentAt={incidentAt} outageStart={outageStart} clock={clock} />
     </div>
   );
 }

@@ -1,12 +1,14 @@
 /**
  * Fiche d'un protagoniste : portrait, confiance, déclarations (debout puis historiques),
  * perceptions révélées, aveux publics, confrontation et sondage par hypothèse.
+ * Mode compact : confronter, sonder et épingler dans la barre au pouce ; le formulaire de
+ * sondage s'ouvre au-dessus de la barre et y amène la vue.
  */
-import { useId, useState, type SubmitEvent } from 'react';
+import { useEffect, useId, useRef, useState, type SubmitEvent } from 'react';
 import { Portrait } from '@/components/portrait';
 import type { Approach } from '@/domain/model/scenario';
 import type { CharacterView, PlayerView, StatementView } from '@/domain/selectors/playerView';
-import { useGameStore } from '@/state';
+import { useGameStore, useReducedMotion } from '@/state';
 import {
   APPROACHES,
   APPROACH_LABELS,
@@ -15,13 +17,14 @@ import {
   TRUST_GLYPHS,
   TRUST_PORTRAIT_STATE,
 } from './casefileItems';
-import { ActionNotice, SheetHeader, SheetSection } from './SheetParts';
+import { ActionNotice, PinButton, SheetActions, SheetHeader, SheetSection } from './SheetParts';
 
 export interface CharacterSheetProps {
   character: CharacterView;
   view: PlayerView;
   titleId: string;
   onNavigate: (kind: 'statement' | 'fact', id: string) => void;
+  compact?: boolean;
 }
 
 interface ProbeReaction {
@@ -67,15 +70,19 @@ export function CharacterSheet({
   view,
   titleId,
   onNavigate,
+  compact = false,
 }: CharacterSheetProps): React.JSX.Element {
   const [probeOpen, setProbeOpen] = useState(false);
   const [hypothesisId, setHypothesisId] = useState<string>(view.hypotheses[0]?.id ?? '');
   const [approach, setApproach] = useState<Approach>('neutral');
   const [reaction, setReaction] = useState<ProbeReaction | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const reducedMotion = useReducedMotion();
+  const probeRef = useRef<HTMLFormElement>(null);
   const selectId = useId();
   const approachName = useId();
   const reactionId = useId();
+  const probeId = useId();
 
   const statements = character.statementIds
     .map((id) => view.statements.find((s) => s.id === id))
@@ -100,6 +107,16 @@ export function CharacterSheet({
     : view.hypotheses.length === 0
       ? noHypothesisHint
       : null;
+  const probeVisible = probeOpen && !probeDisabled;
+
+  // En compact, le formulaire s'ouvre au-dessus de la barre collante : on l'amène dans la vue.
+  useEffect(() => {
+    if (!compact || !probeVisible) return;
+    const el = probeRef.current;
+    if (el && typeof el.scrollIntoView === 'function') {
+      el.scrollIntoView({ block: 'nearest', behavior: reducedMotion ? 'auto' : 'smooth' });
+    }
+  }, [compact, probeVisible, reducedMotion]);
 
   // Les actions du store sont stables : on les lit sans abonnement au moment de l'interaction.
   const onConfront = (): void => {
@@ -131,6 +148,95 @@ export function CharacterSheet({
       store.announce(`${character.name} réagit : ${last.text}`);
     }
   };
+
+  const probeForm = probeVisible && (
+    <form className="casefile-probe" id={probeId} ref={probeRef} onSubmit={onProbe}>
+      <div className="field">
+        <label htmlFor={selectId} className="field-label">
+          Hypothèse à soumettre
+        </label>
+        <select
+          id={selectId}
+          className="select"
+          value={effectiveHypothesisId}
+          onChange={(e) => setHypothesisId(e.target.value)}
+        >
+          {hypothesesBySlot.map((g) => (
+            <optgroup key={g.slot.id} label={slotLabel.get(g.slot.id) ?? g.slot.id}>
+              {g.list.map((h) => (
+                <option key={h.id} value={h.id}>
+                  {h.label}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+      </div>
+      <fieldset className="casefile-fieldset">
+        <legend className="field-label">Approche</legend>
+        <div className="casefile-radios">
+          {APPROACHES.map((a) => (
+            <label key={a} className="casefile-check">
+              <input
+                type="radio"
+                name={approachName}
+                value={a}
+                checked={approach === a}
+                onChange={() => setApproach(a)}
+              />
+              <span>{APPROACH_LABELS[a]}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <div className="casefile-actions">
+        <button type="submit" className="btn btn-primary">
+          Sonder {character.name}
+        </button>
+      </div>
+      <ActionNotice message={notice} />
+    </form>
+  );
+
+  const reactionBlock = reaction && (
+    <section className="casefile-reaction" aria-labelledby={reactionId}>
+      <h4 id={reactionId} className="casefile-section-title">
+        Réaction de {character.name}
+      </h4>
+      <p className="muted casefile-reaction-context">
+        Hypothèse « {reaction.hypothesisLabel} », approche {APPROACH_LABELS[reaction.approach]}.
+      </p>
+      <blockquote className="casefile-quote">
+        <p>{reaction.text}</p>
+      </blockquote>
+    </section>
+  );
+
+  const actions = (
+    <SheetActions compact={compact}>
+      <button
+        type="button"
+        className="btn btn-primary"
+        disabled={view.isSealed}
+        title={view.isSealed ? sealedHint : undefined}
+        onClick={onConfront}
+      >
+        Confronter
+      </button>
+      <button
+        type="button"
+        className="btn"
+        aria-expanded={probeOpen}
+        {...(probeVisible ? { 'aria-controls': probeId } : {})}
+        disabled={probeDisabled}
+        title={probeHint ?? undefined}
+        onClick={() => setProbeOpen((o) => !o)}
+      >
+        Sonder avec une hypothèse
+      </button>
+      {compact && <PinButton id={character.id} label={character.name} />}
+    </SheetActions>
+  );
 
   return (
     <article className="casefile-sheet-content" aria-labelledby={titleId}>
@@ -238,90 +344,20 @@ export function CharacterSheet({
         )}
       </SheetSection>
 
-      <div className="casefile-actions">
-        <button
-          type="button"
-          className="btn btn-primary"
-          disabled={view.isSealed}
-          title={view.isSealed ? sealedHint : undefined}
-          onClick={onConfront}
-        >
-          Confronter
-        </button>
-        <button
-          type="button"
-          className="btn"
-          aria-expanded={probeOpen}
-          disabled={probeDisabled}
-          title={probeHint ?? undefined}
-          onClick={() => setProbeOpen((o) => !o)}
-        >
-          Sonder avec une hypothèse
-        </button>
-      </div>
-      {probeHint && <p className="field-hint">{probeHint}</p>}
-
-      {probeOpen && !probeDisabled && (
-        <form className="casefile-probe" onSubmit={onProbe}>
-          <div className="field">
-            <label htmlFor={selectId} className="field-label">
-              Hypothèse à soumettre
-            </label>
-            <select
-              id={selectId}
-              className="select"
-              value={effectiveHypothesisId}
-              onChange={(e) => setHypothesisId(e.target.value)}
-            >
-              {hypothesesBySlot.map((g) => (
-                <optgroup key={g.slot.id} label={slotLabel.get(g.slot.id) ?? g.slot.id}>
-                  {g.list.map((h) => (
-                    <option key={h.id} value={h.id}>
-                      {h.label}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-          </div>
-          <fieldset className="casefile-fieldset">
-            <legend className="field-label">Approche</legend>
-            <div className="casefile-radios">
-              {APPROACHES.map((a) => (
-                <label key={a} className="casefile-check">
-                  <input
-                    type="radio"
-                    name={approachName}
-                    value={a}
-                    checked={approach === a}
-                    onChange={() => setApproach(a)}
-                  />
-                  <span>{APPROACH_LABELS[a]}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-          <div className="casefile-actions">
-            <button type="submit" className="btn btn-primary">
-              Sonder {character.name}
-            </button>
-          </div>
-          <ActionNotice message={notice} />
-        </form>
-      )}
-
-      {reaction && (
-        <section className="casefile-reaction" aria-labelledby={reactionId}>
-          <h4 id={reactionId} className="casefile-section-title">
-            Réaction de {character.name}
-          </h4>
-          <p className="muted casefile-reaction-context">
-            Hypothèse « {reaction.hypothesisLabel} », approche {APPROACH_LABELS[reaction.approach]}.
-          </p>
-          <blockquote className="casefile-quote">
-            <p>{reaction.text}</p>
-          </blockquote>
-        </section>
+      {compact ? (
+        <>
+          {probeHint && <p className="field-hint">{probeHint}</p>}
+          {probeForm}
+          {reactionBlock}
+          {actions}
+        </>
+      ) : (
+        <>
+          {actions}
+          {probeHint && <p className="field-hint">{probeHint}</p>}
+          {probeForm}
+          {reactionBlock}
+        </>
       )}
     </article>
   );

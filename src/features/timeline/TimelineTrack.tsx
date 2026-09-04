@@ -7,6 +7,11 @@
  *
  * Le composant est mémoïsé et NE dépend PAS du curseur : seuls `CursorRange` et `CursorLine`
  * (petits composants abonnés au store) se rafraîchissent quand le curseur bouge.
+ *
+ * Mode compact (`compact`) : colonne des libellés de 72 px, portrait 20 px et prénom court pour
+ * les personnages (le nom complet reste le nom accessible de la piste), coupures douces sur les
+ * libellés longs. La géométrie (rangées, marqueurs) est inchangée ; la hauteur des rangées est
+ * pilotée par timeline.css (`--tl-row-h`).
  */
 import {
   memo,
@@ -28,6 +33,7 @@ import {
   percentOf,
   percentWidth,
   ratioOf,
+  shortName,
   timeFromPointer,
   unknownSpans,
   visualSpan,
@@ -60,6 +66,8 @@ export interface TimelineTrackProps {
   onSelectCharacter: (characterId: string, zoneId: string, t: number) => void;
   /** Saut simple du curseur (bande de coupure). */
   onJump: (t: number, message: string) => void;
+  /** Mode mobile : libellés courts (72 px), portraits 20 px, prénoms. */
+  compact?: boolean;
 }
 
 const STATUS_LABELS = { established: 'établi', reported: 'rapporté', proposed: 'proposé' } as const;
@@ -67,6 +75,35 @@ const SEVERITY_GLYPH = { notice: 'i', major: '!', critical: '!!' } as const;
 const ANIM_TIMEOUT_MS = 900;
 /** Largeur nominale de la colonne des libellés (px), pour le calcul des rangées. */
 const LABEL_WIDTH_PX = 132;
+/** Largeur de la colonne des libellés en mode compact (px). */
+const COMPACT_LABEL_WIDTH_PX = 72;
+/** Libellés de pistes trop longs pour 72 px : coupure douce (U+00AD) pour l'affichage compact. */
+const SOFT_BREAKS: Record<string, string> = {
+  Contradictions: 'Contra\u00ADdictions',
+  Obstruction: 'Obstruc\u00ADtion',
+};
+
+/**
+ * Libellé compact : version visible abrégée ou coupée + nom complet pour les technologies
+ * d'assistance (le nom accessible de la piste ne change pas).
+ */
+function compactLabel(visible: string, full: string): JSX.Element {
+  return (
+    <>
+      <span className="tl-lane-name" aria-hidden="true">
+        {visible}
+      </span>
+      <span className="visually-hidden">{full}</span>
+    </>
+  );
+}
+
+/** Libellé d'une piste : coupure douce en mode compact si le libellé est trop long. */
+function laneLabel(label: JSX.Element | string, compact: boolean): JSX.Element | string {
+  if (!compact || typeof label !== 'string') return label;
+  const soft = SOFT_BREAKS[label];
+  return soft === undefined ? label : compactLabel(soft, label);
+}
 /** Largeur de repli du viewport si aucune mesure n'est disponible. */
 const FALLBACK_VIEWPORT_PX = 640;
 /** Largeur d'un marqueur ponctuel (px) pour la détection de chevauchement. */
@@ -97,10 +134,21 @@ interface LaneProps {
   children: JSX.Element | (JSX.Element | null)[] | null;
   laneRef?: RefObject<HTMLDivElement | null>;
   data?: Record<string, string>;
+  compact?: boolean;
 }
 
-function Lane({ id, label, rows, className, children, laneRef, data }: LaneProps): JSX.Element {
+function Lane({
+  id,
+  label,
+  rows,
+  className,
+  children,
+  laneRef,
+  data,
+  compact = false,
+}: LaneProps): JSX.Element {
   const labelId = `${id}-label`;
+  const shown = laneLabel(label, compact);
   return (
     <div
       ref={laneRef}
@@ -110,7 +158,7 @@ function Lane({ id, label, rows, className, children, laneRef, data }: LaneProps
       {...data}
     >
       <div className="tl-lane-label" id={labelId}>
-        {label}
+        {shown}
       </div>
       <div className="tl-lane-track" style={cssVars({ '--tl-rows': Math.max(1, rows) })}>
         {children}
@@ -119,17 +167,43 @@ function Lane({ id, label, rows, className, children, laneRef, data }: LaneProps
   );
 }
 
-function Ruler({ view, zoom }: { view: PlayerView; zoom: number }): JSX.Element {
+/** Largeur approximative d'une étiquette de graduation « 21:09 » (px), mode compact. */
+const TICK_LABEL_PX = 42;
+
+function Ruler({
+  view,
+  zoom,
+  trackPx,
+  compact,
+}: {
+  view: PlayerView;
+  zoom: number;
+  /** Largeur estimée de la piste (px) : sert, en compact, à ne pas laisser déborder les étiquettes. */
+  trackPx: number;
+  compact: boolean;
+}): JSX.Element {
   const minutes = Math.floor(view.durationSeconds / 60);
   const labelEvery = zoom >= 4 ? 1 : zoom >= 2 ? 2 : 5;
   const ticks: JSX.Element[] = [];
+  let lastLabelRight = -Infinity;
   for (let m = 0; m <= minutes; m += 1) {
     const t = m * 60;
-    const labelled = m % labelEvery === 0;
+    let labelled = m % labelEvery === 0;
+    let anchorEnd = false;
+    if (compact && labelled) {
+      // Une étiquette qui déborderait de la piste s'ancre à gauche de son trait si la place
+      // le permet, sinon elle est omise : rien ne crée de défilement horizontal parasite.
+      const x = ratioOf(t, view.durationSeconds) * trackPx;
+      if (x + TICK_LABEL_PX > trackPx) {
+        anchorEnd = x - TICK_LABEL_PX >= lastLabelRight + 4;
+        labelled = anchorEnd;
+      }
+      if (labelled) lastLabelRight = anchorEnd ? x : x + TICK_LABEL_PX;
+    }
     ticks.push(
       <span
         key={m}
-        className={`tl-tick${labelled ? ' tl-tick-labelled' : ''}`}
+        className={`tl-tick${labelled ? ' tl-tick-labelled' : ''}${anchorEnd ? ' tl-tick-end' : ''}`}
         style={{ left: percentOf(t, view.durationSeconds) }}
       >
         {labelled ? <span className="tl-tick-label mono">{view.clock(t).slice(0, 5)}</span> : null}
@@ -215,6 +289,7 @@ interface CharacterLaneProps {
   zoneLabels: ReadonlyMap<string, string>;
   pointSpan: number;
   selected: boolean;
+  compact: boolean;
   onSelectCharacter: TimelineTrackProps['onSelectCharacter'];
 }
 
@@ -226,6 +301,7 @@ function CharacterLane({
   zoneLabels,
   pointSpan,
   selected,
+  compact,
   onSelectCharacter,
 }: CharacterLaneProps): JSX.Element {
   const rank = { established: 0, proposed: 1, reported: 2 } as const;
@@ -252,10 +328,14 @@ function CharacterLane({
               seed={character.portraitSeed}
               accentColor={character.accentColor}
               name={character.name}
-              size={22}
+              size={compact ? 20 : 22}
             />
           </span>
-          <span className="tl-lane-name">{character.name}</span>
+          {compact ? (
+            compactLabel(shortName(character.name), character.name)
+          ) : (
+            <span className="tl-lane-name">{character.name}</span>
+          )}
         </>
       }
     >
@@ -353,6 +433,7 @@ interface EventLaneProps {
   reducedMotion: boolean;
   emptyText: string;
   laneRef?: RefObject<HTMLDivElement | null>;
+  compact: boolean;
   onSelectEvent: TimelineTrackProps['onSelectEvent'];
 }
 
@@ -385,6 +466,7 @@ function EventLane({
   reducedMotion,
   emptyText,
   laneRef,
+  compact,
   onSelectEvent,
 }: EventLaneProps): JSX.Element {
   const rows = packRows(events.map((e) => visualSpan(e.at, e.end, pointSpan)));
@@ -394,6 +476,7 @@ function EventLane({
       id={id}
       label={label}
       rows={rowCount}
+      compact={compact}
       {...(className ? { className } : {})}
       {...(laneRef ? { laneRef } : {})}
     >
@@ -486,6 +569,7 @@ interface BandLaneProps {
   view: PlayerView;
   emptyText: string;
   selection: Selection | null;
+  compact: boolean;
   onSelectEvent: TimelineTrackProps['onSelectEvent'];
   onJump: TimelineTrackProps['onJump'];
 }
@@ -498,11 +582,19 @@ function BandLane({
   view,
   emptyText,
   selection,
+  compact,
   onSelectEvent,
   onJump,
 }: BandLaneProps): JSX.Element {
   return (
-    <Lane id={id} label={label} rows={1} className="tl-lane-band" data={{ 'data-band': band }}>
+    <Lane
+      id={id}
+      label={label}
+      rows={1}
+      className="tl-lane-band"
+      compact={compact}
+      data={{ 'data-band': band }}
+    >
       {events.length === 0 ? (
         <span className="tl-empty muted">{emptyText}</span>
       ) : (
@@ -557,6 +649,7 @@ function TimelineTrackImpl({
   onSelectEvent,
   onSelectCharacter,
   onJump,
+  compact = false,
 }: TimelineTrackProps): JSX.Element {
   const versionLaneRef = useRef<HTMLDivElement>(null);
   const previousNonce = useRef(actionNonce);
@@ -583,7 +676,8 @@ function TimelineTrackImpl({
     };
   }, [actionNonce, lastActionType, reducedMotion]);
 
-  const trackPx = Math.max(120, ((viewportWidth ?? FALLBACK_VIEWPORT_PX) - LABEL_WIDTH_PX) * zoom);
+  const labelWidth = compact ? COMPACT_LABEL_WIDTH_PX : LABEL_WIDTH_PX;
+  const trackPx = Math.max(120, ((viewportWidth ?? FALLBACK_VIEWPORT_PX) - labelWidth) * zoom);
   const pointSpan = (POINT_WIDTH_PX / trackPx) * view.durationSeconds;
 
   const byKind = (kind: TimelineEvent['kind']) => events.filter((e) => e.kind === kind);
@@ -594,7 +688,7 @@ function TimelineTrackImpl({
 
   return (
     <div className="tl-canvas" style={cssVars({ '--tl-zoom': zoom })} data-zoom={zoom}>
-      <Ruler view={view} zoom={zoom} />
+      <Ruler view={view} zoom={zoom} trackPx={trackPx} compact={compact} />
       <div className="tl-lane tl-lane-cursor" role="group" aria-labelledby={`${rangeId}-label`}>
         <label className="tl-lane-label" id={`${rangeId}-label`} htmlFor={rangeId}>
           Curseur
@@ -611,6 +705,7 @@ function TimelineTrackImpl({
         view={view}
         emptyText="Aucune coupure connue"
         selection={selection}
+        compact={compact}
         onSelectEvent={onSelectEvent}
         onJump={onJump}
       />
@@ -622,6 +717,7 @@ function TimelineTrackImpl({
         view={view}
         emptyText="Aucune obstruction connue"
         selection={selection}
+        compact={compact}
         onSelectEvent={onSelectEvent}
         onJump={onJump}
       />
@@ -635,6 +731,7 @@ function TimelineTrackImpl({
           zoneLabels={zoneLabels}
           pointSpan={pointSpan}
           selected={selection?.kind === 'character' && selection.id === c.id}
+          compact={compact}
           onSelectCharacter={onSelectCharacter}
         />
       ))}
@@ -648,6 +745,7 @@ function TimelineTrackImpl({
         selection={selection}
         reducedMotion={reducedMotion}
         emptyText="Aucune pièce datée"
+        compact={compact}
         onSelectEvent={onSelectEvent}
       />
       <EventLane
@@ -665,6 +763,7 @@ function TimelineTrackImpl({
             : 'Aucune hypothèse datée'
         }
         laneRef={versionLaneRef}
+        compact={compact}
         onSelectEvent={onSelectEvent}
       />
       <EventLane
@@ -677,6 +776,7 @@ function TimelineTrackImpl({
         selection={selection}
         reducedMotion={reducedMotion}
         emptyText="Aucun instant à inspecter"
+        compact={compact}
         onSelectEvent={onSelectEvent}
       />
       <div

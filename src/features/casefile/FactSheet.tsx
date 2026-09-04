@@ -1,11 +1,12 @@
 /**
  * Fiche d'un fait connu (établi ou rapporté) : lieu, intervalle, participants, relecture.
+ * Mode compact : « Rejouer ce moment » et l'épingle dans la barre au pouce.
  */
 import { DegreeBadge } from '@/components/ui';
 import type { FactView, PlayerView } from '@/domain/selectors/playerView';
 import { useGameStore } from '@/state';
 import { isCompactViewport } from './casefileItems';
-import { SheetHeader, SheetSection } from './SheetParts';
+import { PinButton, SheetActions, SheetHeader, SheetSection } from './SheetParts';
 
 export interface FactSheetProps {
   fact: FactView;
@@ -13,6 +14,7 @@ export interface FactSheetProps {
   zoneLabels: ReadonlyMap<string, string>;
   titleId: string;
   onNavigate: (kind: 'character', id: string) => void;
+  compact?: boolean;
 }
 
 export function FactSheet({
@@ -21,6 +23,7 @@ export function FactSheet({
   zoneLabels,
   titleId,
   onNavigate,
+  compact = false,
 }: FactSheetProps): React.JSX.Element {
   const place = fact.zoneId ? (zoneLabels.get(fact.zoneId) ?? fact.zoneId) : null;
   const participants = fact.participantIds.map((id) => ({
@@ -84,11 +87,12 @@ export function FactSheet({
         </p>
       </SheetSection>
 
-      <div className="casefile-actions">
+      <SheetActions compact={compact}>
         <button type="button" className="btn btn-primary" onClick={onReplay}>
           Rejouer ce moment
         </button>
-      </div>
+        {compact && <PinButton id={fact.id} label={fact.label} />}
+      </SheetActions>
     </article>
   );
 }

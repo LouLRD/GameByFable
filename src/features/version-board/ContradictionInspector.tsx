@@ -3,6 +3,8 @@
  * sensorielle, matérielle, épistémique, discursive), filtres, puis section séparée
  * « Adhésion » pour les résistances sociales — jamais comptées comme incohérences.
  * La contradiction sélectionnée (depuis n'importe quel volet) s'ouvre dans le détail.
+ * Mode compact (`compact`, coquille mobile) : liste et détail ne cohabitent pas — un tap ouvre
+ * le détail plein panneau (en-tête collant « ← Contradictions »), le retour garde la sélection.
  */
 import { useEffect, useId, useMemo, useRef, useState, type JSX, type KeyboardEvent } from 'react';
 import type { ContradictionView } from '@/domain/selectors/playerView';
@@ -22,11 +24,16 @@ import './version-board.css';
 
 type Filter = 'all' | 'version' | 'statements';
 
-const FILTERS: { id: Filter; label: string }[] = [
-  { id: 'all', label: 'Toutes' },
-  { id: 'version', label: 'Impliquant la version' },
-  { id: 'statements', label: 'Témoignages' },
+const FILTERS: { id: Filter; label: string; compactLabel: string }[] = [
+  { id: 'all', label: 'Toutes', compactLabel: 'Toutes' },
+  { id: 'version', label: 'Impliquant la version', compactLabel: 'Version' },
+  { id: 'statements', label: 'Témoignages', compactLabel: 'Témoignages' },
 ];
+
+export interface ContradictionInspectorProps {
+  /** Mode compact (coquille mobile) : liste puis détail plein panneau. */
+  compact?: boolean;
+}
 
 function onToolbarKeyDown(e: KeyboardEvent<HTMLButtonElement>): void {
   if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' && e.key !== 'Home' && e.key !== 'End') {
@@ -53,14 +60,21 @@ function isCoherenceKind(kind: string): kind is CoherenceKind {
   return (KIND_ORDER as readonly string[]).includes(kind);
 }
 
-export function ContradictionInspector(): JSX.Element {
+export function ContradictionInspector({
+  compact = false,
+}: ContradictionInspectorProps): JSX.Element {
   const view = usePlayerView();
   const scenario = useGameStore((s) => s.scenario);
   const selection = useGameStore((s) => s.selection);
   const reducedMotion = useReducedMotion();
   const [filter, setFilter] = useState<Filter>('all');
+  // Compact : détail refermé par « ← Contradictions » sans perdre la sélection partagée.
+  const [closedFor, setClosedFor] = useState<string | null>(null);
   const baseId = useId();
   const detailRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const backRef = useRef<HTMLButtonElement>(null);
+  const pendingFocus = useRef<'detail' | 'list' | null>(null);
 
   const resolve = useMemo(
     () =>
@@ -74,10 +88,25 @@ export function ContradictionInspector(): JSX.Element {
   const selected: ContradictionView | undefined = view
     ? [...view.contradictions, ...view.motivational].find((c) => c.id === selectedId)
     : undefined;
+  const detailOpen = compact && selected !== undefined && closedFor !== selected.id;
 
   useEffect(() => {
-    if (selected) scrollTo(detailRef.current, reducedMotion);
-  }, [selected?.id, reducedMotion, selected]);
+    if (selected && !compact) scrollTo(detailRef.current, reducedMotion);
+  }, [selected?.id, reducedMotion, selected, compact]);
+
+  // Compact : le focus suit la bascule liste ⇄ détail déclenchée par le joueur.
+  useEffect(() => {
+    if (!compact) return;
+    const wanted = pendingFocus.current;
+    if (!wanted) return;
+    if (wanted === 'detail' && detailOpen) {
+      pendingFocus.current = null;
+      backRef.current?.focus();
+    } else if (wanted === 'list' && !detailOpen) {
+      pendingFocus.current = null;
+      rootRef.current?.querySelector<HTMLButtonElement>('.ci-item[aria-current="true"]')?.focus();
+    }
+  }, [compact, detailOpen]);
 
   if (!view) {
     return (
@@ -88,6 +117,49 @@ export function ContradictionInspector(): JSX.Element {
   }
 
   const blockingIds = new Set(view.version.blockingIds);
+
+  const onPick = (id: string): void => {
+    const store = api();
+    setClosedFor(null);
+    if (compact) pendingFocus.current = 'detail';
+    store.select('contradiction', id);
+    store.setInspectorTab('contradictions');
+  };
+
+  const onBack = (): void => {
+    if (!selected) return;
+    pendingFocus.current = 'list';
+    setClosedFor(selected.id);
+  };
+
+  if (detailOpen && selected) {
+    return (
+      <div
+        ref={rootRef}
+        className="ci"
+        data-compact="true"
+        data-detail-open="true"
+        aria-labelledby={`${baseId}-title`}
+        role="region"
+      >
+        <h2 id={`${baseId}-title`} className="visually-hidden">
+          Contradictions
+        </h2>
+        <ContradictionDetail
+          compact
+          contradiction={selected}
+          resolve={resolve}
+          clock={view.clock}
+          slots={view.slots}
+          evaluations={view.version.slots}
+          blocking={blockingIds.has(selected.id)}
+          onBack={onBack}
+          backRef={backRef}
+        />
+      </div>
+    );
+  }
+
   const factual = view.contradictions.filter((c) =>
     filter === 'all' ? true : filter === 'version' ? c.involvesVersion : !c.involvesVersion,
   );
@@ -99,12 +171,6 @@ export function ContradictionInspector(): JSX.Element {
   const motivational = filter === 'statements' ? [] : view.motivational;
   const versionEmpty = Object.keys(view.version.claims).length === 0;
   const nothing = factual.length === 0 && motivational.length === 0;
-
-  const onPick = (id: string): void => {
-    const store = api();
-    store.select('contradiction', id);
-    store.setInspectorTab('contradictions');
-  };
 
   const renderItem = (c: ContradictionView): JSX.Element => {
     const current = c.id === selectedId;
@@ -128,9 +194,15 @@ export function ContradictionInspector(): JSX.Element {
   };
 
   return (
-    <div className="ci" aria-labelledby={`${baseId}-title`} role="region">
+    <div
+      ref={rootRef}
+      className="ci"
+      data-compact={compact ? 'true' : undefined}
+      aria-labelledby={`${baseId}-title`}
+      role="region"
+    >
       <header className="vb-header">
-        <h2 id={`${baseId}-title`} className="vb-title">
+        <h2 id={`${baseId}-title`} className={compact ? 'visually-hidden' : 'vb-title'}>
           Contradictions
         </h2>
         <p className="vb-note">
@@ -152,7 +224,7 @@ export function ContradictionInspector(): JSX.Element {
             }}
             onKeyDown={onToolbarKeyDown}
           >
-            {f.label}
+            {compact ? f.compactLabel : f.label}
           </button>
         ))}
       </div>
@@ -197,19 +269,21 @@ export function ContradictionInspector(): JSX.Element {
         </section>
       ) : null}
 
-      <div ref={detailRef} className="ci-detail-slot">
-        {selected ? (
-          <ContradictionDetail
-            contradiction={selected}
-            resolve={resolve}
-            clock={view.clock}
-            slots={view.slots}
-            blocking={blockingIds.has(selected.id)}
-          />
-        ) : nothing ? null : (
-          <p className="vb-note">Choisissez une contradiction pour lire son explication.</p>
-        )}
-      </div>
+      {compact ? null : (
+        <div ref={detailRef} className="ci-detail-slot">
+          {selected ? (
+            <ContradictionDetail
+              contradiction={selected}
+              resolve={resolve}
+              clock={view.clock}
+              slots={view.slots}
+              blocking={blockingIds.has(selected.id)}
+            />
+          ) : nothing ? null : (
+            <p className="vb-note">Choisissez une contradiction pour lire son explication.</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

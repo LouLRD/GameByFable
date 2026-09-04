@@ -15,6 +15,8 @@ import { SavesDialog } from '@/features/settings/SavesDialog';
 import { SettingsDialog } from '@/features/settings/SettingsDialog';
 import { ClaimFormDialog } from '@/features/version-board/ClaimFormDialog';
 import { useGameStore, usePlayerView } from '@/state';
+import { useIsDesktop } from '@/accessibility/useIsDesktop';
+import { MobileShell } from './mobile/MobileShell';
 import { AmbienceProvider, Subtitles } from './AmbienceProvider';
 import { useAmbienceCues } from './ambienceContext';
 import { ErrorBoundary } from './ErrorBoundary';
@@ -65,11 +67,12 @@ export function App(): React.JSX.Element {
 /** Calcule la vue joueur une fois pour tout le bureau et reste monté pendant l'épilogue (cues). */
 function Desk(): React.JSX.Element {
   const view = usePlayerView();
+  const isDesktop = useIsDesktop();
   useAmbienceCues(view);
   useKeyboardShortcuts({ enabled: view !== null && !view.isSealed });
   if (!view) return <LoadingScreen />;
   if (view.isSealed) return <EpilogueScreen />;
-  return <Workbench view={view} />;
+  return isDesktop ? <Workbench view={view} /> : <MobileShell view={view} />;
 }
 
 function LoadingScreen(): React.JSX.Element {

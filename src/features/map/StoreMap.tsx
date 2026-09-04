@@ -15,6 +15,7 @@ import {
   formatMultiplier,
   formatPercent,
   nearestZone,
+  wrapLabel,
   type ArrowDirection,
   type MapFrame,
   type MarkerFrame,
@@ -35,10 +36,22 @@ export interface StoreMapProps {
   pulseIds: ReadonlySet<string>;
   /** Faux en mouvement réduit : aucune classe d'animation n'est posée. */
   animate: boolean;
+  /**
+   * Mode mobile : noms de zone plus grands (3,4 unités de viewBox, miroir de map.css) et coupés
+   * sur plusieurs lignes quand la zone est étroite. Les étiquettes de durée sont masquées par CSS
+   * tant que le zoom est inférieur à 1,5× ; les libellés accessibles des passages sont inchangés.
+   */
+  compact?: boolean;
   onSelectZone: (zoneId: string) => void;
 }
 
 const TOKEN_RADIUS = 3.4;
+/** Corps des noms de zone (unités viewBox) — doit rester en phase avec `.map-zone-name` de map.css. */
+const ZONE_NAME_FONT = 3;
+const ZONE_NAME_FONT_COMPACT = 3.4;
+/** Largeur moyenne estimée d'un caractère (polices condensées) en fraction du corps. */
+const CHAR_WIDTH_RATIO = 0.5;
+const ZONE_NAME_LINE_HEIGHT = 1.1;
 const SOUND_RINGS = [4, 8, 12];
 const ARROW_KEYS: Record<string, ArrowDirection> = {
   ArrowLeft: 'left',
@@ -155,12 +168,21 @@ function LightMark({ zone }: { zone: ZoneFrame }): React.JSX.Element {
   );
 }
 
+/** Lignes du nom de zone : une seule en desktop ; coupées selon la largeur de la zone en compact. */
+function zoneNameLines(zone: ZoneFrame, compact: boolean): string[] {
+  if (!compact) return [zone.zone.label];
+  const width = zone.bounds.maxX - zone.bounds.minX - 2.8;
+  const maxChars = Math.max(4, Math.floor(width / (ZONE_NAME_FONT_COMPACT * CHAR_WIDTH_RATIO)));
+  return wrapLabel(zone.zone.label, maxChars);
+}
+
 interface ZoneButtonProps {
   zone: ZoneFrame;
   selected: boolean;
   highlighted: boolean;
   pulsing: boolean;
   animate: boolean;
+  compact: boolean;
   paperId: string;
   offCamId: string;
   register: (id: string, el: SVGGElement | null) => void;
@@ -174,6 +196,7 @@ function ZoneButton({
   highlighted,
   pulsing,
   animate,
+  compact,
   paperId,
   offCamId,
   register,
@@ -184,6 +207,11 @@ function ZoneButton({
   const shade = Math.round((1 - zone.zone.light) * 70) / 100;
   const classes = ['map-zone'];
   if (animate && pulsing) classes.push('anim-propagate');
+  const nameLines = zoneNameLines(zone, compact);
+  const nameFont = compact ? ZONE_NAME_FONT_COMPACT : ZONE_NAME_FONT;
+  const nameX = b.minX + 1.4;
+  const nameY = b.minY + 3.6;
+  const extraNameHeight = (nameLines.length - 1) * nameFont * ZONE_NAME_LINE_HEIGHT;
   return (
     <g
       ref={(el) => register(zone.zone.id, el)}
@@ -209,12 +237,21 @@ function ZoneButton({
       ) : null}
       <path className="map-zone-outline" d={zone.path} />
       <path className="map-zone-halo" d={zone.path} />
-      <text className="map-zone-name" x={b.minX + 1.4} y={b.minY + 3.6}>
-        {zone.zone.label}
+      <text className="map-zone-name" x={nameX} y={nameY} data-lines={nameLines.length}>
+        {nameLines.length === 1
+          ? nameLines[0]
+          : nameLines.map((line, i) => (
+              <tspan key={i} x={nameX} y={nameY + i * nameFont * ZONE_NAME_LINE_HEIGHT}>
+                {line}
+              </tspan>
+            ))}
       </text>
       <LightMark zone={zone} />
       {zone.covered ? (
-        <g className="map-zone-cam" transform={`translate(${b.minX + 1.4} ${b.minY + 4.7})`}>
+        <g
+          className="map-zone-cam"
+          transform={`translate(${b.minX + 1.4} ${b.minY + 4.7 + extraNameHeight})`}
+        >
           <rect className="map-zone-cam-bg" x={0} y={0} width={6} height={2.8} rx={0.4} />
           <text className="map-zone-cam-text" x={3} y={2.1} textAnchor="middle">
             CAM
@@ -436,6 +473,7 @@ export function StoreMap({
   highlightIds,
   pulseIds,
   animate,
+  compact = false,
   onSelectZone,
 }: StoreMapProps): React.JSX.Element {
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, '');
@@ -473,6 +511,7 @@ export function StoreMap({
       role="group"
       aria-label={`Plan du magasin à ${frame.clock}`}
       data-camera-on={frame.cameraOn ? 'true' : 'false'}
+      data-compact={compact ? 'true' : 'false'}
     >
       <defs>
         <pattern id={paperId} patternUnits="userSpaceOnUse" width={4} height={4}>
@@ -501,6 +540,7 @@ export function StoreMap({
             highlighted={highlightIds.has(z.zone.id)}
             pulsing={pulseIds.has(z.zone.id)}
             animate={animate}
+            compact={compact}
             paperId={paperId}
             offCamId={offCamId}
             register={register}

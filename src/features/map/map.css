@@ -117,6 +117,89 @@
   font-weight: 700;
 }
 
+/* Symboles supplémentaires de la feuille de légende (mode compact). */
+.map-legend-symbol {
+  width: 2.1rem;
+}
+
+.map-legend-cam-bg {
+  fill: var(--info);
+}
+
+.map-legend-cam-text {
+  fill: var(--info-fg);
+  font-family: var(--font-mono);
+  font-size: 6px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.map-legend-frame {
+  fill: var(--bg-elevated);
+  stroke: var(--border-strong);
+  stroke-width: 0.6;
+}
+
+.map-legend-hatch {
+  stroke: color-mix(in srgb, var(--info) 70%, transparent);
+  stroke-width: 1.4;
+}
+
+.map-legend-slat {
+  fill: var(--warning);
+}
+
+.map-legend-block {
+  fill: var(--fg-muted);
+}
+
+.map-legend-passage {
+  stroke: var(--fg-subtle);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+
+.map-legend-passage-tag {
+  fill: var(--bg);
+  stroke: var(--border-strong);
+  stroke-width: 0.5;
+}
+
+.map-legend-sight-origin {
+  fill: var(--warning);
+}
+
+.map-legend-sight {
+  stroke: var(--warning);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+
+.map-legend-sound {
+  fill: none;
+  stroke: var(--danger);
+  stroke-width: 1;
+  stroke-dasharray: 2 1.4;
+}
+
+/* Dans la feuille, une entrée par ligne. */
+.map-legend-sheet {
+  flex-flow: column nowrap;
+  gap: var(--space-3);
+  padding: 0;
+  border-bottom: 0;
+  background: transparent;
+}
+
+.map-legend-sheet .map-legend-item {
+  display: flex;
+  align-items: flex-start;
+}
+
+.map-legend-sheet .map-legend-swatch {
+  margin-top: 0.1rem;
+}
+
 /* ---------------------------------------------------------------------------
  * Corps : plan + tray, fiche
  * ------------------------------------------------------------------------- */
@@ -172,6 +255,295 @@
   .map-sheet {
     max-height: 100%;
     overflow: auto;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Fenêtre de la vue (MapViewport) : couche transformée, contrôles de zoom
+ * ------------------------------------------------------------------------- */
+
+.map-viewport {
+  position: relative;
+  min-width: 0;
+}
+
+/* Seul élément à neutraliser les gestes natifs : le pan / pinch est géré par Pointer Events. */
+.map-viewport-stage {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--radius-2);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.map-viewport-layer {
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* Hors geste, les paliers (boutons, clavier, double-tap) glissent brièvement ;
+ * motion.css neutralise la transition en mouvement réduit. */
+.map-viewport[data-phase='idle'] .map-viewport-layer {
+  transition: transform var(--duration-fast) var(--ease);
+}
+
+/* Le cadre du plan reste sur les bords de la fenêtre quand la couche est déplacée. */
+.map-viewport[data-transformed='true'] .map-viewport-stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2);
+  pointer-events: none;
+}
+
+.map-viewport[data-phase='pan'] .map-viewport-stage {
+  cursor: grabbing;
+}
+
+.map-zoom {
+  position: absolute;
+  right: var(--space-2);
+  bottom: var(--space-2);
+  z-index: var(--z-raised);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-2);
+  background: color-mix(in srgb, var(--bg-elevated) 88%, transparent);
+  box-shadow: var(--shadow-1);
+}
+
+.map-zoom-btn {
+  width: var(--tap-comfortable);
+  min-width: var(--tap-comfortable);
+  height: var(--tap-comfortable);
+  min-height: var(--tap-comfortable);
+  padding: 0;
+  font-size: var(--text-lg);
+  line-height: 1;
+}
+
+.map-zoom-reset {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+}
+
+.map-zoom-btn[aria-disabled='true'] {
+  border-style: dashed;
+  opacity: 0.6;
+}
+
+.map-zoom-level {
+  min-width: 2.6rem;
+  color: var(--fg-muted);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+/* ---------------------------------------------------------------------------
+ * Mode compact (coquille mobile) : plan pleine largeur, barre d'outils au pouce,
+ * tray en rangée défilante ; légende et fiche en feuilles de fond (Dialog).
+ * Aucune zone de défilement vertical dans le panneau : la fiche défile dans sa feuille.
+ * ------------------------------------------------------------------------- */
+
+.map-panel[data-compact='true'] {
+  gap: var(--space-2);
+  padding: var(--space-2);
+  overflow: hidden;
+}
+
+.map-panel[data-compact='true'] .map-viewport {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 0;
+}
+
+/* Carré : toute la largeur, hauteur bornée par la place restante (unités de conteneur),
+ * déduction faite de la rangée de zoom placée sous le plan. */
+.map-panel[data-compact='true'] .map-viewport-stage {
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 1;
+  margin: 0;
+  border: 1px solid var(--border);
+  background: var(--bg-sunken);
+}
+
+@supports (width: 1cqh) {
+  .map-panel[data-compact='true'] .map-viewport {
+    container-type: size;
+  }
+
+  .map-panel[data-compact='true'] .map-viewport-stage {
+    width: min(100cqw, max(calc(100cqh - 60px), 180px));
+  }
+}
+
+/* Contrôles de zoom : sous le plan (rien n'est recouvert), alignés côté pouce. */
+.map-panel[data-compact='true'] .map-zoom {
+  position: static;
+  flex-direction: row;
+  align-self: flex-end;
+  box-shadow: none;
+}
+
+.map-panel[data-compact='true'] .map-svg {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+/* Noms de zone lisibles à 320 px : 3,4 unités (≈ 11 px à 320 px, 13 px à 390 px). */
+.map-svg[data-compact='true'] .map-zone-name {
+  font-size: 3.4px;
+}
+
+/* Les durées de passage gênent la lecture tant que le zoom est inférieur à 1,5× ;
+ * les libellés accessibles des passages (role="img") sont portés par une autre couche. */
+.map-viewport[data-compact='true'][data-zoomed='false'] .map-passage-labels {
+  display: none;
+}
+
+.map-toolbar {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  min-height: var(--tap-comfortable);
+  padding: 0 var(--space-1);
+  overflow-x: auto;
+}
+
+.map-toolbar .map-clock {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--text-sm);
+  text-overflow: ellipsis;
+}
+
+.map-toolbar .btn {
+  flex: 0 0 auto;
+  min-height: var(--tap-comfortable);
+}
+
+/* Tray : rangée horizontale défilante, jamais de retour à la ligne. */
+.map-panel[data-compact='true'] .map-tray {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-1) var(--space-2);
+}
+
+.map-panel[data-compact='true'] .map-tray-title {
+  flex: 0 0 auto;
+  max-width: 6.5rem;
+  white-space: normal;
+  line-height: 1.15;
+}
+
+.map-panel[data-compact='true'] .map-tray-list {
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
+  min-width: 0;
+  padding-bottom: 2px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+
+.map-panel[data-compact='true'] .map-tray-list > li {
+  flex: 0 0 auto;
+}
+
+.map-panel[data-compact='true'] .map-tray-chip {
+  min-height: var(--tap-comfortable);
+}
+
+.map-panel[data-compact='true'] .map-tray-empty {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Fiche en feuille : plus d'encadré propre, le Dialog porte le cadre. */
+.map-sheet-embedded {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+/* Paysage bas (téléphone couché) : le plan à gauche, outils et tray empilés à droite. */
+@media (max-width: 1023px) and (orientation: landscape) and (max-height: 520px) {
+  .map-panel[data-compact='true'] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 38%);
+    grid-template-rows: auto minmax(0, 1fr);
+    column-gap: var(--space-3);
+  }
+
+  /* Plan à gauche, colonne de zoom à sa droite : toute la hauteur pour le plan. */
+  .map-panel[data-compact='true'] .map-viewport {
+    grid-row: 1 / 3;
+    grid-column: 1;
+    flex-direction: row;
+  }
+
+  .map-panel[data-compact='true'] .map-zoom {
+    flex-direction: column;
+    align-self: center;
+  }
+
+  @supports (width: 1cqh) {
+    .map-panel[data-compact='true'] .map-viewport-stage {
+      width: min(calc(100cqw - 64px), max(100cqh, 180px));
+    }
+  }
+
+  .map-panel[data-compact='true'] .map-toolbar {
+    grid-row: 1;
+    grid-column: 2;
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+
+  .map-panel[data-compact='true'] .map-tray {
+    grid-row: 2;
+    grid-column: 2;
+    flex-direction: column;
+    align-items: stretch;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .map-panel[data-compact='true'] .map-tray-title {
+    max-width: none;
+  }
+
+  .map-panel[data-compact='true'] .map-tray-list {
+    flex-wrap: wrap;
+    overflow: visible;
   }
 }
 

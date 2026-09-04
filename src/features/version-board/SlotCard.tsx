@@ -3,6 +3,8 @@
  * statut, contradictions liées, actions. Retours visuels : .anim-propagate quand une
  * hypothèse vient d'être posée, .anim-crack quand l'emplacement porte une contradiction
  * après une réévaluation (désactivés en mouvement réduit).
+ * Mode compact : paramètres sur une ligne (« Malik · Bureau · 20:57:10 → 20:57:40 »),
+ * « Modifier » et « Retirer » côte à côte, « Choisir » pleine largeur.
  */
 import { useEffect, useRef, type JSX } from 'react';
 import type { ClaimSlot, Zone } from '@/domain/model/scenario';
@@ -32,6 +34,8 @@ export interface SlotCardProps {
   /** Compteur d'actions acceptées : déclenche les retours visuels. */
   actionNonce: number;
   reducedMotion: boolean;
+  /** Mode compact (coquille mobile). */
+  compact?: boolean;
   onChoose: () => void;
   onEdit: () => void;
   onClear: () => void;
@@ -64,6 +68,7 @@ export function SlotCard({
   sealed,
   actionNonce,
   reducedMotion,
+  compact = false,
   onChoose,
   onEdit,
   onClear,
@@ -112,6 +117,14 @@ export function SlotCard({
   const zoneLabel = claim?.zoneId
     ? (zones.find((z) => z.id === claim.zoneId)?.label ?? claim.zoneId)
     : null;
+  const intervalLabel = claim?.interval
+    ? `${clock(claim.interval.start)} – ${clock(claim.interval.end)}`
+    : null;
+  const compactParams = [
+    actorName ? (actorName.split(' ')[0] ?? actorName) : null,
+    zoneLabel,
+    claim?.interval ? `${clock(claim.interval.start)} → ${clock(claim.interval.end)}` : null,
+  ].filter((p): p is string => p !== null);
   const disabledProps = sealed
     ? { disabled: true, title: 'Le rapport est scellé.', 'aria-describedby': sealedNoteId }
     : {};
@@ -127,6 +140,7 @@ export function SlotCard({
       data-slot-id={slot.id}
       data-status={evaluation.status}
       data-blocking={hasBlocking}
+      data-compact={compact ? 'true' : undefined}
     >
       <header className="slot-card-head">
         <span className="slot-card-index" aria-hidden="true">
@@ -147,19 +161,24 @@ export function SlotCard({
             <p className="slot-card-hyp-label">{hypothesis?.label ?? claim.hypothesisId}</p>
             <StatusBadge status={evaluation.status} />
           </div>
-          {hypothesis ? <p className="slot-card-summary">{hypothesis.summary}</p> : null}
-          <dl className="slot-card-params">
-            <dt>Acteur</dt>
-            <dd>{actorName ?? 'non précisé'}</dd>
-            <dt>Lieu</dt>
-            <dd>{zoneLabel ?? 'non précisé'}</dd>
-            <dt>Intervalle</dt>
-            <dd className="mono">
-              {claim.interval
-                ? `${clock(claim.interval.start)} – ${clock(claim.interval.end)}`
-                : 'non précisé'}
-            </dd>
-          </dl>
+          {compact ? (
+            <p className="slot-card-params-line mono">
+              <span className="visually-hidden">Paramètres : </span>
+              {compactParams.length > 0 ? compactParams.join(' · ') : 'aucun paramètre précisé'}
+            </p>
+          ) : (
+            <>
+              {hypothesis ? <p className="slot-card-summary">{hypothesis.summary}</p> : null}
+              <dl className="slot-card-params">
+                <dt>Acteur</dt>
+                <dd>{actorName ?? 'non précisé'}</dd>
+                <dt>Lieu</dt>
+                <dd>{zoneLabel ?? 'non précisé'}</dd>
+                <dt>Intervalle</dt>
+                <dd className="mono">{intervalLabel ?? 'non précisé'}</dd>
+              </dl>
+            </>
+          )}
           {evaluation.supportingEvidenceIds.length > 0 ? (
             <p className="vb-note">
               {plural(
@@ -227,7 +246,7 @@ export function SlotCard({
           </span>
           <button
             type="button"
-            className="btn btn-primary"
+            className={`btn btn-primary${compact ? ' vb-btn-block' : ''}`}
             onClick={onChoose}
             aria-label={`Choisir une hypothèse pour « ${slot.label} »`}
             {...disabledProps}

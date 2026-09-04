@@ -2,8 +2,11 @@
  * Formulaire d'hypothèse (GDD §6.2) : choix de l'hypothèse pour un emplacement, puis acteur,
  * lieu et intervalle (horloge HH:MM:SS convertie en secondes simulées). Validation locale,
  * erreur du moteur affichée sans fermer, annonce et mise en évidence après placement.
+ * Mode compact (`compact`, sinon déduit du viewport < 1024 px) : boutons « −10 s / −1 s /
+ * +1 s / +10 s » sous chaque champ d'heure, bouton « Placer dans la version » collant en bas.
  */
 import { useCallback, useId, useRef, useState, type JSX, type SyntheticEvent } from 'react';
+import { useIsDesktop } from '@/accessibility/useIsDesktop';
 import { Dialog, STATUS_LABELS } from '@/components/ui';
 import type { PlayerAction } from '@/domain/model/actions';
 import type { ClaimSlot, LoadedScenario, Zone } from '@/domain/model/scenario';
@@ -15,11 +18,24 @@ import { useGameStore, usePlayerView } from '@/state';
 import { api, clockToOffset, describeVersion, formatDuration } from './labels';
 import './version-board.css';
 
-export function ClaimFormDialog(): JSX.Element | null {
+export interface ClaimFormDialogProps {
+  /** Mode compact ; omis : déduit du viewport (compact sous 1024 px). */
+  compact?: boolean;
+}
+
+/** Pas d'ajustement des champs d'heure en mode compact (secondes). */
+const NUDGES: readonly number[] = [-10, -1, 1, 10];
+
+function nudgeLabel(delta: number): string {
+  return `${delta < 0 ? '−' : '+'}${Math.abs(delta)} s`;
+}
+
+export function ClaimFormDialog({ compact }: ClaimFormDialogProps = {}): JSX.Element | null {
   const view = usePlayerView();
   const scenario = useGameStore((s) => s.scenario);
   const dialog = useGameStore((s) => s.dialog);
   const claimForm = useGameStore((s) => s.claimForm);
+  const isDesktop = useIsDesktop();
   const onClose = useCallback(() => {
     api().closeDialog();
   }, []);
@@ -36,6 +52,7 @@ export function ClaimFormDialog(): JSX.Element | null {
         scenario={scenario}
         slot={slot}
         initialHypothesisId={claimForm.hypothesisId}
+        compact={compact ?? !isDesktop}
         onClose={onClose}
       />
     </Dialog>
@@ -72,6 +89,7 @@ interface ClaimFormBodyProps {
   scenario: LoadedScenario;
   slot: ClaimSlot;
   initialHypothesisId: string | null;
+  compact: boolean;
   onClose: () => void;
 }
 
@@ -81,6 +99,7 @@ function ClaimFormBody({
   scenario,
   slot,
   initialHypothesisId,
+  compact,
   onClose,
 }: ClaimFormBodyProps): JSX.Element {
   const zones: readonly Zone[] = scenario.data.zones;
@@ -115,6 +134,7 @@ function ClaimFormBody({
   const duration = view.durationSeconds;
   const endClock = view.clock(duration);
   const inWindow = (t: number | null): t is number => t !== null && t >= 0 && t <= duration;
+  const clamp = (t: number): number => Math.min(duration, Math.max(0, t));
 
   const errors: { actor?: string; start?: string; end?: string } = {};
   if (hypothesis?.requiresActor && !actor) {
@@ -138,6 +158,21 @@ function ClaimFormBody({
   const onHypothesisChange = (id: string): void => {
     const next = options.find((h) => h.id === id);
     setDraft(draftFor(next, current, view.clock));
+    setDomainError(null);
+  };
+
+  /**
+   * Ajuste un champ d'heure de `delta` secondes, borné à la fenêtre du scénario. Une saisie
+   * invalide repart du début de la fenêtre (début) ou du début saisi (fin).
+   */
+  const nudge = (field: 'start' | 'end', delta: number): void => {
+    setDraft((d) => {
+      const currentOff = clockToOffset(view.startClock, d[field]);
+      const other = clockToOffset(view.startClock, field === 'start' ? d.end : d.start);
+      const fallback = field === 'start' ? 0 : inWindow(other) ? other : 0;
+      const base = currentOff === null ? fallback : clamp(currentOff);
+      return { ...d, [field]: view.clock(clamp(base + delta)) };
+    });
     setDomainError(null);
   };
 
@@ -184,8 +219,38 @@ function ClaimFormBody({
     return list.length > 0 ? list.join(' ') : undefined;
   };
 
+  const renderNudges = (field: 'start' | 'end'): JSX.Element | null => {
+    if (!compact) return null;
+    return (
+      <div
+        className="claim-form-nudges"
+        role="group"
+        aria-label={field === 'start' ? 'Ajuster le début' : 'Ajuster la fin'}
+      >
+        {NUDGES.map((delta) => (
+          <button
+            key={delta}
+            type="button"
+            className="btn claim-form-nudge"
+            disabled={sealed}
+            onClick={() => {
+              nudge(field, delta);
+            }}
+          >
+            {nudgeLabel(delta)}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
   return (
-    <form className="claim-form" onSubmit={onSubmit} noValidate>
+    <form
+      className="claim-form"
+      data-compact={compact ? 'true' : undefined}
+      onSubmit={onSubmit}
+      noValidate
+    >
       <p className="vb-note">{slot.prompt}</p>
 
       {options.length === 0 ? (
@@ -328,6 +393,7 @@ function ClaimFormBody({
                       setDraft((d) => ({ ...d, start: e.target.value }));
                     }}
                   />
+                  {renderNudges('start')}
                   <p id={`${ids}-start-sec`} className="field-hint mono">
                     {inWindow(startOff) ? `= ${startOff} s` : '= — s'}
                   </p>
@@ -360,6 +426,7 @@ function ClaimFormBody({
                       setDraft((d) => ({ ...d, end: e.target.value }));
                     }}
                   />
+                  {renderNudges('end')}
                   <p id={`${ids}-end-sec`} className="field-hint mono">
                     {inWindow(endOff) ? `= ${endOff} s` : '= — s'}
                   </p>

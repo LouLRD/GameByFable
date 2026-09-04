@@ -1,16 +1,17 @@
 /**
  * Carte d'une contradiction dans le dossier : résumé et bascule vers l'inspecteur, qui porte
- * l'explication complète.
+ * l'explication complète. Mode compact : ouverture et épingle dans la barre au pouce.
  */
 import { KindBadge, SeverityBadge } from '@/components/ui';
 import type { ContradictionView, PlayerView } from '@/domain/selectors/playerView';
-import { SheetHeader, SheetSection } from './SheetParts';
+import { PinButton, SheetActions, SheetHeader, SheetSection } from './SheetParts';
 
 export interface ContradictionCardProps {
   contradiction: ContradictionView;
   view: PlayerView;
   titleId: string;
   onOpenInspector: (id: string) => void;
+  compact?: boolean;
 }
 
 export function ContradictionCard({
@@ -18,6 +19,7 @@ export function ContradictionCard({
   view,
   titleId,
   onOpenInspector,
+  compact = false,
 }: ContradictionCardProps): React.JSX.Element {
   const slots = contradiction.slotIds
     .map((id) => view.slots.find((s) => s.id === id)?.label ?? id)
@@ -51,7 +53,7 @@ export function ContradictionCard({
       <p className="muted">
         L’explication pas à pas et les moyens de l’examiner se trouvent dans l’inspecteur.
       </p>
-      <div className="casefile-actions">
+      <SheetActions compact={compact}>
         <button
           type="button"
           className="btn btn-primary"
@@ -59,7 +61,8 @@ export function ContradictionCard({
         >
           Ouvrir dans l’inspecteur
         </button>
-      </div>
+        {compact && <PinButton id={contradiction.id} label={contradiction.title} />}
+      </SheetActions>
     </article>
   );
 }

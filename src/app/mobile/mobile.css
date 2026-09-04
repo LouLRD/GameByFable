@@ -1,0 +1,467 @@
+/*
+ * Coquille mobile : terminal d'enquête tenu en main.
+ * Structure : en-tête 48 px · espace (défilant) · [bandeau temporel] · dock (guide) · navigation 56 px.
+ * Une seule zone défile : .mobile-space. Safe-area prises en charge.
+ */
+.mobile {
+  --mobile-header-h: 48px;
+  --mobile-nav-h: 56px;
+  --mobile-timestrip-h: 52px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+.mobile > * {
+  min-width: 0;
+  min-height: 0;
+}
+
+/* En-tête ------------------------------------------------------------------ */
+.mobile-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--mobile-header-h);
+  padding: 0 var(--space-2);
+  padding-top: env(safe-area-inset-top, 0px);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elevated);
+}
+
+.mobile-act {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 2px var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-1);
+  color: var(--fg-muted);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mobile-clock {
+  flex: 0 0 auto;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-1);
+  background: transparent;
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  cursor: pointer;
+}
+
+.mobile-clock:hover {
+  background: var(--bg-hover);
+}
+
+.mobile-pressure {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  min-width: 0;
+  color: var(--fg-muted);
+  font-size: var(--text-xs);
+}
+
+.mobile-pressure-pips {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.mobile-pip {
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--c-amber);
+  border-radius: 50%;
+}
+
+.mobile-pip[data-filled='true'] {
+  background: var(--c-amber);
+}
+
+.mobile-menu-btn {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-1);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+@media (max-width: 359px) {
+  .mobile-menu-label,
+  .mobile-pressure-num {
+    display: none;
+  }
+}
+
+/* Espace ------------------------------------------------------------------- */
+.mobile-space {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  outline: none;
+}
+
+.mobile-space > * {
+  min-width: 0;
+}
+
+/* Les panneaux occupent la hauteur disponible ; une seule zone défile par écran :
+   l'espace lui-même (Dossier, Version, Plan) ou le canevas des pistes (Temps). */
+.mobile-space[data-space='casefile'] .casefile,
+.mobile-space[data-space='inspector'] .mobile-inspector {
+  min-height: 100%;
+}
+
+.mobile-space[data-space='timeline'] {
+  overflow: hidden;
+}
+
+.mobile-space[data-space='timeline'] > * {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.mobile-space[data-space='map'] > * {
+  flex: 1 0 auto;
+}
+
+/* Espace Version : segments ----------------------------------------------- */
+.mobile-inspector {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-segments {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px dashed var(--border-strong);
+  background: var(--bg-elevated);
+}
+
+.mobile-segment {
+  flex: 1 1 0;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-1);
+  background: var(--bg);
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.mobile-segment[aria-selected='true'] {
+  border-color: var(--accent);
+  background: var(--bg-hover);
+  color: var(--fg);
+  box-shadow: inset 0 -3px 0 var(--accent);
+}
+
+.mobile-segment-badge {
+  color: var(--warning);
+}
+
+/* Bandeau temporel (Plan) ------------------------------------------------- */
+.mobile-timestrip {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--mobile-timestrip-h);
+  padding: var(--space-1) var(--space-2);
+  border-top: 1px dashed var(--border-strong);
+  background: var(--bg-elevated);
+}
+
+.mobile-time-btn {
+  flex: 0 0 auto;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-1);
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.mobile-time-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.mobile-time-play {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.mobile-time-play[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+.mobile-time-range {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.mobile-time-out {
+  font-size: var(--text-xs);
+  line-height: 1;
+  text-align: center;
+  color: var(--fg-muted);
+}
+
+.mobile-time-range input[type='range'] {
+  width: 100%;
+  min-height: 28px;
+  margin: 0;
+  accent-color: var(--accent);
+  touch-action: pan-x;
+}
+
+.mobile-time-range input[type='range']::-webkit-slider-thumb {
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width: 359px) {
+  .mobile-timestrip .mobile-time-btn:not(.mobile-time-play) {
+    min-width: 40px;
+    font-size: var(--text-xs);
+  }
+}
+
+/* Dock du guide ------------------------------------------------------------ */
+.mobile-dock {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: 0 var(--space-2);
+}
+
+.mobile-dock:empty {
+  display: none;
+}
+
+.mobile-dock .callout,
+.guide-strip {
+  margin: var(--space-1) 0;
+}
+
+.guide-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-left: 4px solid var(--c-amber);
+  border-radius: var(--radius-2);
+  background: var(--bg-elevated);
+}
+
+.guide-strip-kicker {
+  margin: 0;
+  color: var(--c-amber);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.guide-strip-text {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.guide-strip-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.guide-strip-actions .btn {
+  min-height: var(--tap-min);
+}
+
+/* Navigation ---------------------------------------------------------------- */
+.mobile-nav {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: stretch;
+  min-height: var(--mobile-nav-h);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  border-top: 1px solid var(--border-strong);
+  background: var(--bg-elevated);
+}
+
+.mobile-nav-tab {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  min-height: var(--mobile-nav-h);
+  padding: var(--space-1) var(--space-1) 0;
+  border: 0;
+  border-top: 3px solid transparent;
+  background: transparent;
+  color: var(--fg-muted);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.mobile-nav-tab[aria-current='page'] {
+  border-top-color: var(--accent);
+  background: var(--bg-hover);
+  color: var(--fg);
+}
+
+.mobile-nav-glyph {
+  font-size: var(--text-lg);
+  line-height: 1;
+}
+
+.mobile-nav-badge {
+  position: absolute;
+  top: 6px;
+  right: calc(50% - 26px);
+  min-width: 18px;
+  padding: 0 5px;
+  border: 1px solid var(--border-strong);
+  border-radius: 9px;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+}
+
+.mobile-nav-badge[data-kind='inspector'] {
+  border-color: var(--warning);
+  color: var(--warning);
+}
+
+/* Menu (feuille) ----------------------------------------------------------- */
+.mobile-menu-subtitle {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.mobile-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.mobile-menu-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: 56px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-2);
+  background: var(--bg);
+  color: var(--fg);
+  text-align: left;
+  cursor: pointer;
+}
+
+.mobile-menu-item:hover {
+  background: var(--bg-hover);
+}
+
+.mobile-menu-item[aria-pressed='true'] {
+  border-color: var(--accent);
+}
+
+.mobile-menu-item-label {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mobile-menu-item-hint {
+  font-size: var(--text-xs);
+}
+
+/* Paysage bas (≤ 450 px de haut) : en-tête et navigation plus fins */
+@media (max-height: 450px) {
+  .mobile {
+    --mobile-header-h: 40px;
+    --mobile-nav-h: 44px;
+    --mobile-timestrip-h: 44px;
+  }
+
+  .mobile-nav-glyph {
+    display: none;
+  }
+
+  .mobile-clock {
+    font-size: var(--text-md);
+  }
+}
+
+/* Les dialogues deviennent des feuilles de fond au-dessus de la navigation */
+.mobile .dialog-panel,
+.mobile ~ .dialog-backdrop .dialog-panel {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

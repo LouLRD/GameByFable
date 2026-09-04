@@ -1,19 +1,21 @@
 /**
  * Fiche d'une déclaration : locuteur, texte cité, lecture structurée, état (debout / rétractée /
  * remplacée par une précision), actions de confrontation.
+ * Mode compact : confronter, appuyer, épingler dans la barre au pouce.
  */
 import { Portrait } from '@/components/portrait';
 import { DegreeBadge } from '@/components/ui';
 import type { PlayerView, StatementView } from '@/domain/selectors/playerView';
 import { useGameStore } from '@/state';
 import { TRUST_GLYPHS, TRUST_PORTRAIT_STATE } from './casefileItems';
-import { SheetHeader, SheetSection } from './SheetParts';
+import { PinButton, SheetActions, SheetHeader, SheetSection } from './SheetParts';
 
 export interface StatementSheetProps {
   statement: StatementView;
   view: PlayerView;
   titleId: string;
   onNavigate: (kind: 'statement' | 'character', id: string) => void;
+  compact?: boolean;
 }
 
 export function StatementSheet({
@@ -21,6 +23,7 @@ export function StatementSheet({
   view,
   titleId,
   onNavigate,
+  compact = false,
 }: StatementSheetProps): React.JSX.Element {
   const speaker = view.characters.find((c) => c.id === statement.speakerId);
   const successor = statement.supersededById
@@ -114,7 +117,8 @@ export function StatementSheet({
         )}
       </SheetSection>
 
-      <div className="casefile-actions">
+      {compact && view.isSealed && <p className="field-hint">{sealedHint}</p>}
+      <SheetActions compact={compact}>
         <button
           type="button"
           className="btn btn-primary"
@@ -133,8 +137,9 @@ export function StatementSheet({
         >
           Utiliser comme appui
         </button>
-      </div>
-      {view.isSealed && <p className="field-hint">{sealedHint}</p>}
+        {compact && <PinButton id={statement.id} label={statement.propositionLabel} />}
+      </SheetActions>
+      {!compact && view.isSealed && <p className="field-hint">{sealedHint}</p>}
     </article>
   );
 }

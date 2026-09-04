@@ -47,6 +47,22 @@ Le fichier `.npmrc` active `legacy-peer-deps` : sans lui, npm 9/10 échoue sur u
 
 Raccourcis : `1`–`4` espaces, `Espace` lecture/pause, `←`/`→` curseur (±1 s, `Maj` ±10 s), `Début`/`Fin`, `?` aide, `Échap` fermer.
 
+
+## Sur téléphone et tablette étroite (≤ 1023 px)
+
+Sous 1024 px, le jeu bascule sur une coquille mobile dédiée (`src/app/mobile/`) qui partage le même store, les mêmes actions et les mêmes sélecteurs que le bureau : rien n'est dupliqué, seule la présentation change.
+
+- **En-tête compact** : acte, horloge simulée (toucher → espace Temps), pression, bouton Menu (sauvegardes, options, aide, son, nouvelle partie) en feuille de fond.
+- **Navigation au pouce** : quatre onglets persistants — Plan, Temps, Dossier, Version — avec compteurs (éléments au dossier, contradictions bloquantes). Touches `1`–`4` au clavier.
+- **Plan** : pincer pour zoomer, glisser pour déplacer, double-toucher pour zoomer ×2 ; boutons « Zoom avant / arrière / Recadrer » et touches `+` `−` `0` pour la même chose. Toucher une zone ou un jeton ouvre sa fiche en feuille de fond sans quitter le plan ; la légende est une feuille. Un **bandeau temporel** reste sous le plan : −10 s, −1 s, curseur, +1 s, +10 s, lecture.
+- **Temps** : heure en grand, lecture/pause, vitesse, zoom ; rangée du pouce (−10 / −1 / +1 / +10, appui long pour répéter), événement précédent/suivant, « Aller à la coupure », « Aller au comptage » ; la frise défile horizontalement.
+- **Dossier** : filtres en rangée défilante, recherche dépliable, prémisse repliée, épinglage des éléments, groupes repliables ; une fiche ouverte remplace la liste avec « Retour à la liste » et une barre d'actions collée en bas (Confronter, Ajouter à la version, Utiliser comme appui…).
+- **Version** : segments Version | Contradictions ; cartes d'emplacement compactes ; axes et pièces jointes repliables ; table ronde en barre collée en bas ; une contradiction s'ouvre en détail plein écran avec son raisonnement numéroté et des boutons « Voir » qui replacent le curseur sur le plan.
+- **Guide** : les repères d'onboarding s'affichent dans une bande ancrée au-dessus de la navigation (jamais sur leur cible), avec « Y aller », « Compris », « Tout passer » ; ils restent consultables dans l'Aide.
+- Les feuilles verrouillent le défilement d'arrière-plan, se ferment par bouton visible et Échap, respectent les `safe-area-inset-*` ; aucune opération n'exige un glisser-déposer ni un survol.
+
+Formats vérifiés par Playwright : 390 × 844 (référence), 320 × 568, 844 × 390 (paysage), 768 × 1024 (tablette), plus le bureau à 1440 × 900.
+
 ## Architecture
 
 ```

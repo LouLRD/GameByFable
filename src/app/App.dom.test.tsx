@@ -59,39 +59,22 @@ describe('<App /> — coquille du bureau', () => {
     );
   });
 
-  it('en mobile (≤ 1023 px), la barre d’espaces change l’espace actif', async () => {
+  it('en mobile (≤ 1023 px), la coquille mobile remplace le bureau et sa navigation change l’espace actif', async () => {
     stubViewport(390);
     const user = userEvent.setup();
     render(<App />);
-    expect(document.querySelector('.space[data-space="casefile"]')).toHaveAttribute(
-      'data-active',
-      'true',
-    );
-    expect(document.querySelector('.space[data-space="inspector"]')).toHaveAttribute(
-      'data-active',
-      'false',
-    );
+    expect(screen.getByTestId('mobile-shell')).toBeInTheDocument();
+    expect(document.querySelector('.workbench')).toBeNull();
+    expect(screen.getByRole('region', { name: 'Espace Dossier' })).toBeInTheDocument();
     const nav = screen.getByRole('navigation', { name: 'Espaces de travail' });
-    await user.click(within(nav).getByRole('button', { name: /^Version/ }));
-    expect(useGameStore.getState().activeSpace).toBe('inspector');
-    expect(document.querySelector('.space[data-space="inspector"]')).toHaveAttribute(
-      'data-active',
-      'true',
-    );
-    expect(document.querySelector('.space[data-space="casefile"]')).toHaveAttribute(
-      'data-active',
-      'false',
-    );
-    expect(within(nav).getByRole('button', { name: /^Version/ })).toHaveAttribute(
+    await user.click(within(nav).getByRole('button', { name: /^Plan/ }));
+    expect(useGameStore.getState().activeSpace).toBe('map');
+    expect(screen.getByRole('region', { name: 'Espace Plan' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Espace Dossier' })).toBeNull();
+    expect(within(nav).getByRole('button', { name: /^Plan/ })).toHaveAttribute(
       'aria-current',
       'page',
     );
-    // Pas de bouton « Agrandir » sur petit écran ; les commandes sont derrière « Menu ».
-    expect(screen.queryByRole('button', { name: /Agrandir/ })).toBeNull();
-    const menu = screen.getByRole('button', { name: 'Menu' });
-    expect(screen.queryByRole('button', { name: 'Options' })).toBeNull();
-    await user.click(menu);
-    expect(screen.getByRole('button', { name: 'Options' })).toBeVisible();
   });
 
   it('raccourcis : → et Maj+→ déplacent le curseur, Fin va au bout, ? ouvre l’aide, inactifs dialogue ouvert', async () => {

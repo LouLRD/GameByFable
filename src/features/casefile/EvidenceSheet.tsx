@@ -1,19 +1,21 @@
 /**
  * Fiche d'une pièce : texte joueur sur ticket thermique, marqueur (lieu / heure), ce qu'elle
  * établit ou exclut, état « jointe au rapport », appui pour une confrontation.
+ * Mode compact : les actions (repérer, confronter, joindre, épingler) forment la barre au pouce.
  */
 import { useId, useState } from 'react';
 import { DegreeBadge } from '@/components/ui';
 import type { EvidenceView, PlayerView } from '@/domain/selectors/playerView';
 import { useGameStore } from '@/state';
 import { isCompactViewport } from './casefileItems';
-import { ActionNotice, SheetHeader, SheetSection } from './SheetParts';
+import { ActionNotice, PinButton, SheetActions, SheetHeader, SheetSection } from './SheetParts';
 
 export interface EvidenceSheetProps {
   evidence: EvidenceView;
   view: PlayerView;
   zoneLabels: ReadonlyMap<string, string>;
   titleId: string;
+  compact?: boolean;
 }
 
 export function EvidenceSheet({
@@ -21,6 +23,7 @@ export function EvidenceSheet({
   view,
   zoneLabels,
   titleId,
+  compact = false,
 }: EvidenceSheetProps): React.JSX.Element {
   const [notice, setNotice] = useState<string | null>(null);
   const hintId = useId();
@@ -36,6 +39,7 @@ export function EvidenceSheet({
         : null
     : null;
   const canLocate = markerTime !== null || markerPlace !== null;
+  const locateHint = 'Aucun lieu ni instant connu pour cette pièce.';
 
   const attachHint = evidence.mandatory
     ? 'Pièce initiale du dossier : elle fait partie du rapport et ne peut pas en être retirée.'
@@ -43,6 +47,7 @@ export function EvidenceSheet({
       ? 'Le rapport est scellé : les pièces jointes ne peuvent plus changer.'
       : 'Une pièce retirée du rapport n’est plus partagée à la table ronde ni comptée dans le dévoilement.';
   const attachDisabled = evidence.mandatory || view.isSealed;
+  const sealedHint = 'Le rapport est scellé : plus aucune confrontation.';
 
   // Les actions du store sont stables : on les lit sans abonnement au moment de l'interaction.
   const onToggleAttached = (attached: boolean): void => {
@@ -82,6 +87,30 @@ export function EvidenceSheet({
     store.openDialog('confrontation');
   };
 
+  const locateButton = (
+    <button
+      type="button"
+      className="btn"
+      disabled={!canLocate}
+      title={canLocate ? undefined : locateHint}
+      onClick={onLocate}
+    >
+      Voir sur le plan / la frise
+    </button>
+  );
+
+  const supportButton = (
+    <button
+      type="button"
+      className="btn btn-primary"
+      disabled={view.isSealed}
+      title={view.isSealed ? sealedHint : undefined}
+      onClick={onUseAsSupport}
+    >
+      Utiliser dans une confrontation
+    </button>
+  );
+
   return (
     <article className="casefile-sheet-content" aria-labelledby={titleId}>
       <SheetHeader kind="evidence" title={evidence.label} titleId={titleId}>
@@ -117,18 +146,8 @@ export function EvidenceSheet({
         ) : (
           <p className="muted">Cette pièce n’est rattachée à aucun lieu ni instant précis.</p>
         )}
-        <div className="casefile-actions">
-          <button
-            type="button"
-            className="btn"
-            disabled={!canLocate}
-            title={canLocate ? undefined : 'Aucun lieu ni instant connu pour cette pièce.'}
-            onClick={onLocate}
-          >
-            Voir sur le plan / la frise
-          </button>
-        </div>
-        {!canLocate && <p className="field-hint">Aucun lieu ni instant connu pour cette pièce.</p>}
+        {!compact && <div className="casefile-actions">{locateButton}</div>}
+        {!canLocate && <p className="field-hint">{locateHint}</p>}
       </SheetSection>
 
       <SheetSection title="Ce que la pièce établit">
@@ -156,38 +175,53 @@ export function EvidenceSheet({
       </SheetSection>
 
       <SheetSection title="Rapport">
-        <div className="field">
-          <label className="casefile-check">
-            <input
-              type="checkbox"
-              checked={evidence.attached}
-              disabled={attachDisabled}
-              aria-describedby={hintId}
-              title={attachDisabled ? attachHint : undefined}
-              onChange={(e) => onToggleAttached(e.target.checked)}
-            />
-            <span>Jointe au rapport</span>
-          </label>
+        {compact ? (
           <p id={hintId} className="field-hint">
+            {evidence.attached ? 'Jointe au rapport. ' : 'Hors rapport. '}
             {attachHint}
           </p>
-        </div>
+        ) : (
+          <div className="field">
+            <label className="casefile-check">
+              <input
+                type="checkbox"
+                checked={evidence.attached}
+                disabled={attachDisabled}
+                aria-describedby={hintId}
+                title={attachDisabled ? attachHint : undefined}
+                onChange={(e) => onToggleAttached(e.target.checked)}
+              />
+              <span>Jointe au rapport</span>
+            </label>
+            <p id={hintId} className="field-hint">
+              {attachHint}
+            </p>
+          </div>
+        )}
         <ActionNotice message={notice} />
       </SheetSection>
 
-      <div className="casefile-actions">
-        <button
-          type="button"
-          className="btn btn-primary"
-          disabled={view.isSealed}
-          title={view.isSealed ? 'Le rapport est scellé : plus aucune confrontation.' : undefined}
-          onClick={onUseAsSupport}
-        >
-          Utiliser dans une confrontation
-        </button>
-      </div>
-      {view.isSealed && (
-        <p className="field-hint">Le rapport est scellé : plus aucune confrontation.</p>
+      {view.isSealed && <p className="field-hint">{sealedHint}</p>}
+
+      {compact ? (
+        <SheetActions compact>
+          {locateButton}
+          {supportButton}
+          <button
+            type="button"
+            className="btn"
+            aria-pressed={evidence.attached}
+            disabled={attachDisabled}
+            aria-describedby={hintId}
+            title={attachDisabled ? attachHint : undefined}
+            onClick={() => onToggleAttached(!evidence.attached)}
+          >
+            <span aria-hidden="true">{evidence.attached ? '☑ ' : '☐ '}</span>Jointe au rapport
+          </button>
+          <PinButton id={evidence.id} label={evidence.label} />
+        </SheetActions>
+      ) : (
+        <SheetActions compact={false}>{supportButton}</SheetActions>
       )}
     </article>
   );

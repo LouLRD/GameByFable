@@ -800,3 +800,380 @@
   white-space: normal;
   text-align: center;
 }
+
+/* ---------------------------------------------------------------------------
+ * Mode compact (coquille mobile, `compact` → data-compact). La coquille est l'unique zone qui
+ * défile : le panneau ne crée aucun conteneur défilant ; statut sur une ligne ; sections
+ * repliables ; barre de table ronde collante en bas (jamais fixe : la coquille réserve la barre
+ * de navigation) ; en-tête du détail de contradiction collant sous les onglets de la coquille
+ * (`--mobile-segments-h`, 0 par défaut : il les recouvre alors).
+ * ------------------------------------------------------------------------- */
+
+.vb[data-compact='true'],
+.ci[data-compact='true'] {
+  /* Jamais rétréci par la coquille (colonne flex) : le panneau grandit avec son contenu. */
+  flex: 1 0 auto;
+  gap: var(--space-3);
+  min-height: 0;
+  padding: var(--space-2) var(--space-2) 0;
+}
+
+.vb[data-compact='true'] .vb-header,
+.ci[data-compact='true'] .vb-header {
+  gap: var(--space-1);
+}
+
+.vb[data-compact='true'] .vb-status {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  min-height: var(--tap-comfortable);
+}
+
+.vb-status-count {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Bouton pleine largeur (Choisir, table ronde). */
+.vb-btn-block {
+  width: 100%;
+  min-height: var(--tap-comfortable);
+}
+
+/* Cartes d'emplacement serrées : question, ligne « acteur · lieu · intervalle », actions côte à côte. */
+.slot-card[data-compact='true'] {
+  gap: var(--space-1);
+  padding: var(--space-3);
+}
+
+.slot-card[data-compact='true'] .slot-card-prompt {
+  font-size: var(--text-sm);
+}
+
+.slot-card[data-compact='true'] .slot-card-body {
+  gap: var(--space-1);
+  /* Le retrait gauche reste celui du statut (glyphe + bordure, degrees.css). */
+  padding-block: var(--space-2);
+  padding-right: var(--space-2);
+}
+
+.slot-card-params-line {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.slot-card[data-compact='true'] .slot-card-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.slot-card[data-compact='true'] .slot-card-actions .btn {
+  min-height: var(--tap-comfortable);
+}
+
+.slot-card[data-compact='true'] .slot-card-empty {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Sections repliables : l'en-tête entier est un bouton ≥ 44 px. */
+.vb-fold-title {
+  display: block;
+}
+
+.vb-fold {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--tap-comfortable);
+  padding: var(--space-2) var(--space-3);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-2);
+  background: var(--bg-elevated);
+  color: var(--fg);
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: inherit;
+  text-align: left;
+  text-transform: inherit;
+}
+
+.vb-fold:hover {
+  background: var(--bg-hover);
+}
+
+.vb-fold[aria-expanded='true'] {
+  border-style: solid;
+  border-radius: var(--radius-2) var(--radius-2) 0 0;
+}
+
+.vb-fold-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.vb-fold-chevron {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+}
+
+.vb-fold-body {
+  min-width: 0;
+}
+
+/* Table ronde : barre collante pleine largeur, message visible sous le bouton désactivé. */
+.vb-round-table-compact {
+  position: sticky;
+  bottom: 0;
+  z-index: var(--z-sticky);
+  margin: var(--space-2) calc(-1 * var(--space-2)) 0;
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  border: 0;
+  border-top: 2px dotted var(--border-strong);
+  border-radius: 0;
+  background: var(--bg-elevated);
+  box-shadow: 0 -6px 12px rgb(0 0 0 / 35%);
+}
+
+.vb-round-table-compact .vb-round-table-actions {
+  display: block;
+}
+
+.vb-round-table-compact .vb-note {
+  font-size: var(--text-xs);
+}
+
+/* Écran bas (paysage, 320 × 568) : la barre garde bouton + message, sans les compteurs. */
+@media (max-height: 640px) {
+  .vb-round-table-compact .vb-counter {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Inspecteur compact : filtres sur une ligne, détail plein panneau avec en-tête collant,
+ * progression numérotée.
+ * ------------------------------------------------------------------------- */
+
+.ci[data-compact='true'] .ci-filters {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  margin: 0 calc(-1 * var(--space-2));
+  padding: var(--space-1) var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.ci[data-compact='true'] .ci-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.ci[data-compact='true'] .ci-filters .chip {
+  flex: 0 0 auto;
+  min-height: var(--tap-comfortable);
+}
+
+.ci[data-compact='true'] .ci-item {
+  min-height: 56px;
+}
+
+.ci[data-compact='true'][data-detail-open='true'] {
+  padding: 0 var(--space-2) var(--space-3);
+}
+
+.ci-detail-compact {
+  gap: var(--space-4);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.ci-detail-bar {
+  position: sticky;
+  top: var(--mobile-segments-h, 0px);
+  z-index: calc(var(--z-sticky) + 1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0 calc(-1 * var(--space-2)) var(--space-2);
+  padding: var(--space-1) var(--space-2) var(--space-2);
+  border-bottom: 1px dashed var(--border-strong);
+  background: var(--bg-elevated);
+}
+
+.ci-detail-bar .ci-back {
+  align-self: flex-start;
+  min-height: var(--tap-comfortable);
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+.ci-detail-bar-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: 0 var(--space-2);
+}
+
+.ci-detail-bar .ci-detail-title {
+  font-size: var(--text-md);
+  overflow-wrap: anywhere;
+}
+
+/* Progression : cinq étapes numérotées, chacune sur sa fiche. */
+.ci-progression {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ci-stage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-left-width: 4px;
+  border-radius: var(--radius-2);
+  background: var(--bg-elevated);
+}
+
+.ci-stage[data-stage='consequences'] {
+  border-left-style: double;
+  border-left-width: 6px;
+}
+
+.ci-stage-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ci-stage-num {
+  display: inline-grid;
+  flex: 0 0 auto;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.ci-stage-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.ci-stage-lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ci-stage-lines .ci-step {
+  padding: var(--space-2);
+  border-left: 2px solid var(--border);
+}
+
+.ci-stage-steps {
+  padding-left: var(--space-5);
+}
+
+.ci-detail-compact .ci-step-view {
+  min-height: var(--tap-comfortable);
+  font-family: var(--font-mono);
+  text-transform: none;
+}
+
+.ci-conclusion {
+  margin: 0;
+  font-weight: 700;
+}
+
+.ci-slot-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ci-slot-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: var(--space-1) 0;
+  border-bottom: 1px dotted var(--border);
+}
+
+.ci-slot-label {
+  font-weight: 700;
+}
+
+.ci-detail-compact .ci-examine .btn {
+  min-height: var(--tap-comfortable);
+}
+
+.ci-detail-compact .ci-examine .btn-primary {
+  flex: 1 1 100%;
+}
+
+/* ---------------------------------------------------------------------------
+ * Formulaire d'hypothèse compact : boutons ± sous chaque heure, validation collante en bas.
+ * ------------------------------------------------------------------------- */
+
+.claim-form-nudges {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+
+.claim-form .claim-form-nudge {
+  min-width: 0;
+  min-height: var(--tap-comfortable);
+  padding: var(--space-2) var(--space-1);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-transform: none;
+}
+
+.claim-form[data-compact='true'] .claim-form-actions {
+  position: sticky;
+  bottom: calc(-1 * var(--space-4));
+  z-index: var(--z-raised);
+  margin: 0 calc(-1 * var(--space-4)) calc(-1 * var(--space-4));
+  padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+  border-top: 1px dashed var(--border-strong);
+  background: var(--bg-elevated);
+}
+
+.claim-form[data-compact='true'] .claim-form-actions .btn {
+  flex: 1 1 auto;
+  min-height: var(--tap-comfortable);
+}

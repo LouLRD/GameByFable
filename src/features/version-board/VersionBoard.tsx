@@ -2,6 +2,8 @@
  * Canevas de version (GDD §6.2, §10, §12.3) : en-tête avec statut global, cinq emplacements
  * reliés par un fil causal (fissuré là où une contradiction bloque), trois axes d'évaluation,
  * pièces jointes au rapport et demande de table ronde.
+ * Mode compact (`compact`, coquille mobile) : statut sur une ligne, cartes serrées, axes et
+ * pièces repliés derrière des boutons `aria-expanded`, table ronde dans une barre collante.
  * Toutes les données viennent de la vue joueur ; toute action passe par le store.
  */
 import { useId, useState, type JSX } from 'react';
@@ -15,12 +17,20 @@ import { SlotCard } from './SlotCard';
 import { api, coherenceDisplay, describeVersion, plural, scrollTo, slotCardDomId } from './labels';
 import './version-board.css';
 
-export function VersionBoard(): JSX.Element {
+export interface VersionBoardProps {
+  /** Mode compact (coquille mobile) : sans grand en-tête, sections repliables, CTA collant. */
+  compact?: boolean;
+}
+
+export function VersionBoard({ compact = false }: VersionBoardProps): JSX.Element {
   const view = usePlayerView();
   const scenario = useGameStore((s) => s.scenario);
   const actionNonce = useGameStore((s) => s.actionNonce);
   const reducedMotion = useReducedMotion();
   const [error, setError] = useState<string | null>(null);
+  // Replis du mode compact : null = pas encore touché (les axes s'ouvrent seuls à 5/5).
+  const [axesOpen, setAxesOpen] = useState<boolean | null>(null);
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
   const baseId = useId();
 
   if (!view || !scenario) {
@@ -36,11 +46,17 @@ export function VersionBoard(): JSX.Element {
   const blockingIds = new Set(version.blockingIds);
   const coherence = coherenceDisplay(version.coherenceStatus);
   const filled = view.slots.filter((s) => version.claims[s.id] !== undefined).length;
+  const allFilled = view.slots.length > 0 && filled === view.slots.length;
   const sealed = view.isSealed;
   const atRoundTable = view.phase === 'round-table';
+  const attachedCount = view.evidence.filter((e) => e.attached).length;
+  const axesExpanded = !compact || (axesOpen ?? allFilled);
+  const evidenceExpanded = !compact || evidenceOpen;
   const mandatoryNoteId = `${baseId}-mandatory`;
   const sealedNoteId = `${baseId}-sealed`;
   const roundTableMsgId = `${baseId}-rt-msg`;
+  const axesBodyId = `${baseId}-axes-body`;
+  const evidenceBodyId = `${baseId}-evidence-body`;
 
   /** Dispatch + annonce concise ; l'erreur du moteur est affichée comme remarque de l'outil. */
   const run = (action: PlayerAction, describe: (next: PlayerView) => string): boolean => {
@@ -100,7 +116,7 @@ export function VersionBoard(): JSX.Element {
   };
 
   const onSelectEvidence = (id: string): void => {
-    api().select('evidence', id);
+    api().select('evidence', id, compact ? { space: 'casefile' } : {});
   };
 
   const slotHasBlocking = (slotId: string): boolean =>
@@ -112,10 +128,26 @@ export function VersionBoard(): JSX.Element {
       ? (version.roundTableMessage ?? 'La table ronde n’est pas encore possible.')
       : null;
 
+  const counters = (
+    <p className="vb-note vb-counter">
+      <span className="tag">
+        révélations {version.revelations}/{version.revelationsRequired}
+      </span>{' '}
+      <span className="tag">
+        emplacements {filled}/{view.slots.length}
+      </span>
+    </p>
+  );
+
   return (
-    <div className="vb" role="region" aria-labelledby={`${baseId}-title`}>
+    <div
+      className="vb"
+      role="region"
+      aria-labelledby={`${baseId}-title`}
+      data-compact={compact ? 'true' : undefined}
+    >
       <header className="vb-header">
-        <h2 id={`${baseId}-title`} className="vb-title">
+        <h2 id={`${baseId}-title`} className={compact ? 'visually-hidden' : 'vb-title'}>
           Version proposée
         </h2>
         <p className="vb-status" data-status={version.coherenceStatus}>
@@ -123,10 +155,19 @@ export function VersionBoard(): JSX.Element {
             {coherence.glyph}
           </span>
           <span>Version {coherence.label}</span>
+          {compact ? (
+            <span className="vb-status-count">
+              <span aria-hidden="true"> — </span>
+              {filled}/{view.slots.length}
+              <span className="visually-hidden"> emplacements remplis</span>
+            </span>
+          ) : null}
         </p>
-        <p className="vb-note vb-completeness">
-          {filled}/{view.slots.length} emplacements remplis
-        </p>
+        {!compact ? (
+          <p className="vb-note vb-completeness">
+            {filled}/{view.slots.length} emplacements remplis
+          </p>
+        ) : null}
       </header>
 
       {error ? (
@@ -179,6 +220,7 @@ export function VersionBoard(): JSX.Element {
                 sealed={sealed}
                 actionNonce={actionNonce}
                 reducedMotion={reducedMotion}
+                compact={compact}
                 onChoose={() => {
                   api().openClaimForm(slot.id);
                 }}
@@ -196,96 +238,144 @@ export function VersionBoard(): JSX.Element {
       </ol>
 
       <section className="vb-section" aria-labelledby={`${baseId}-axes`}>
-        <h3 id={`${baseId}-axes`} className="vb-section-title">
-          Évaluation
-        </h3>
-        <AxesPanel
-          version={version}
-          characters={view.characters}
-          evidence={view.evidence}
-          slots={view.slots}
-          onSelectEvidence={onSelectEvidence}
-          onGoToSlot={onGoToSlot}
-        />
+        {compact ? (
+          <h3 id={`${baseId}-axes`} className="vb-section-title vb-fold-title">
+            <button
+              type="button"
+              className="vb-fold"
+              aria-expanded={axesExpanded}
+              aria-controls={axesExpanded ? axesBodyId : undefined}
+              onClick={() => {
+                setAxesOpen(!axesExpanded);
+              }}
+            >
+              <span className="vb-fold-label">Cohérence · Dévoilement · Adhésion</span>
+              <span className="vb-fold-chevron" aria-hidden="true">
+                {axesExpanded ? '▾' : '▸'}
+              </span>
+            </button>
+          </h3>
+        ) : (
+          <h3 id={`${baseId}-axes`} className="vb-section-title">
+            Évaluation
+          </h3>
+        )}
+        {axesExpanded ? (
+          <div id={axesBodyId} className="vb-fold-body">
+            <AxesPanel
+              version={version}
+              characters={view.characters}
+              evidence={view.evidence}
+              slots={view.slots}
+              onSelectEvidence={onSelectEvidence}
+              onGoToSlot={onGoToSlot}
+            />
+          </div>
+        ) : null}
       </section>
 
       <section className="vb-section" aria-labelledby={`${baseId}-evidence`}>
-        <h3 id={`${baseId}-evidence`} className="vb-section-title">
-          Pièces jointes au rapport
-        </h3>
-        <p className="vb-note">
-          {plural(view.evidence.filter((e) => e.attached).length, 'pièce jointe', 'pièces jointes')}{' '}
-          sur {view.evidence.length}. Une pièce retirée devient une omission du rapport.
-        </p>
-        <ul className="vb-list vb-evidence-list">
-          {view.evidence.map((e) => {
-            const inputId = `${baseId}-ev-${e.id}`;
-            const locked = e.mandatory || sealed;
-            return (
-              <li key={e.id} className="vb-evidence-row" data-attached={e.attached}>
-                <input
-                  id={inputId}
-                  type="checkbox"
-                  checked={e.attached}
-                  disabled={locked}
-                  aria-describedby={
-                    e.mandatory ? mandatoryNoteId : sealed ? sealedNoteId : undefined
-                  }
-                  title={
-                    e.mandatory
-                      ? 'Pièce du dossier initial : toujours jointe au rapport.'
-                      : sealed
-                        ? 'Le rapport est scellé.'
-                        : undefined
-                  }
-                  onChange={() => {
-                    onToggleEvidence(e, !e.attached);
-                  }}
-                />
-                <label htmlFor={inputId}>
-                  <span className="vb-evidence-label">{e.label}</span>
-                  <DegreeBadge degree={e.degree} />
-                </label>
-                {e.mandatory ? <span className="tag">dossier initial</span> : null}
-                {!e.attached ? <span className="tag vb-omission">omission</span> : null}
-              </li>
-            );
-          })}
-        </ul>
-        {view.evidence.some((e) => e.mandatory) ? (
-          <p id={mandatoryNoteId} className="vb-note">
-            Les pièces du dossier initial font toujours partie du rapport : leur case est
-            verrouillée.
-          </p>
-        ) : null}
-        {sealed ? (
-          <p id={sealedNoteId} className="vb-note">
-            Le rapport est scellé : les pièces jointes ne peuvent plus changer.
-          </p>
+        {compact ? (
+          <h3 id={`${baseId}-evidence`} className="vb-section-title vb-fold-title">
+            <button
+              type="button"
+              className="vb-fold"
+              aria-expanded={evidenceExpanded}
+              aria-controls={evidenceExpanded ? evidenceBodyId : undefined}
+              onClick={() => {
+                setEvidenceOpen((open) => !open);
+              }}
+            >
+              <span className="vb-fold-label">
+                Pièces jointes au rapport ({attachedCount}/{view.evidence.length})
+              </span>
+              <span className="vb-fold-chevron" aria-hidden="true">
+                {evidenceExpanded ? '▾' : '▸'}
+              </span>
+            </button>
+          </h3>
+        ) : (
+          <h3 id={`${baseId}-evidence`} className="vb-section-title">
+            Pièces jointes au rapport
+          </h3>
+        )}
+        {evidenceExpanded ? (
+          <div id={evidenceBodyId} className="vb-fold-body vb-section">
+            <p className="vb-note">
+              {plural(attachedCount, 'pièce jointe', 'pièces jointes')} sur {view.evidence.length}.
+              Une pièce retirée devient une omission du rapport.
+            </p>
+            <ul className="vb-list vb-evidence-list">
+              {view.evidence.map((e) => {
+                const inputId = `${baseId}-ev-${e.id}`;
+                const locked = e.mandatory || sealed;
+                return (
+                  <li key={e.id} className="vb-evidence-row" data-attached={e.attached}>
+                    <input
+                      id={inputId}
+                      type="checkbox"
+                      checked={e.attached}
+                      disabled={locked}
+                      aria-describedby={
+                        e.mandatory ? mandatoryNoteId : sealed ? sealedNoteId : undefined
+                      }
+                      title={
+                        e.mandatory
+                          ? 'Pièce du dossier initial : toujours jointe au rapport.'
+                          : sealed
+                            ? 'Le rapport est scellé.'
+                            : undefined
+                      }
+                      onChange={() => {
+                        onToggleEvidence(e, !e.attached);
+                      }}
+                    />
+                    <label htmlFor={inputId}>
+                      <span className="vb-evidence-label">{e.label}</span>
+                      <DegreeBadge degree={e.degree} />
+                    </label>
+                    {e.mandatory ? <span className="tag">dossier initial</span> : null}
+                    {!e.attached ? <span className="tag vb-omission">omission</span> : null}
+                  </li>
+                );
+              })}
+            </ul>
+            {view.evidence.some((e) => e.mandatory) ? (
+              <p id={mandatoryNoteId} className="vb-note">
+                Les pièces du dossier initial font toujours partie du rapport : leur case est
+                verrouillée.
+              </p>
+            ) : null}
+            {sealed ? (
+              <p id={sealedNoteId} className="vb-note">
+                Le rapport est scellé : les pièces jointes ne peuvent plus changer.
+              </p>
+            ) : null}
+          </div>
         ) : null}
       </section>
 
-      <section className="vb-round-table" aria-labelledby={`${baseId}-rt`}>
-        <h3 id={`${baseId}-rt`} className="vb-section-title">
+      <section
+        className={`vb-round-table${compact ? ' vb-round-table-compact' : ''}`}
+        aria-labelledby={`${baseId}-rt`}
+      >
+        <h3 id={`${baseId}-rt`} className={compact ? 'visually-hidden' : 'vb-section-title'}>
           Table ronde
         </h3>
-        <p className="vb-note vb-counter">
-          <span className="tag">
-            révélations {version.revelations}/{version.revelationsRequired}
-          </span>{' '}
-          <span className="tag">
-            emplacements {filled}/{view.slots.length}
-          </span>
-        </p>
+        {!compact ? counters : null}
         <div className="vb-round-table-actions">
           {atRoundTable ? (
-            <button type="button" className="btn btn-primary" onClick={onResumeRoundTable}>
+            <button
+              type="button"
+              className={`btn btn-primary${compact ? ' vb-btn-block' : ''}`}
+              onClick={onResumeRoundTable}
+            >
               Reprendre la table ronde
             </button>
           ) : (
             <button
               type="button"
-              className="btn btn-primary"
+              className={`btn btn-primary${compact ? ' vb-btn-block' : ''}`}
               onClick={onRoundTable}
               disabled={roundTableDisabledReason !== null}
               title={roundTableDisabledReason ?? undefined}
@@ -300,6 +390,7 @@ export function VersionBoard(): JSX.Element {
             {roundTableDisabledReason}
           </p>
         ) : null}
+        {compact && roundTableDisabledReason && !atRoundTable ? counters : null}
       </section>
     </div>
   );

@@ -3,6 +3,7 @@
  * fermeture par Échap, restitution du focus à l'élément déclencheur.
  */
 import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { lockScroll } from '@/accessibility/scrollLock';
 
 export interface DialogProps {
   open: boolean;
@@ -37,6 +38,7 @@ export function Dialog({
 
   useEffect(() => {
     if (!open) return;
+    const unlock = lockScroll();
     previousFocus.current = document.activeElement;
     const panel = panelRef.current;
     const first =
@@ -71,6 +73,7 @@ export function Dialog({
     document.addEventListener('keydown', onKey);
     return () => {
       document.removeEventListener('keydown', onKey);
+      unlock();
       const prev = previousFocus.current;
       if (prev instanceof HTMLElement) prev.focus();
     };

@@ -8,6 +8,7 @@ import {
   outageSpans,
   packRows,
   previousEvent,
+  shortName,
   timeFromPointer,
   unknownSpans,
   visualSpan,
@@ -148,5 +149,13 @@ describe('buildTimelineEvents (vue joueur en début de partie)', () => {
     const ana = view.positions.byCharacter.get('ana' as never) ?? [];
     const unknown = unknownSpans(ana, view.durationSeconds);
     expect(unknown).toEqual([{ start: 245, end: 760 }]);
+  });
+});
+
+describe('shortName', () => {
+  it('garde le premier mot du nom, sans espaces superflus', () => {
+    expect(shortName('Ana Sorel')).toBe('Ana');
+    expect(shortName('  Malik   Bensaïd ')).toBe('Malik');
+    expect(shortName('Jo')).toBe('Jo');
   });
 });

@@ -10,3 +10,4 @@ blob-report
 *.log
 .vite
 .claude/
+*.tsbuildinfo

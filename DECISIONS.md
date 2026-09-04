@@ -37,6 +37,16 @@ Ordre de priorité appliqué en cas de tension : prompt de mission > spécificat
 26. **Aide progressive** : après trois actions refusées (`hintAfterImpasses`), une « Piste » cite la première contradiction bloquante et les pièces qu'elle suggère, jamais la solution ; désactivable dans Options.
 27. **Libellés des déclarations dans la liste du dossier** : la liste montre la lecture structurée (proposition), la fiche montre la citation intégrale ; les deux portent le degré « rapporté ».
 
+## Adaptation mobile
+
+28. **Coquille dédiée plutôt qu'une pile CSS.** Sous 1024 px, `MobileShell` remplace `Workbench` ; les panneaux reçoivent `compact` et adaptent leur présentation. Store, actions, sélecteurs et évaluations restent identiques : aucune logique métier n'est dupliquée. Le seuil reste 1024 px (la tablette portrait 768 px utilise la coquille mobile, la tablette paysage le bureau).
+29. **Une seule zone défilante par écran.** L'espace actif défile ; les fiches contextuelles (zone, personnage, légende, menu) sont des feuilles de fond au-dessus du contenu au lieu d'un second panneau défilant. La frise est l'exception : son canevas de pistes est la zone défilante de l'espace Temps.
+30. **Le temps reste à portée de pouce dans le Plan.** Un bandeau temporel (−10 / −1 / curseur / +1 / +10 / lecture) accompagne le plan ; c'est le même curseur que partout ailleurs. L'espace Temps garde la manipulation fine (événements, vitesses, zoom, appui long).
+31. **Gestes = raccourcis, jamais des obligations.** Pincer, glisser et double-toucher sur le plan ont des équivalents boutons et clavier ; la discrimination toucher / glisser (8 px, 400 ms) évite les sélections accidentelles pendant un pan ou un scroll.
+32. **Onboarding en bande ancrée.** Sur mobile, les repères ne sont plus des popovers : une bande au-dessus de la navigation montre une étape à la fois, avec « Y aller » vers l'espace visé ; elle ne recouvre jamais sa cible et ne bloque rien. Les déclencheurs de données du scénario restent inchangés.
+33. **Épinglage** : préférence d'interface stockée en `localStorage` (`lva:pins:v1`), hors journal d'actions et hors sauvegarde, car sans effet sur la partie.
+34. **Verrou de défilement** partagé (`src/accessibility/scrollLock.ts`) pour toutes les modales et feuilles, avec compteur de références et compensation de la barre de défilement.
+
 ## Technique
 
 18. **Journal d'actions.** Les actions journalisées sont : placer/retirer une hypothèse, joindre/retirer une pièce, confronter, sonder, demander/quitter la table ronde, sceller, fermer une bulle d'onboarding. Le curseur temporel, la sélection et l'espace actif sont de l'état d'interface, sauvegardés à côté du journal, hors réduction.

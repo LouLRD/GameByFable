@@ -289,6 +289,28 @@ export function tokenLabel(name: string, zoneLabel: string, seg: PositionSegment
   return `${name} — ${zoneLabel} (${source}${seg.transit ? ', en transit' : ''})`;
 }
 
+/**
+ * Coupe un libellé en lignes d'au plus `maxChars` caractères, sur les espaces uniquement (un mot
+ * plus long que la limite reste entier). Sert aux noms de zone du plan en mode compact.
+ */
+export function wrapLabel(label: string, maxChars: number): string[] {
+  const words = label.split(/\s+/).filter((w) => w.length > 0);
+  if (words.length === 0) return [label];
+  const lines: string[] = [];
+  let current = '';
+  for (const word of words) {
+    const candidate = current === '' ? word : `${current} ${word}`;
+    if (current === '' || candidate.length <= maxChars) {
+      current = candidate;
+    } else {
+      lines.push(current);
+      current = word;
+    }
+  }
+  lines.push(current);
+  return lines;
+}
+
 // ---------------------------------------------------------------------------
 // Géométrie
 // ---------------------------------------------------------------------------

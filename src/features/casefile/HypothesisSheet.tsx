@@ -1,11 +1,12 @@
 /**
  * Fiche d'une hypothèse formulable : résumé, emplacement du canevas, valeurs par défaut,
  * ajout à la version via le formulaire de claim.
+ * Mode compact : « Ajouter à la version » et l'épingle dans la barre au pouce.
  */
 import { DegreeBadge } from '@/components/ui';
 import type { HypothesisView, PlayerView } from '@/domain/selectors/playerView';
 import { useGameStore } from '@/state';
-import { SheetHeader, SheetSection } from './SheetParts';
+import { PinButton, SheetActions, SheetHeader, SheetSection } from './SheetParts';
 
 export interface HypothesisSheetProps {
   hypothesis: HypothesisView;
@@ -13,6 +14,7 @@ export interface HypothesisSheetProps {
   zoneLabels: ReadonlyMap<string, string>;
   titleId: string;
   onNavigate: (kind: 'character', id: string) => void;
+  compact?: boolean;
 }
 
 export function HypothesisSheet({
@@ -21,6 +23,7 @@ export function HypothesisSheet({
   zoneLabels,
   titleId,
   onNavigate,
+  compact = false,
 }: HypothesisSheetProps): React.JSX.Element {
   const slot = view.slots.find((s) => s.id === hypothesis.slotId);
   const current = view.version.claims[hypothesis.slotId];
@@ -90,7 +93,8 @@ export function HypothesisSheet({
         </dl>
       </SheetSection>
 
-      <div className="casefile-actions">
+      {compact && view.isSealed && <p className="field-hint">{sealedHint}</p>}
+      <SheetActions compact={compact}>
         <button
           type="button"
           className="btn btn-primary"
@@ -100,8 +104,9 @@ export function HypothesisSheet({
         >
           {placed ? 'Modifier dans la version' : 'Ajouter à la version'}
         </button>
-      </div>
-      {view.isSealed && <p className="field-hint">{sealedHint}</p>}
+        {compact && <PinButton id={hypothesis.id} label={hypothesis.label} />}
+      </SheetActions>
+      {!compact && view.isSealed && <p className="field-hint">{sealedHint}</p>}
     </article>
   );
 }

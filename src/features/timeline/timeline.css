@@ -770,3 +770,367 @@
     min-height: var(--tap-comfortable);
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Mode compact (coquille mobile < 1024 px, prop `compact`)
+ *
+ * La frise est le contenu principal : barre du haut sur une rangée (heure, Lecture, vitesse,
+ * zoom), pistes = seule zone défilante, pied de panneau au pouce (puces défilantes, −10 s / −1 s /
+ * +1 s / +10 s, précédent / suivant). Cibles ≥ 44 px, rangées de 36 px (marqueurs 32 px),
+ * libellés de 72 px avec prénoms courts.
+ * ------------------------------------------------------------------------- */
+
+.tl-compact {
+  --tl-label-w: 72px;
+  --tl-row-h: 36px;
+
+  overflow: hidden;
+}
+
+/* Barre du haut : une seule rangée, jamais de débordement du panneau. */
+.tl-topbar {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  min-height: 52px;
+  padding: var(--space-1) var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px dashed var(--border-strong);
+  background: var(--bg-elevated);
+}
+
+.tl-topbar::-webkit-scrollbar {
+  display: none;
+}
+
+.tl-topbar .tl-clock {
+  flex: 1 0 auto;
+  font-size: var(--text-xl);
+  letter-spacing: 0.02em;
+}
+
+.tl-topbar .btn {
+  flex: 0 0 auto;
+  min-width: var(--tap-comfortable);
+  min-height: var(--tap-comfortable);
+  padding-right: var(--space-2);
+  padding-left: var(--space-2);
+}
+
+.tl-playback-compact {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  gap: var(--space-2);
+}
+
+.tl-play-compact {
+  font-size: var(--text-md);
+}
+
+.tl-play-compact .tl-play-glyph {
+  min-width: 1.4em;
+}
+
+.tl-speed-select {
+  width: auto;
+  min-height: var(--tap-comfortable);
+  padding: 0 var(--space-5) 0 var(--space-2);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  background-position:
+    calc(100% - 14px) 50%,
+    calc(100% - 9px) 50%;
+}
+
+.tl-zoom-cycle {
+  border-color: var(--border-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.tl-zoom-cycle .mono {
+  font-size: var(--text-md);
+}
+
+/* Très petits écrans (320 px) : le mot « Zoom » passe hors écran (le nom accessible ne change pas). */
+@media (max-width: 359px) {
+  .tl-topbar .tl-clock {
+    font-size: var(--text-lg);
+  }
+
+  .tl-zoom-word {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* Pistes : LA zone défilante (horizontal pour le temps, vertical si les lanes dépassent). */
+.tl-compact .tl-scroll {
+  scrollbar-gutter: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tl-compact .tl-lane-label {
+  gap: var(--space-1);
+  padding: 0 var(--space-1);
+  font-size: 0.7rem;
+  line-height: 1.15;
+  letter-spacing: 0.03em;
+  white-space: normal;
+  hyphens: manual;
+}
+
+.tl-compact .tl-lane-character .tl-lane-label {
+  flex-wrap: nowrap;
+}
+
+.tl-compact .tl-lane-character .tl-lane-name {
+  white-space: nowrap;
+}
+
+/* Graduations en fin de piste : étiquette ancrée à gauche du trait, dernier trait rentré ;
+   rien ne crée de défilement horizontal parasite. */
+.tl-compact .tl-tick-end .tl-tick-label {
+  right: 3px;
+  left: auto;
+}
+
+.tl-compact .tl-lane-ruler .tl-tick:last-child {
+  margin-left: -1px;
+}
+
+.tl-compact .tl-incident-label {
+  top: auto;
+  right: 4px;
+  bottom: 2px;
+  left: auto;
+}
+
+.tl-compact .tl-lane-cursor .tl-lane-track {
+  height: var(--tap-comfortable);
+}
+
+/* Range : pouce ≥ 28 px, piste tactile de 44 px. */
+.tl-compact .tl-range {
+  height: var(--tap-comfortable);
+  appearance: none;
+  -webkit-appearance: none;
+  touch-action: pan-y;
+}
+
+.tl-compact .tl-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border-strong);
+}
+
+.tl-compact .tl-range::-webkit-slider-thumb {
+  width: 28px;
+  height: 28px;
+  margin-top: -12px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 2px solid var(--c-ink);
+  border-radius: 50%;
+  background: var(--warning);
+  box-shadow: var(--shadow-1);
+  cursor: ew-resize;
+}
+
+.tl-compact .tl-range::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border-strong);
+}
+
+.tl-compact .tl-range::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--c-ink);
+  border-radius: 50%;
+  background: var(--warning);
+  box-shadow: var(--shadow-1);
+  cursor: ew-resize;
+}
+
+/* Marqueurs : ≥ 32 px de haut, zone tactile étendue à 44 px (le bouton ne rogne plus). */
+.tl-compact .tl-seg,
+.tl-compact .tl-mark {
+  overflow: visible;
+  font-size: var(--text-sm);
+  touch-action: manipulation;
+}
+
+.tl-compact .tl-seg::before,
+.tl-compact .tl-mark::before {
+  top: min(0px, calc((100% - var(--tap-comfortable)) / 2));
+  bottom: min(0px, calc((100% - var(--tap-comfortable)) / 2));
+  left: min(0px, calc((100% - var(--tap-comfortable)) / 2));
+  right: min(0px, calc((100% - var(--tap-comfortable)) / 2));
+}
+
+.tl-compact .tl-seg-text {
+  overflow: hidden;
+}
+
+.tl-compact .tl-mark-transit {
+  width: 24px;
+}
+
+/* Pied de panneau au pouce : puces défilantes puis pavé de navigation. */
+.tl-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-1) var(--space-2);
+  border-top: 1px solid var(--border-strong);
+  background: var(--bg-elevated);
+}
+
+.tl-chips {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  padding-bottom: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tl-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.tl-chip {
+  flex: 0 0 auto;
+  min-height: var(--tap-comfortable);
+  scroll-snap-align: start;
+  touch-action: manipulation;
+}
+
+.tl-chip:disabled {
+  border-style: dashed;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.tl-thumb-nav {
+  display: grid;
+  grid-template-areas:
+    'b10 b1 f1 f10'
+    'prev prev next next';
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.tl-thumb-nav .btn {
+  min-width: 0;
+  min-height: var(--tap-comfortable);
+  padding-right: var(--space-1);
+  padding-left: var(--space-1);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+.tl-thumb-nav .tl-nudge {
+  min-height: 48px;
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  font-weight: 700;
+  text-transform: none;
+}
+
+.tl-thumb-nav .tl-nudge[data-delta='-10'] {
+  grid-area: b10;
+}
+
+.tl-thumb-nav .tl-nudge[data-delta='-1'] {
+  grid-area: b1;
+}
+
+.tl-thumb-nav .tl-nudge[data-delta='1'] {
+  grid-area: f1;
+}
+
+.tl-thumb-nav .tl-nudge[data-delta='10'] {
+  grid-area: f10;
+}
+
+.tl-thumb-nav .tl-nav-prev {
+  grid-area: prev;
+}
+
+.tl-thumb-nav .tl-nav-next {
+  grid-area: next;
+}
+
+/* Paysage (hauteur ≤ 450 px) : pied de panneau sur une rangée, les pistes gardent la hauteur. */
+@media (max-height: 450px) {
+  .tl-topbar {
+    min-height: var(--tap-comfortable);
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .tl-footer {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .tl-chips {
+    flex: 1 1 auto;
+    padding-bottom: 0;
+  }
+
+  .tl-thumb-nav {
+    flex: 0 0 auto;
+    grid-template-areas: 'prev b10 b1 f1 f10 next';
+    grid-template-columns: repeat(6, auto);
+  }
+
+  .tl-thumb-nav .btn {
+    min-width: 48px;
+  }
+
+  .tl-thumb-nav .tl-nudge {
+    min-width: 56px;
+    min-height: 48px;
+  }
+}
+
+/* Feuille de fond « Légende » (mode compact). */
+.tl-legend-sheet .tl-legend-list {
+  position: static;
+  min-width: 0;
+  max-width: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: var(--text-md);
+}
+
+.tl-legend-sheet .tl-legend-list li {
+  min-height: var(--tap-comfortable);
+}

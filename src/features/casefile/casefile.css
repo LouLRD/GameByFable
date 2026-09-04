@@ -608,3 +608,244 @@
     margin-top: var(--space-1);
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Mode compact (coquille mobile, `compact` → data-compact). La coquille est l'unique zone qui
+ * défile : le panneau ne crée aucun conteneur défilant vertical ; en-tête (filtres) et barre de
+ * fiche sont collants en haut, la barre d'actions est collante en bas (jamais fixe : la coquille
+ * réserve la barre de navigation). Titre masqué mais présent, outils au pouce, filtres sur une
+ * rangée défilante à ombres, éléments hauts, groupes repliables.
+ * ------------------------------------------------------------------------- */
+
+.casefile[data-compact='true'] {
+  /* Jamais rétréci par la coquille (colonne flex) : le panneau grandit avec son contenu. */
+  flex: 1 0 auto;
+  height: auto;
+  min-height: 100%;
+}
+
+.casefile[data-compact='true'] .casefile-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2) var(--space-2);
+}
+
+/* Fiche ouverte : elle remplace liste ET en-tête (la barre de fiche devient l'en-tête collant). */
+.casefile[data-compact='true'][data-sheet-open='true'] .casefile-header {
+  display: none;
+}
+
+.casefile[data-compact='true'] .casefile-title-row {
+  align-items: center;
+  min-height: var(--tap-comfortable);
+}
+
+.casefile-tools {
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+
+.casefile-tools .casefile-tool {
+  min-width: var(--tap-comfortable);
+  min-height: var(--tap-comfortable);
+  padding: var(--space-2) var(--space-3);
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+.casefile-tools .casefile-tool[aria-expanded='true'] {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+}
+
+.casefile[data-compact='true'] .casefile-premise {
+  margin: calc(var(--ticket-tooth) + var(--space-2)) var(--space-1);
+}
+
+/* Rangée de filtres : une seule ligne, défilement horizontal, ombres de bord (scroll shadows). */
+.casefile[data-compact='true'] .casefile-filters {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  gap: var(--space-2);
+  margin: 0 calc(-1 * var(--space-2));
+  padding: var(--space-1) var(--space-2);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  background:
+    linear-gradient(90deg, var(--bg-elevated) 40%, transparent) left / 28px 100% no-repeat local,
+    linear-gradient(270deg, var(--bg-elevated) 40%, transparent) right / 28px 100% no-repeat local,
+    linear-gradient(90deg, rgb(0 0 0 / 45%), transparent) left / 14px 100% no-repeat scroll,
+    linear-gradient(270deg, rgb(0 0 0 / 45%), transparent) right / 14px 100% no-repeat scroll;
+}
+
+.casefile[data-compact='true'] .casefile-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.casefile[data-compact='true'] .casefile-filters .chip {
+  flex: 0 0 auto;
+  min-height: var(--tap-comfortable);
+  scroll-snap-align: start;
+}
+
+.casefile-chip-pinned::after {
+  content: '★';
+  content: '★' / '';
+  margin-left: var(--space-1);
+  font-size: var(--text-xs);
+}
+
+/* Liste : pas de défilement interne, éléments ≥ 56 px, métadonnées lisibles. */
+.casefile[data-compact='true'] .casefile-list-region {
+  flex: 1 0 auto;
+  padding: var(--space-2) var(--space-2) var(--space-3);
+  overflow: visible;
+  scrollbar-gutter: auto;
+}
+
+.casefile[data-compact='true'] .casefile-item {
+  min-height: 56px;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-md);
+}
+
+.casefile[data-compact='true'] .casefile-item-meta {
+  font-size: var(--text-sm);
+  gap: var(--space-2);
+}
+
+.casefile[data-compact='true'] .casefile-item-meta .badge,
+.casefile[data-compact='true'] .casefile-item-meta .tag {
+  min-height: 1.5rem;
+  font-size: var(--text-xs);
+}
+
+/* Groupes repliables : l'en-tête entier est un bouton ≥ 44 px. */
+.casefile-group-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+  min-height: var(--tap-comfortable);
+  padding: var(--space-2);
+  margin: 0 calc(-1 * var(--space-2));
+  border-radius: var(--radius-2);
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  text-transform: inherit;
+}
+
+.casefile-group-toggle:hover {
+  background: var(--bg-hover);
+}
+
+.casefile-group-chevron {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+}
+
+.casefile-group[data-group='pinned'] .casefile-group-title {
+  color: var(--warning);
+}
+
+/* Fiche : occupe la hauteur, en-tête collant (retour + titre), barre d'actions collante en bas. */
+.casefile[data-compact='true'] .casefile-sheet {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  max-height: none;
+  padding: 0 var(--space-3) 0;
+  border-top: 0;
+  overflow: visible;
+  scrollbar-gutter: auto;
+}
+
+.casefile[data-compact='true'] .casefile-sheet-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+/* Contenu court : la barre d'actions reste au bas de l'écran, à portée du pouce. */
+.casefile[data-compact='true'] .casefile-sheet-content > :has(+ .casefile-actionbar) {
+  margin-bottom: var(--space-4);
+}
+
+.casefile[data-compact='true'] .casefile-sheet-bar {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-comfortable);
+  margin: 0 calc(-1 * var(--space-3)) var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px dashed var(--border-strong);
+  background: var(--bg-elevated);
+}
+
+.casefile[data-compact='true'] .casefile-back {
+  flex: 0 0 auto;
+  min-height: var(--tap-comfortable);
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+.casefile-sheet-bar-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.casefile-actionbar {
+  position: sticky;
+  bottom: 0;
+  z-index: var(--z-sticky);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: auto calc(-1 * var(--space-3)) 0;
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  border-top: 2px dotted var(--border-strong);
+  background: var(--bg-elevated);
+  box-shadow: 0 -6px 12px rgb(0 0 0 / 35%);
+}
+
+.casefile-actionbar .btn {
+  flex: 1 1 calc(50% - var(--space-2));
+  min-height: var(--tap-comfortable);
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+}
+
+.casefile-pin[aria-pressed='true'] {
+  border-color: var(--warning);
+  color: var(--warning);
+}
+
+/* Portrait et titre plus serrés sur petit écran. */
+@media (max-width: 480px) {
+  .casefile[data-compact='true'] .casefile-sheet-head {
+    gap: var(--space-2);
+  }
+
+  .casefile[data-compact='true'] .casefile-sheet-title {
+    font-size: var(--text-md);
+  }
+}

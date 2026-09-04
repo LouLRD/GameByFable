@@ -1,1 +1,0 @@
-{"root":["./vite.config.ts","./vitest.config.ts","./playwright.config.ts","./e2e/endings.spec.ts","./e2e/keyboard-mobile.spec.ts","./e2e/noe-perception.spec.ts","./e2e/onboarding-first-claim.spec.ts","./e2e/persistence.spec.ts","./e2e/secrets.spec.ts","./e2e/support/game.ts","./e2e/support/secrets.ts"],"version":"5.9.3"}
