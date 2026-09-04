@@ -19,10 +19,17 @@ export function loadForbiddenAtStart(): string[] {
   // L'extension est un module TS ; ses libellés de faits sont lus par expression régulière (sans transpilation).
   const extSource = fs.readFileSync(path.join(root, 'src/scenario/la-veilleuse.extension.ts'), 'utf8');
   const factLabels = new Map<string, string>();
-  for (const m of extSource.matchAll(/factId: '([a-z_]+)', label: '([^']+)'/g)) factLabels.set(m[1] ?? '', m[2] ?? '');
+  const reportedAtStart = new Set<string>();
+  const startStatements = new Set(raw.statements.filter((s) => s.availableAtStart).map((s) => s.id));
+  for (const m of extSource.matchAll(/factId: '([a-z_]+)', label: '([^']+)'[^\n]*reportedByStatementIds: \[([^\]]*)\]/g)) {
+    factLabels.set(m[1] ?? '', m[2] ?? '');
+    const reporters = (m[3] ?? '').split(',').map((x) => x.trim().replace(/'/g, '')).filter(Boolean);
+    if (reporters.some((r) => startStatements.has(r))) reportedAtStart.add(m[1] ?? '');
+  }
   const out: string[] = [];
   for (const f of raw.canonicalFacts) {
     if (f.secrecy !== 'canonical-only') continue;
+    if (reportedAtStart.has(f.id)) continue; // rapporté d'emblée par une déclaration initiale : visible comme « rapporté »
     const label = factLabels.get(f.id);
     if (label) out.push(label);
     out.push(f.id);

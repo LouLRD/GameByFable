@@ -2,8 +2,6 @@
 
 Format : `[OK | PARTIEL | ÉCHEC] Critère` puis **Preuve** (commande, fichier/fonction ou procédure manuelle exacte) et, si nécessaire, **Limite connue**. Toutes les commandes s'exécutent depuis la racine après `npm ci`. Les preuves marquées « E2E » se rejouent avec `npm run test:e2e` (Chromium Playwright requis : `npx playwright install chromium`).
 
-À COMPLÉTER : les sections D, G et les parcours manuels seront finalisés après l'intégration de l'interface.
-
 ## A. Moteur causal — 25 points
 
 [OK] Séparation vérifiable entre faits, perceptions, croyances, déclarations et claims.
@@ -60,7 +58,20 @@ Preuve : `src/domain/selectors/epilogue.ts` (`slots[]` chosen/canonical/matches,
 
 ## D. UX et direction artistique — 15 points
 
-À COMPLÉTER après intégration.
+[OK] Plan, frise, dossier et version forment un espace de travail compréhensible.
+Preuve : `src/app/Workbench.tsx` (grille desktop bandeau / dossier / plan + frise / version, mode focus, poignées clavier) ; `src/app/App.dom.test.tsx` (« rend le bureau après bootstrap : titre, quatre espaces, horloge et pression », « mode focus… », « onglets Version | Contradictions ») ; un seul curseur temporel partagé (`useGameStore.cursor`) : `src/features/timeline/TimelinePanel.dom.test.tsx` (« cliquer sur un marqueur… déplace le curseur et met la zone en évidence »), `src/features/map/MapPanel.dom.test.tsx` (« déplacer le curseur à 600 retire les jetons… »). Procédure : `npm run dev`, largeur ≥ 1024 px.
+
+[OK] Identité visuelle spécifique, cohérente avec le dossier nocturne et sans kit générique évident.
+Preuve : `src/styles/tokens.css` (palette imposée, piles de polices système, texture papier thermique `.ticket`, annotations `.hand-note`, ruban `.tape`), aucune dépendance d'interface (`package.json`), portraits SVG génératifs (`src/components/portrait`). Contraste WCAG AA vérifié par `src/styles/tokens.test.ts` (ratios ≥ 4,5 calculés).
+
+[OK] Micro-interactions informatives et mode mouvement réduit.
+Preuve : propagation à la pose d'une hypothèse et fissure du fil causal (`src/features/version-board/VersionBoard.dom.test.tsx` « place « Vol par Malik » … fissure »), pulsation des zones (`MapPanel.dom.test.tsx` « placer une hypothèse fait pulser la zone et l’acteur… sans classe d’animation en mouvement réduit »), frise (`TimelinePanel.dom.test.tsx` « en mouvement réduit, aucune classe d’animation »), annotations manuscrites (`src/features/casefile`, `JournalEntry.handwritten`), sous-titres des sons (`src/app/AmbienceProvider.tsx`) ; neutralisation CSS sous `prefers-reduced-motion` et `html[data-reduced-motion="true"]` (`src/styles/motion.css`, testé dans `tokens.test.ts`).
+
+[OK] Onboarding intégré, progressif et non bloquant.
+Preuve : `src/domain/selectors/playerView.ts` (`selectOnboarding`, déclencheurs de données), `src/domain/selectors/playerView.test.ts` (« l’onboarding progresse sans bloquer »), `src/features/onboarding/OnboardingCallout.dom.test.tsx` (« Compris » / « Tout passer » / bulle non bloquante ; aide progressive après trois impasses, désactivable).
+
+[OK] Retours d'erreur et états vides soignés.
+Preuve : refus du moteur rendus comme remarques de l'outil (`VersionBoard.dom.test.tsx` « affiche l’erreur du moteur comme remarque de l’outil, sans fermer le formulaire », `ConfrontationDialog.dom.test.tsx` « Non recevable »), écran d'erreur de scénario (`App.dom.test.tsx` « écran d’erreur de scénario : diagnostic listé en développement, jamais présenté comme le jeu »), `ErrorBoundary` ; états vides du dossier, de l'inspecteur (« Placez une hypothèse pour que le moteur la vérifie. ») et de la fiche de zone.
 
 ## E. Robustesse technique — 15 points
 
@@ -89,7 +100,17 @@ Preuve : `npm run build` (base `./`), aucune URL distante dans `src/` (test `src
 
 ## G. Accessibilité et responsive — 5 points
 
-À COMPLÉTER après intégration.
+[OK] Parcours essentiel réalisable au clavier.
+Preuve : E2E `e2e/onboarding-first-claim.spec.ts` (onboarding et première hypothèse au clavier), `App.dom.test.tsx` (raccourcis), `MapPanel.dom.test.tsx` (« Entrée et Espace sélectionnent la zone focalisée ; les flèches déplacent le focus »), `RoundTableDialog.dom.test.tsx` (« la confirmation se fait aussi au clavier »), `TimelinePanel.dom.test.tsx` (PageUp/PageDown, range natif). Aucun glisser-déposer : toute opération a un bouton ou un formulaire.
+
+[OK] Focus, noms accessibles et annonces utiles.
+Preuve : `:focus-visible` renforcé (`src/styles/base.css`), noms accessibles sur zones, passages, jetons, marqueurs (`MapPanel.dom.test.tsx`, `TimelinePanel.dom.test.tsx`), région `aria-live` alimentée par `announce` (`App.dom.test.tsx` « la région aria-live reflète les annonces du store »), dialogues `role="dialog"` avec piège de focus (`src/components/ui/Dialog.tsx`).
+
+[OK] Mobile 390 px véritablement recomposé.
+Preuve : `src/styles/layout.css` (pile d'espaces + barre persistante à quatre onglets ≤ 1023 px, aucun zoom), `App.dom.test.tsx` (« en mobile (≤ 1023 px), la barre d’espaces change l’espace actif »), E2E projet `mobile` (`e2e/keyboard-mobile.spec.ts`, 390 × 844, vérifie l'absence de débordement horizontal).
+
+[OK] Contraste, mouvement réduit, son non obligatoire.
+Preuve : `src/styles/tokens.test.ts` (ratios ≥ 4,5), `src/styles/motion.css`, son opt-in uniquement par bouton (`src/app/AmbienceProvider.tsx`), sous-titres toujours publiés (`src/audio/ambience.test.ts` « playCue publie un sous-titre même désactivé »).
 
 ## Invariants automatisables (§4)
 
