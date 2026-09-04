@@ -1,0 +1,695 @@
+/*
+ * LA VERSION ACCEPTABLE — canevas de version, axes, inspecteur de contradictions.
+ * Dépend des jetons globaux (tokens.css) et des classes de base (.btn, .card, .badge…).
+ * Aucune information portée par la couleur seule : glyphes, motifs et libellés.
+ */
+
+.vb {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: var(--space-3);
+}
+
+.vb-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+  min-width: 0;
+}
+
+.vb-title {
+  margin: 0;
+  font-size: var(--text-lg);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Statut global : glyphe + libellé, bordure dont le style varie avec le statut. */
+.vb-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: var(--space-1) var(--space-3);
+  border: 2px solid var(--vb-status-color, var(--fg-muted));
+  border-radius: var(--radius-2);
+  color: var(--vb-status-color, var(--fg-muted));
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.vb-status[data-status='incomplete'] {
+  --vb-status-color: var(--fg-subtle);
+
+  border-style: dotted;
+}
+
+.vb-status[data-status='impossible'] {
+  --vb-status-color: var(--danger);
+
+  border-style: solid;
+}
+
+.vb-status[data-status='contradicted'] {
+  --vb-status-color: var(--warning);
+
+  border-style: double;
+  border-width: 4px;
+}
+
+.vb-status[data-status='unsupported'] {
+  --vb-status-color: var(--info);
+
+  border-style: dashed;
+}
+
+.vb-status[data-status='coherent'] {
+  --vb-status-color: var(--success);
+
+  border-style: solid;
+}
+
+.vb-glyph {
+  display: inline-block;
+  min-width: 1.25em;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-align: center;
+}
+
+/* ---------------------------------------------------------------------------
+ * Fil causal et cartes d'emplacement
+ * ------------------------------------------------------------------------- */
+
+.vb-slots {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.vb-slot-item {
+  position: relative;
+  min-width: 0;
+}
+
+/* Segment du fil entre deux cartes : trait plein, ou fissuré (tirets + glyphe). */
+.vb-thread {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 28px;
+  margin-left: var(--space-5);
+  color: var(--fg-subtle);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.vb-thread::before {
+  content: '';
+  display: block;
+  width: 0;
+  height: 100%;
+  border-left: 3px solid var(--border-strong);
+}
+
+.vb-thread[data-cracked='true'] {
+  color: var(--danger);
+}
+
+.vb-thread[data-cracked='true']::before {
+  border-left-style: dashed;
+  border-left-color: var(--danger);
+  transform: translateX(-2px) rotate(6deg);
+}
+
+.vb-thread-glyph {
+  font-weight: 700;
+}
+
+.slot-card {
+  --anim-color: var(--danger);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.slot-card:focus-visible {
+  outline-offset: 3px;
+}
+
+.slot-card.anim-propagate {
+  --anim-color: var(--accent);
+}
+
+.slot-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-2);
+}
+
+.slot-card-index {
+  min-width: 1.5em;
+  color: var(--fg-subtle);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.slot-card-label {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.slot-card-prompt {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.slot-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-2);
+}
+
+.slot-card-hyp {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.slot-card-hyp-label {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 700;
+}
+
+.slot-card-summary {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+}
+
+.slot-card-params {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.slot-card-params dt {
+  color: var(--fg-subtle);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.slot-card-params dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.slot-card-empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-2);
+  color: var(--fg-muted);
+}
+
+.slot-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.vb-linklist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+/* Bouton-lien : ligne cliquable pleine largeur, cible ≥ 40 px. */
+.vb-link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-2);
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.vb-link:hover {
+  background: var(--bg-hover);
+  border-color: var(--border);
+}
+
+.vb-link[aria-current='true'] {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent);
+  font-weight: 700;
+}
+
+.vb-link-text {
+  flex: 1 1 12ch;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.vb-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.vb-section-title {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.vb-note {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+}
+
+.vb-alert {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 2px dashed var(--danger);
+  border-radius: var(--radius-2);
+  color: var(--fg);
+  font-size: var(--text-sm);
+}
+
+.vb-alert::before {
+  content: '✕ ';
+  content: '✕ ' / '';
+  color: var(--danger);
+  font-weight: 700;
+}
+
+/* ---------------------------------------------------------------------------
+ * Pièces jointes au rapport
+ * ------------------------------------------------------------------------- */
+
+.vb-evidence-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+}
+
+.vb-evidence-row label {
+  display: flex;
+  flex: 1 1 14ch;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  min-height: var(--tap-min);
+  cursor: pointer;
+}
+
+.vb-evidence-row input:disabled + span {
+  color: var(--fg-muted);
+}
+
+.vb-round-table {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-2);
+}
+
+.vb-round-table-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ---------------------------------------------------------------------------
+ * Axes d'évaluation : trois blocs distincts, jamais fusionnés
+ * ------------------------------------------------------------------------- */
+
+.axes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.axis {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--border-strong);
+  border-radius: var(--radius-2);
+  background: var(--bg-elevated);
+}
+
+.axis[data-axis='coherence'] {
+  border-top-style: solid;
+}
+
+.axis[data-axis='disclosure'] {
+  border-top-style: dashed;
+}
+
+.axis[data-axis='adhesion'] {
+  border-top-style: double;
+  border-top-width: 5px;
+}
+
+.axis-title {
+  margin: 0;
+  font-size: var(--text-md);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.axis-value {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.axis-meter {
+  position: relative;
+  height: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-1);
+  background: var(--bg-sunken);
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0 9px,
+    color-mix(in srgb, var(--fg-subtle) 40%, transparent) 9px 10px
+  );
+}
+
+.axis-meter-fill {
+  height: 100%;
+  background: var(--accent);
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0 4px,
+    color-mix(in srgb, var(--c-ink) 30%, transparent) 4px 6px
+  );
+}
+
+.axis-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  max-height: 16rem;
+  overflow: auto;
+}
+
+.adhesion-row {
+  display: grid;
+  grid-template-columns: 1.5em minmax(0, 1fr);
+  gap: var(--space-1) var(--space-2);
+  padding: var(--space-1) 0;
+  border-bottom: 1px dotted var(--border);
+}
+
+.adhesion-glyph {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-align: center;
+}
+
+.adhesion-row[data-verdict='signs'] .adhesion-glyph {
+  color: var(--success);
+}
+
+.adhesion-row[data-verdict='refuses'] .adhesion-glyph {
+  color: var(--danger);
+}
+
+.adhesion-row[data-verdict='requests-change'] .adhesion-glyph {
+  color: var(--warning);
+}
+
+.adhesion-name {
+  font-weight: 700;
+}
+
+.adhesion-verdict {
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+}
+
+.adhesion-reasons {
+  grid-column: 2;
+  margin: 0;
+  padding-left: var(--space-3);
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+}
+
+.adhesion-row .btn {
+  grid-column: 2;
+  justify-self: start;
+}
+
+/* ---------------------------------------------------------------------------
+ * Inspecteur de contradictions
+ * ------------------------------------------------------------------------- */
+
+.ci {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: var(--space-3);
+}
+
+.ci-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.ci-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ci-group-title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ci-item {
+  border-left-width: 3px;
+}
+
+/* Résistance sociale : cartouche double, jamais assimilée à une incohérence. */
+.ci-social {
+  padding: var(--space-3);
+  border: 3px double var(--border-strong);
+  border-radius: var(--radius-2);
+}
+
+.ci-social-tag {
+  display: inline-block;
+  padding: 0.1em 0.5em;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ci-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-2);
+  background: var(--bg-elevated);
+}
+
+.ci-detail-title {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+
+.ci-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.ci-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+}
+
+.ci-chips .chip {
+  max-width: 100%;
+  min-height: var(--tap-min);
+  white-space: normal;
+  text-align: left;
+}
+
+.ci-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-5);
+}
+
+.ci-step {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.ci-step-text {
+  flex: 1 1 18ch;
+  min-width: 0;
+}
+
+.ci-step-text[data-conclusion='true'] {
+  font-weight: 700;
+}
+
+.ci-examine {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* ---------------------------------------------------------------------------
+ * Formulaire d'hypothèse
+ * ------------------------------------------------------------------------- */
+
+.claim-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.claim-form-summary {
+  margin: 0;
+  padding: var(--space-3);
+  border-left: 4px dashed var(--fg);
+  background: var(--bg-sunken);
+  color: var(--fg-muted);
+}
+
+.claim-form-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.claim-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: var(--space-3);
+}
+
+.claim-form-time {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+  gap: var(--space-3);
+}
+
+.claim-form-duration {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.claim-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+@media (max-width: 480px) {
+  .vb,
+  .ci {
+    padding: var(--space-2);
+  }
+
+  .slot-card-params {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .slot-card-params dd {
+    margin-bottom: var(--space-1);
+  }
+}

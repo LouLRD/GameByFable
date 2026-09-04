@@ -233,11 +233,16 @@ export function buildPositionModel(
 export type OccupancyStatus = 'established' | 'possible' | 'reported-elsewhere' | 'impossible';
 
 /**
- * Tolérance (secondes) appliquée aux absences caméra et aux durées de trajet : bord de zone
- * imprécis et durées estimées. Les chevauchements avec une position établie dans une AUTRE zone
+ * Tolérances (secondes). Les chevauchements avec une position établie dans une AUTRE zone
  * restent stricts. Voir DECISIONS.md.
+ * - bord de zone : une absence caméra qui ne dépasse pas cette marge n'est pas retenue
+ *   (une personne au bord du champ, en train de sortir) ;
+ * - trajet : marge d'estimation des durées de traversée.
  */
-export const TOLERANCE_SECONDS = 12;
+export const CAMERA_EDGE_TOLERANCE_SECONDS = 12;
+export const TRAVEL_TOLERANCE_SECONDS = 3;
+/** @deprecated alias historique de la tolérance de bord de zone. */
+export const TOLERANCE_SECONDS = CAMERA_EDGE_TOLERANCE_SECONDS;
 
 export interface OccupancyConflict {
   kind: 'overlap' | 'absence' | 'arrival-too-late' | 'departure-too-late' | 'reported-overlap';
@@ -297,7 +302,7 @@ export function canOccupy(
     for (const abs of model.absences.get(characterId) ?? []) {
       if (!intervalsOverlap(abs, iv) && !(iv.start === iv.end && overlapsPoint(abs, iv.start))) continue;
       const overlapLength = Math.min(abs.end, iv.end) - Math.max(abs.start, iv.start);
-      if (iv.start !== iv.end && overlapLength <= TOLERANCE_SECONDS) continue;
+      if (iv.start !== iv.end && overlapLength <= CAMERA_EDGE_TOLERANCE_SECONDS) continue;
       conflicts.push({
         kind: 'absence',
         at: Math.max(abs.start, iv.start),
@@ -318,7 +323,7 @@ export function canOccupy(
     const tA = before.transit ? before.interval.start : before.interval.end;
     const route = traceRoute(before.zoneId, zoneId, tA, scenario, world);
     const travel = route ? route.seconds : Number.POSITIVE_INFINITY;
-    if (tA + travel > iv.start + TOLERANCE_SECONDS) {
+    if (tA + travel > iv.start + TRAVEL_TOLERANCE_SECONDS) {
       conflicts.push({
         kind: 'arrival-too-late',
         segment: before,
@@ -339,7 +344,7 @@ export function canOccupy(
   if (after && conflicts.every((c) => c.kind !== 'overlap')) {
     const route = traceRoute(zoneId, after.zoneId, iv.end, scenario, world);
     const travel = route ? route.seconds : Number.POSITIVE_INFINITY;
-    if (iv.end + travel > after.interval.start + TOLERANCE_SECONDS) {
+    if (iv.end + travel > after.interval.start + TRAVEL_TOLERANCE_SECONDS) {
       conflicts.push({
         kind: 'departure-too-late',
         segment: after,
@@ -399,7 +404,7 @@ export function checkPairCompatibility(
     };
   }
   const travel = shortestTravelTime(first.zoneId, second.zoneId, first.interval.end, scenario, world);
-  if (first.interval.end + travel > second.interval.start + TOLERANCE_SECONDS) {
+  if (first.interval.end + travel > second.interval.start + TRAVEL_TOLERANCE_SECONDS) {
     const route = traceRoute(first.zoneId, second.zoneId, first.interval.end, scenario, world);
     return {
       kind: 'arrival-too-late',

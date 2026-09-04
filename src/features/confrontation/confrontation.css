@@ -1,0 +1,489 @@
+/*
+ * LA VERSION ACCEPTABLE — confrontation (GDD §8).
+ * Formulaire en étapes visibles simultanément, aperçu de recevabilité, résultat sur ticket.
+ * Dépend des jetons et de base.css ; aucun sens porté par la couleur seule.
+ */
+
+.confrontation-form,
+.confrontation-result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+/* ---------------------------------------------------------------------------
+ * Étapes
+ * ------------------------------------------------------------------------- */
+
+.confrontation-step {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.confrontation-step > legend,
+.confrontation-step-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.confrontation-step-index {
+  display: inline-grid;
+  min-width: 1.6em;
+  height: 1.6em;
+  place-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-1);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.confrontation-step .field-hint {
+  margin-bottom: var(--space-2);
+}
+
+/* Listes de choix (protagonistes, cibles) : cartes radio natives. */
+.confrontation-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  max-height: 38vh;
+  padding: 3px;
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.confrontation-choice {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+  min-width: 0;
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2);
+  background: var(--bg);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease),
+    border-color var(--duration-fast) var(--ease);
+}
+
+.confrontation-choice[data-with-portrait='true'] {
+  grid-template-columns: auto auto 1fr;
+}
+
+.confrontation-choice:hover {
+  background: var(--bg-hover);
+}
+
+/* Sélection : bordure accent + barre interne (forme + couleur). */
+.confrontation-choice:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--bg-elevated);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.confrontation-choice:has(input:focus-visible) {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.confrontation-choice > input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Non sélectionnable : bordure tiretée + opacité (la forme change, pas seulement la couleur). */
+.confrontation-choice:has(input:disabled) {
+  border-style: dashed;
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.confrontation-choice > input {
+  margin: 0;
+}
+
+.confrontation-choice-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.confrontation-choice-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 700;
+}
+
+.confrontation-choice-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+}
+
+.confrontation-quote {
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+
+/* ---------------------------------------------------------------------------
+ * Confiance : glyphe + libellé
+ * ------------------------------------------------------------------------- */
+
+.trust-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.trust-mark-glyph {
+  display: inline-grid;
+  min-width: 1.4em;
+  height: 1.4em;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.trust-mark[data-trust='fermé'] .trust-mark-glyph {
+  border-style: dashed;
+  color: var(--danger);
+}
+
+.trust-mark[data-trust='prudent'] .trust-mark-glyph {
+  border-style: dotted;
+  color: var(--warning);
+}
+
+.trust-mark[data-trust='disponible'] .trust-mark-glyph {
+  color: var(--info);
+}
+
+.trust-mark[data-trust='engagé'] .trust-mark-glyph {
+  border-width: 2px;
+  color: var(--success);
+}
+
+/* ---------------------------------------------------------------------------
+ * Approche : trois cartes
+ * ------------------------------------------------------------------------- */
+
+.approach-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.approach-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-1) var(--space-2);
+  align-items: start;
+  min-width: 0;
+  min-height: var(--tap-min);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2);
+  background: var(--bg);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease),
+    border-color var(--duration-fast) var(--ease);
+}
+
+.approach-card:hover {
+  background: var(--bg-hover);
+}
+
+.approach-card > input {
+  grid-row: 1;
+  margin: 0.15em 0 0;
+}
+
+.approach-card > input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.approach-card:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--bg-elevated);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.approach-card:has(input:focus-visible) {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.approach-card:has(input:disabled) {
+  border-style: dashed;
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.approach-card-title {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 700;
+}
+
+.approach-glyph {
+  display: inline-grid;
+  min-width: 1.5em;
+  height: 1.5em;
+  place-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-1);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.approach-card[data-approach='direct'] .approach-glyph {
+  border-style: dashed;
+}
+
+.approach-card[data-approach='empathetic'] .approach-glyph {
+  border-radius: 50%;
+}
+
+.approach-card-intent {
+  grid-column: 2;
+  font-size: var(--text-sm);
+}
+
+.approach-card-reminder {
+  grid-column: 2;
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+}
+
+/* ---------------------------------------------------------------------------
+ * Aperçu : recevabilité, coût, exigence
+ * ------------------------------------------------------------------------- */
+
+.confrontation-preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-2);
+  background: var(--bg-sunken);
+}
+
+.confrontation-pressure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.confrontation-pressure meter {
+  width: 8rem;
+  max-width: 100%;
+  height: 0.75rem;
+}
+
+.confrontation-verdict {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.confrontation-verdict-glyph {
+  display: inline-grid;
+  flex: 0 0 auto;
+  min-width: 1.6em;
+  height: 1.6em;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-1);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.confrontation-verdict[data-tone='ready'] .confrontation-verdict-glyph {
+  color: var(--success);
+}
+
+.confrontation-verdict[data-tone='invalid'] .confrontation-verdict-glyph {
+  border-style: dashed;
+  color: var(--danger);
+}
+
+.confrontation-verdict[data-tone='probe'] .confrontation-verdict-glyph {
+  border-style: dotted;
+  color: var(--info);
+}
+
+.confrontation-verdict[data-tone='incomplete'] .confrontation-verdict-glyph {
+  border-style: dotted;
+  color: var(--fg-subtle);
+}
+
+.confrontation-verdict-label {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Erreur technique du moteur : jamais présentée comme une réponse du jeu. */
+.confrontation-alert {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  min-width: 0;
+  padding: var(--space-3);
+  border: 2px dashed var(--danger);
+  border-radius: var(--radius-2);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  overflow-wrap: anywhere;
+}
+
+.confrontation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+/* ---------------------------------------------------------------------------
+ * Résultat
+ * ------------------------------------------------------------------------- */
+
+.confrontation-result-head {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  min-width: 0;
+}
+
+.confrontation-result-identity {
+  min-width: 0;
+}
+
+.confrontation-result-identity h3 {
+  margin: 0;
+  font-size: var(--text-lg);
+  overflow-wrap: anywhere;
+}
+
+.confrontation-result-identity p {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.confrontation-ticket {
+  margin: var(--space-3) 0;
+}
+
+.confrontation-ticket p {
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.confrontation-effects-title {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.confrontation-effects {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.confrontation-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.confrontation-links .btn {
+  max-width: 100%;
+  letter-spacing: normal;
+  text-align: left;
+  text-transform: none;
+  white-space: normal;
+}
+
+.confrontation-annotations {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* ---------------------------------------------------------------------------
+ * Petits écrans : une colonne, listes sans hauteur maximale
+ * ------------------------------------------------------------------------- */
+
+@media (max-width: 767px) {
+  .approach-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .confrontation-list {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .confrontation-actions .btn {
+    flex: 1 1 auto;
+  }
+}

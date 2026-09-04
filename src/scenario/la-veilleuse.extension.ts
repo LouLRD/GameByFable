@@ -74,7 +74,7 @@ export const laVeilleuseExtension = {
       },
       excludes: ['prop_ana_no_unusual_drawer', 'prop_ana_unaware_all_evening'],
       knowledgeTags: ['drawer-open', 'ana'],
-      costKeys: { ana: ['exposeRefund'] },
+      costKeys: { ana: ['admitProcedureBreach'] },
       truth: true,
     },
     {
@@ -441,6 +441,7 @@ export const laVeilleuseExtension = {
           interval: s(535, 565),
           claimedTags: ['ines', 'toward-stockroom'],
           identityClaimed: true,
+          soundTags: ['door-like', 'brief'],
         },
       },
       excludes: ['prop_ines_cold_aisle_continuous'],

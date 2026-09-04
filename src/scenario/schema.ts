@@ -328,6 +328,7 @@ export const PropositionSemanticsSchema = z.discriminatedUnion('type', [
       interval: IntervalSchema,
       claimedTags: z.array(z.string()).default([]),
       identityClaimed: z.boolean().optional(),
+      soundTags: z.array(z.string()).optional(),
     }),
   }),
   z.object({ type: z.literal('object-location'), objectTag: z.string(), zoneId: id, interval: IntervalSchema }),

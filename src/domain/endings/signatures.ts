@@ -106,6 +106,7 @@ export function decideSignature(ctx: EvaluationContext, characterId: CharacterId
 
   // 4. Conflits avec une certitude
   let silent = false;
+  const objections: { q: PropositionId; label: string; known: boolean }[] = [];
   for (const q of ctx.versionPropositions) {
     const qdef = scenario.index.propositions.get(q);
     if (!qdef) continue;
@@ -125,13 +126,20 @@ export function decideSignature(ctx: EvaluationContext, characterId: CharacterId
         internalReasons.push(`Sait que « ${pdef.label} » est ${value ? 'vrai' : 'faux'} ; contredire coûterait : ${truthCosts.join(', ')}.`);
         continue;
       }
-      if (ctx.playerKnownPropositions.has(p)) {
-        publicReasons.push(`Cette version contredit ce que ${name} tient pour certain : « ${pdef.label} ».`);
+      objections.push({ q, label: pdef.label, known: ctx.playerKnownPropositions.has(p) });
+    }
+  }
+  if (objections.length > 0) {
+    // On cite de préférence une certitude déjà connue du joueur ; sinon le refus reste inexpliqué publiquement.
+    const objection = objections.find((o) => o.known) ?? objections[0];
+    if (objection) {
+      if (objection.known) {
+        publicReasons.push(`Cette version contredit ce que ${name} tient pour certain : « ${objection.label} ».`);
       } else {
         publicReasons.push(`${name} refuse cette formulation sans vouloir s'expliquer.`);
-        internalReasons.push(`Certitude non révélée au joueur : « ${pdef.label} ».`);
+        internalReasons.push(`Certitude non révélée au joueur : « ${objection.label} ».`);
       }
-      const claim = ctx.claimEvents.find((ev) => ev.hypothesis.propositions.includes(q));
+      const claim = ctx.claimEvents.find((ev) => ev.hypothesis.propositions.includes(objection.q));
       return decision('requests-change', claim ? slotOf(claim.hypothesis.id) : undefined);
     }
   }

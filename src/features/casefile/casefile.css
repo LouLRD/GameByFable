@@ -1,0 +1,599 @@
+/*
+ * LA VERSION ACCEPTABLE — dossier (src/features/casefile).
+ * Dépend des jetons et classes globales (base.css, degrees.css). Aucun débordement horizontal
+ * à 390 px : min-width 0 partout, listes en overflow auto, boutons qui passent à la ligne.
+ */
+
+.casefile {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+/* ---------------------------------------------------------------------------
+ * En-tête : titre, recherche, filtres
+ * ------------------------------------------------------------------------- */
+
+.casefile-header {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px dashed var(--border-strong);
+  background: var(--bg-elevated);
+}
+
+.casefile-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.casefile-count {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+
+.casefile-search {
+  min-width: 0;
+}
+
+.casefile-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+/* Les puces de filtre sont des cibles tactiles : ≥ 40 px. */
+.casefile-filters .chip {
+  min-height: var(--tap-min);
+}
+
+.casefile-filter-count {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+/* ---------------------------------------------------------------------------
+ * Corps : liste + fiche
+ * ------------------------------------------------------------------------- */
+
+.casefile-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.casefile-list-region {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.casefile-premise {
+  margin: calc(var(--ticket-tooth) + var(--space-1)) var(--space-1) var(--space-4);
+  font-size: var(--text-xs);
+}
+
+.casefile-premise p {
+  margin: 0;
+}
+
+.casefile-group + .casefile-group {
+  margin-top: var(--space-3);
+}
+
+.casefile-group-title {
+  margin: 0 0 var(--space-1);
+  padding: 0 var(--space-2);
+  color: var(--fg-muted);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.casefile-group-count {
+  font-family: var(--font-mono);
+  font-weight: 400;
+}
+
+.casefile-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.casefile-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
+  min-height: var(--tap-min);
+  padding: var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-2);
+  background: transparent;
+  color: var(--fg);
+  font-size: var(--text-sm);
+  line-height: 1.3;
+  text-align: left;
+  transition:
+    background-color var(--duration-fast) var(--ease),
+    border-color var(--duration-fast) var(--ease);
+}
+
+.casefile-item:hover {
+  background: var(--bg-hover);
+  border-color: var(--border);
+}
+
+/* Sélection : bordure accent + barre gauche + fond (jamais la couleur seule). */
+.casefile-item[aria-current='true'] {
+  background: var(--bg-elevated);
+  border-color: var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.casefile-item-glyph {
+  flex: 0 0 1.5em;
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  line-height: 1.2;
+  text-align: center;
+}
+
+.casefile-item-main {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.casefile-item-label {
+  overflow-wrap: anywhere;
+}
+
+.casefile-item-label-historic {
+  color: var(--fg-muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+
+.casefile-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  color: var(--fg-muted);
+  font-size: var(--text-xs);
+}
+
+.casefile-item-provenance {
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
+}
+
+.casefile-empty {
+  margin: 0;
+  padding: var(--space-5) var(--space-3);
+  color: var(--fg-muted);
+  text-align: center;
+}
+
+/* ---------------------------------------------------------------------------
+ * Fiche de détail
+ * ------------------------------------------------------------------------- */
+
+.casefile-sheet {
+  flex: 0 0 auto;
+  min-width: 0;
+  min-height: 0;
+  max-height: 58%;
+  padding: var(--space-2) var(--space-3) var(--space-4);
+  border-top: 2px dotted var(--border-strong);
+  background: var(--bg-elevated);
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.casefile-sheet-bar {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: var(--space-2);
+}
+
+.casefile-sheet-content {
+  min-width: 0;
+}
+
+.casefile-sheet-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.casefile-sheet-glyph {
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-2);
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+}
+
+.casefile-sheet-heading {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.casefile-sheet-kind {
+  margin: 0;
+  color: var(--fg-subtle);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.casefile-sheet-title {
+  margin: 0;
+  font-size: var(--text-lg);
+  overflow-wrap: anywhere;
+}
+
+.casefile-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: var(--space-1) 0;
+  min-width: 0;
+}
+
+.casefile-role,
+.casefile-trust {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-sm);
+}
+
+.casefile-trust-glyph {
+  display: inline-block;
+  min-width: 1.25em;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-align: center;
+}
+
+.casefile-section {
+  margin-top: var(--space-4);
+  min-width: 0;
+}
+
+.casefile-section-title {
+  margin: 0 0 var(--space-1);
+  color: var(--fg-muted);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.casefile-section p {
+  margin: 0;
+}
+
+.casefile-section p + p {
+  margin-top: var(--space-1);
+}
+
+.casefile-ticket {
+  margin-top: calc(var(--ticket-tooth) + var(--space-3));
+}
+
+.casefile-ticket-text {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.casefile-summary {
+  margin: var(--space-3) 0 0;
+}
+
+.casefile-proposition {
+  padding: var(--space-2) var(--space-3);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-2);
+  background: var(--bg-sunken);
+}
+
+.casefile-quote {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--border-strong);
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+
+.casefile-quote p {
+  margin: 0;
+}
+
+.casefile-bullets {
+  margin: 0;
+  padding-left: 1.2em;
+}
+
+.casefile-bullets li + li {
+  margin-top: var(--space-1);
+}
+
+.casefile-dl {
+  display: grid;
+  grid-template-columns: minmax(5rem, max-content) minmax(0, 1fr);
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.casefile-dl dt {
+  color: var(--fg-muted);
+}
+
+.casefile-dl dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.casefile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  min-width: 0;
+}
+
+/* Les libellés longs passent à la ligne plutôt que de déborder à 390 px. */
+.casefile-actions .btn {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+}
+
+/* Lien-bouton : souligné, cible ≥ 40 px, fond au survol. */
+.casefile-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  max-width: 100%;
+  padding: var(--space-1) var(--space-2);
+  margin-left: calc(-1 * var(--space-2));
+  border-radius: var(--radius-1);
+  color: var(--accent);
+  font-size: var(--text-sm);
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
+  overflow-wrap: anywhere;
+}
+
+.casefile-link:hover {
+  background: var(--bg-hover);
+  color: var(--accent-hover);
+}
+
+.casefile-struck {
+  color: var(--fg-muted);
+  text-decoration-thickness: 1.5px;
+}
+
+.casefile-statements,
+.casefile-perceptions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.casefile-statement-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  min-width: 0;
+}
+
+.casefile-statement-row[data-historic='true'] {
+  padding-left: var(--space-2);
+  border-left: 2px dashed var(--border-strong);
+}
+
+.casefile-perception {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  min-width: 0;
+  padding: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2);
+}
+
+.casefile-chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+/* Étiquette de perception : arrondie mais non interactive (pas de .chip cliquable). */
+.casefile-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--bg-sunken);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+
+.casefile-inline-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+}
+
+.casefile-check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  cursor: pointer;
+}
+
+.casefile-check input:disabled + span {
+  color: var(--fg-muted);
+  text-decoration: underline dotted;
+}
+
+.casefile-fieldset {
+  min-width: 0;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.casefile-radios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+}
+
+.casefile-probe {
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-2);
+  background: var(--bg);
+}
+
+.casefile-notice {
+  margin: var(--space-2) 0 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px dashed var(--danger);
+  border-radius: var(--radius-2);
+  color: var(--fg);
+  font-size: var(--text-sm);
+}
+
+.casefile-reaction {
+  margin-top: var(--space-4);
+}
+
+.casefile-reaction-context {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+/* ---------------------------------------------------------------------------
+ * Journal
+ * ------------------------------------------------------------------------- */
+
+.casefile-journal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.casefile-journal-entry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  border-left: 2px solid var(--border-strong);
+}
+
+.casefile-journal-entry[data-handwritten='true'] {
+  border-left-style: dashed;
+  border-left-color: var(--warning);
+}
+
+.casefile-journal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.casefile-journal-index {
+  font-size: var(--text-xs);
+}
+
+.casefile-journal-text {
+  margin: 0;
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+
+.casefile-journal-entry .hand-note {
+  margin: var(--space-1) 0;
+}
+
+.casefile-journal-refs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+}
+
+/* ---------------------------------------------------------------------------
+ * Pile mobile / tablette : la fiche remplace la liste (bouton « Retour »)
+ * ------------------------------------------------------------------------- */
+
+@media (max-width: 1023px) {
+  .casefile[data-sheet-open='true'] .casefile-list-region {
+    display: none;
+  }
+
+  .casefile[data-sheet-open='true'] .casefile-sheet {
+    flex: 1 1 auto;
+    max-height: none;
+  }
+
+  .casefile-dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .casefile-dl dt {
+    margin-top: var(--space-1);
+  }
+}

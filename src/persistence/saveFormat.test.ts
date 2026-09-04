@@ -179,7 +179,7 @@ describe('migration v1 → v2', () => {
     expect(reimported.save).toEqual(migrated.save);
   });
 
-  it('applique des valeurs par défaut et borne le curseur quand la v1 est minimale', () => {
+  it('applique des valeurs par défaut et conserve le curseur temporel quand la v1 est minimale', () => {
     const v1 = SaveFileV1Schema.parse({
       formatVersion: 1,
       scenarioId: 'la-veilleuse-300',
@@ -189,7 +189,7 @@ describe('migration v1 → v2', () => {
       actions: [{ type: 'seal' }],
     });
     const v2 = migrateV1toV2(v1);
-    expect(v2.ui.cursor).toBe(1);
+    expect(v2.ui.cursor).toBe(99);
     expect(v2.label).toBe(LEGACY_LABEL);
     expect(v2.savedAt).toBe('');
     expect(v2.actions).toEqual([{ type: 'seal-report' }]);
@@ -245,10 +245,12 @@ describe('refus non destructifs', () => {
     expect(result).toMatchObject({ ok: false, reason: 'invalid-schema' });
     if (!result.ok) expect(result.issues.some((i) => i.startsWith('actions.12'))).toBe(true);
 
-    const cursorTooFar = makeSave({ ui: { cursor: 999, selectedId: null, activeSpace: null } });
+    const cursorTooFar = makeSave({ ui: { cursor: 999_999, selectedId: null, activeSpace: null } });
     const cursorResult = parseSave(cursorTooFar, EXPECTED);
     expect(cursorResult).toMatchObject({ ok: false, reason: 'invalid-schema' });
     if (!cursorResult.ok) expect(cursorResult.issues[0]).toContain('ui.cursor');
+    // un curseur temporel plausible (secondes simulées) est accepté quel que soit le nombre d'actions
+    expect(parseSave(makeSave({ ui: { cursor: 1_500, selectedId: null, activeSpace: null } }), EXPECTED).ok).toBe(true);
 
     expect(parseSave({ formatVersion: 0, scenarioId: 'x' }, EXPECTED)).toMatchObject({
       ok: false,

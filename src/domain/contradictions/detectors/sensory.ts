@@ -92,7 +92,8 @@ export const sensoryDetector: ContradictionDetector & { detect(ctx: EvaluationCo
         }
       }
 
-      if (sem.modality === 'audio') {
+      const soundTags = sem.modality === 'audio' ? sem.target.claimedTags : (sem.target.soundTags ?? []);
+      if (soundTags.length > 0) {
         for (const ev of soundClaims) {
           const effect = ev.extension?.worldEffect;
           if (effect?.type !== 'sound' || !ev.zoneId || !ev.interval) continue;
@@ -109,10 +110,10 @@ export const sensoryDetector: ContradictionDetector & { detect(ctx: EvaluationCo
             severity = 'critical';
             problems.push(`Le son proposé n'est pas audible depuis ${zoneLabel(ctx.scenario, from)} : intensité perçue ${heard.intensity.toFixed(2)}.`);
           }
-          const shared = sharedTags(effect.signatureTags, sem.target.claimedTags);
-          if (sem.target.claimedTags.length > 0 && shared.length / sem.target.claimedTags.length < 0.5) {
+          const shared = sharedTags(effect.signatureTags, soundTags);
+          if (shared.length / soundTags.length < 0.5) {
             severity = severity ?? 'major';
-            steps.push({ type: 'signature-mismatch', expected: sem.target.claimedTags, claimed: effect.signatureTags, shared });
+            steps.push({ type: 'signature-mismatch', expected: soundTags, claimed: effect.signatureTags, shared });
             problems.push(`La signature du son proposé ne correspond pas à ce que ${observerName} décrit.`);
           }
           const tolerant = interval(ev.interval.start - TIMING_TOLERANCE, ev.interval.end + TIMING_TOLERANCE);

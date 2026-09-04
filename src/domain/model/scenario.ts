@@ -337,6 +337,8 @@ export type PropositionSemantics =
         claimedTags: string[];
         /** L'identité de la cible est-elle revendiquée ? Exige une vue nette. */
         identityClaimed?: boolean;
+        /** Signature sonore revendiquée en plus d'une perception visuelle (« j'ai entendu… et vu… »). */
+        soundTags?: string[];
       };
     }
   /** Un objet se trouvait à un endroit. */

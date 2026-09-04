@@ -144,9 +144,10 @@ export const SaveFileV2Schema = z
     savedAt: z.string(),
     appVersion: z.string(),
   })
-  .refine((save) => save.ui.cursor <= save.actions.length, {
+  // `ui.cursor` est le curseur TEMPOREL (secondes simulées), borné par l'interface au chargement.
+  .refine((save) => save.ui.cursor <= 24 * 3600, {
     path: ['ui', 'cursor'],
-    message: 'Le curseur dépasse le nombre d’actions.',
+    message: 'Le curseur temporel dépasse une journée.',
   });
 
 export type SaveFileV2Input = z.infer<typeof SaveFileV2Schema>;
@@ -214,7 +215,7 @@ export function migrateV1toV2(v1: SaveFileV1): SaveFileV2 {
     scenarioVersion: v1.scenarioVersion,
     seed: v1.seed,
     actions: v1.actions.map(migrateActionV1),
-    ui: { cursor: Math.min(v1.cursor, v1.actions.length), selectedId: null, activeSpace: null },
+    ui: { cursor: Math.max(0, v1.cursor), selectedId: null, activeSpace: null },
     label: truncateLabel(v1.label ?? LEGACY_LABEL),
     savedAt: v1.savedAt ?? '',
     appVersion: LEGACY_APP_VERSION,
