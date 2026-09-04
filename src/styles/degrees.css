@@ -1,0 +1,454 @@
+/*
+ * LA VERSION ACCEPTABLE — degrés d'information, statuts de cohérence, sévérités.
+ *
+ * GDD §6.1 : « Ces degrés utilisent icône, libellé et texture, jamais la
+ * couleur seule. » Chaque classe combine donc :
+ *   - un glyphe textuel dans ::before (masqué aux lecteurs d'écran via la
+ *     syntaxe `content: "…" / ""`, le libellé restant dans le DOM) ;
+ *   - une texture CSS distincte (gradients répétés) ;
+ *   - un style de bordure gauche distinct ;
+ *   - une couleur, toujours redondante avec les trois cues précédents.
+ *
+ * La couleur est portée par --degree-color / --status-color / --severity-color
+ * afin que les textures suivent les surcharges de contexte (ex. .ticket).
+ *
+ *   Degré        glyphe  texture      bordure gauche
+ *   établi       ■       plein        pleine
+ *   rapporté     ▤       hachures     double
+ *   déduit       ◆       pointillés   pleine
+ *   proposé      ◌       trame        tiretée
+ *   inconnu      ?       damier       pointillée
+ *
+ *   Statut         glyphe  texture             bordure
+ *   impossible     ✕       hachures serrées    pleine 4 px
+ *   contradicted   ≠       hachures croisées   double 4 px
+ *   unsupported    ○       pointillés          tiretée 4 px
+ *   supported      ✓       plein               pleine 4 px
+ *   unknown        ?       damier              pointillée 4 px
+ *
+ *   Sévérité   glyphe  texture     épaisseur
+ *   notice     i       aucune      1 px
+ *   major      !       pointillés  2 px
+ *   critical   !!      hachures    3 px, tiretée
+ */
+
+/* ---------------------------------------------------------------------------
+ * Degrés
+ * ------------------------------------------------------------------------- */
+
+.degree-established,
+.degree-reported,
+.degree-deduced,
+.degree-proposed,
+.degree-unknown {
+  --degree-color: var(--fg-muted);
+
+  position: relative;
+  padding-left: calc(var(--space-2) * 2 + 1.25em);
+  border-left: 4px solid var(--degree-color);
+  background-repeat: repeat;
+}
+
+.degree-established::before,
+.degree-reported::before,
+.degree-deduced::before,
+.degree-proposed::before,
+.degree-unknown::before {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  display: grid;
+  width: 1.25em;
+  height: 1.25em;
+  place-items: center;
+  color: var(--degree-color);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* Établi : plein. */
+.degree-established,
+.degree-label[data-degree='established'] {
+  --degree-color: var(--success);
+}
+
+.degree-established {
+  border-left-style: solid;
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--degree-color) 10%, transparent),
+    color-mix(in srgb, var(--degree-color) 10%, transparent)
+  );
+}
+
+.degree-established::before,
+.degree-label[data-degree='established']::before {
+  content: '■';
+  content: '■' / '';
+}
+
+/* Rapporté : hachures. */
+.degree-reported,
+.degree-label[data-degree='reported'] {
+  --degree-color: var(--info);
+}
+
+.degree-reported {
+  border-left-style: double;
+  background-image: repeating-linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--degree-color) 16%, transparent) 0 2px,
+    transparent 2px 8px
+  );
+}
+
+.degree-reported::before,
+.degree-label[data-degree='reported']::before {
+  content: '▤';
+  content: '▤' / '';
+}
+
+/* Déduit : pointillés. */
+.degree-deduced,
+.degree-label[data-degree='deduced'] {
+  --degree-color: var(--warning);
+}
+
+.degree-deduced {
+  border-left-style: solid;
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--degree-color) 28%, transparent) 1px,
+    transparent 1.5px
+  );
+  background-size: 8px 8px;
+}
+
+.degree-deduced::before,
+.degree-label[data-degree='deduced']::before {
+  content: '◆';
+  content: '◆' / '';
+}
+
+/* Proposé : trame. */
+.degree-proposed,
+.degree-label[data-degree='proposed'] {
+  --degree-color: var(--fg);
+}
+
+.degree-proposed {
+  border-left-style: dashed;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--degree-color) 9%, transparent) 1px, transparent 1px),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--degree-color) 9%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 10px 10px;
+}
+
+.degree-proposed::before,
+.degree-label[data-degree='proposed']::before {
+  content: '◌';
+  content: '◌' / '';
+}
+
+/* Inconnu : damier. */
+.degree-unknown,
+.degree-label[data-degree='unknown'] {
+  --degree-color: var(--fg-subtle);
+}
+
+.degree-unknown {
+  border-left-style: dotted;
+  background-image: repeating-conic-gradient(
+    color-mix(in srgb, var(--degree-color) 12%, transparent) 0 25%,
+    transparent 0 50%
+  );
+  background-size: 12px 12px;
+}
+
+.degree-unknown::before,
+.degree-label[data-degree='unknown']::before {
+  content: '?';
+  content: '?' / '';
+}
+
+/* ---------------------------------------------------------------------------
+ * Libellés (degré, statut, sévérité) : mono, majuscules, glyphe en ligne
+ * lorsqu'ils portent leur propre attribut data-*.
+ * ------------------------------------------------------------------------- */
+
+.degree-label,
+.status-label,
+.severity-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.degree-label {
+  color: var(--degree-color, var(--fg-muted));
+}
+
+.status-label {
+  color: var(--status-color, var(--fg-muted));
+}
+
+.severity-label {
+  color: var(--severity-color, var(--fg-muted));
+}
+
+.degree-label[data-degree]::before,
+.status-label[data-status]::before,
+.severity-label[data-severity]::before {
+  display: inline-block;
+  min-width: 1em;
+  text-align: center;
+}
+
+/* ---------------------------------------------------------------------------
+ * Statuts de cohérence d'une claim
+ * ------------------------------------------------------------------------- */
+
+.status-impossible,
+.status-contradicted,
+.status-unsupported,
+.status-supported,
+.status-unknown {
+  --status-color: var(--fg-muted);
+
+  position: relative;
+  padding-left: calc(var(--space-2) * 2 + 1.25em);
+  border: 1px solid color-mix(in srgb, var(--status-color) 55%, transparent);
+  border-left: 4px solid var(--status-color);
+  background-repeat: repeat;
+}
+
+.status-impossible::before,
+.status-contradicted::before,
+.status-unsupported::before,
+.status-supported::before,
+.status-unknown::before {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  display: grid;
+  width: 1.25em;
+  height: 1.25em;
+  place-items: center;
+  color: var(--status-color);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* Impossible : hachures serrées. */
+.status-impossible,
+.status-label[data-status='impossible'] {
+  --status-color: var(--danger);
+}
+
+.status-impossible {
+  border-left-style: solid;
+  background-image: repeating-linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--status-color) 22%, transparent) 0 2px,
+    transparent 2px 6px
+  );
+}
+
+.status-impossible::before,
+.status-label[data-status='impossible']::before {
+  content: '✕';
+  content: '✕' / '';
+}
+
+/* Contredit : hachures croisées. */
+.status-contradicted,
+.status-label[data-status='contradicted'] {
+  --status-color: var(--warning);
+}
+
+.status-contradicted {
+  border-left-style: double;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      color-mix(in srgb, var(--status-color) 14%, transparent) 0 1px,
+      transparent 1px 7px
+    ),
+    repeating-linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--status-color) 14%, transparent) 0 1px,
+      transparent 1px 7px
+    );
+}
+
+.status-contradicted::before,
+.status-label[data-status='contradicted']::before {
+  content: '≠';
+  content: '≠' / '';
+}
+
+/* Non étayé : pointillés. */
+.status-unsupported,
+.status-label[data-status='unsupported'] {
+  --status-color: var(--info);
+}
+
+.status-unsupported {
+  border-left-style: dashed;
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--status-color) 30%, transparent) 1px,
+    transparent 1.5px
+  );
+  background-size: 7px 7px;
+}
+
+.status-unsupported::before,
+.status-label[data-status='unsupported']::before {
+  content: '○';
+  content: '○' / '';
+}
+
+/* Étayé : plein. */
+.status-supported,
+.status-label[data-status='supported'] {
+  --status-color: var(--success);
+}
+
+.status-supported {
+  border-left-style: solid;
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--status-color) 10%, transparent),
+    color-mix(in srgb, var(--status-color) 10%, transparent)
+  );
+}
+
+.status-supported::before,
+.status-label[data-status='supported']::before {
+  content: '✓';
+  content: '✓' / '';
+}
+
+/* Inconnu : damier. */
+.status-unknown,
+.status-label[data-status='unknown'] {
+  --status-color: var(--fg-subtle);
+}
+
+.status-unknown {
+  border-left-style: dotted;
+  background-image: repeating-conic-gradient(
+    color-mix(in srgb, var(--status-color) 12%, transparent) 0 25%,
+    transparent 0 50%
+  );
+  background-size: 12px 12px;
+}
+
+.status-unknown::before,
+.status-label[data-status='unknown']::before {
+  content: '?';
+  content: '?' / '';
+}
+
+/* ---------------------------------------------------------------------------
+ * Sévérités d'une contradiction (notice / major / critical)
+ * L'épaisseur et le style de bordure croissent avec la sévérité.
+ * ------------------------------------------------------------------------- */
+
+.severity-notice,
+.severity-major,
+.severity-critical {
+  --severity-color: var(--info);
+
+  position: relative;
+  padding-left: calc(var(--space-2) * 2 + 1.5em);
+  border: 1px solid var(--severity-color);
+  background-repeat: repeat;
+}
+
+.severity-notice::before,
+.severity-major::before,
+.severity-critical::before {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  display: grid;
+  min-width: 1.5em;
+  height: 1.5em;
+  padding: 0 0.2em;
+  place-items: center;
+  border: 1px solid var(--severity-color);
+  border-radius: var(--radius-1);
+  color: var(--severity-color);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.severity-notice,
+.severity-label[data-severity='notice'] {
+  --severity-color: var(--info);
+}
+
+.severity-notice::before,
+.severity-label[data-severity='notice']::before {
+  content: 'i';
+  content: 'i' / '';
+}
+
+.severity-major,
+.severity-label[data-severity='major'] {
+  --severity-color: var(--warning);
+}
+
+.severity-major {
+  border-width: 2px;
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--severity-color) 26%, transparent) 1px,
+    transparent 1.5px
+  );
+  background-size: 8px 8px;
+}
+
+.severity-major::before,
+.severity-label[data-severity='major']::before {
+  content: '!';
+  content: '!' / '';
+}
+
+.severity-critical,
+.severity-label[data-severity='critical'] {
+  --severity-color: var(--danger);
+}
+
+.severity-critical {
+  border-width: 3px;
+  border-style: dashed;
+  background-image: repeating-linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--severity-color) 20%, transparent) 0 2px,
+    transparent 2px 7px
+  );
+}
+
+.severity-critical::before,
+.severity-label[data-severity='critical']::before {
+  content: '!!';
+  content: '!!' / '';
+}

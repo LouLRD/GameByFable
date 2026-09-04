@@ -1,0 +1,149 @@
+/*
+ * LA VERSION ACCEPTABLE — jetons de design (GDD §13, §15).
+ *
+ * Thème unique, sombre : « dossier nocturne fabriqué avec les outils du magasin ».
+ * Fond nuit encre, texte papier froid, accents sauge / ambre / corail / bleu caméra.
+ *
+ * Contraste WCAG 2.x (luminance relative, formule sRGB) — vérifié par
+ * src/styles/tokens.test.ts. Cible : ≥ 4.5:1 pour tout texte, ≥ 3:1 pour les
+ * indicateurs non textuels (bordures, anneau de focus).
+ *
+ *   paire                          couleurs            ratio
+ *   --fg          / --bg           #E8E3D7 / #11151C   14.29
+ *   --fg          / --bg-elevated  #E8E3D7 / #1A2029   12.79
+ *   --fg          / --bg-sunken    #E8E3D7 / #0B0E13   15.10
+ *   --fg-muted    / --bg           #B9B3A7 / #11151C    8.77
+ *   --fg-muted    / --bg-elevated  #B9B3A7 / #1A2029    7.85
+ *   --fg-subtle   / --bg           #8E8A80 / #11151C    5.31
+ *   --fg-subtle   / --bg-elevated  #8E8A80 / #1A2029    4.75
+ *   --accent-fg   / --accent       #11151C / #A8C7A0    9.88
+ *   --accent-fg   / --accent-hover #11151C / #B8D2B0   11.22
+ *   --accent-fg   / --accent-active#11151C / #97B78F    8.26
+ *   --danger-fg   / --danger       #11151C / #D66B5D    5.33
+ *   --danger-fg   / --danger-hover #11151C / #DF8073    6.51
+ *   --success (texte) / --bg       #A8C7A0 / #11151C    9.88
+ *   --warning (texte) / --bg       #E3A857 / #11151C    8.72
+ *   --danger  (texte) / --bg       #D66B5D / #11151C    5.33
+ *   --info    (texte) / --bg       #6D8FA8 / #11151C    5.35
+ *   --info    (texte) / --bg-elevated #6D8FA8 / #1A2029 4.79
+ *   --focus-ring  / --bg           #E3A857 / #11151C    8.72  (indicateur, ≥ 3:1)
+ *
+ * Décisions issues de ces mesures :
+ * - Le papier sur bleu caméra (2.67) ou sur corail (2.68) échoue : tout badge ou
+ *   bouton plein utilise l'encre comme couleur de texte (--*-fg = --c-ink).
+ * - Un état actif plus sombre que le corail de base (#C85C4E → 4.44) échoue :
+ *   l'état actif du danger garde la teinte de base et signale la pression par
+ *   ombre interne + déplacement.
+ * - Corail et bleu caméra descendent sous 4.5 sur une surface plus claire que
+ *   --bg-elevated : ne pas écrire de texte dans ces couleurs sur --bg-hover.
+ * - Sur papier (.ticket), les couleurs d'état sont remplacées par des teintes
+ *   profondes (voir base.css) : #A63F2C 4.87, #3A5B70 5.64, #6E4B0E 6.13,
+ *   #3F6B3A 4.86, texte atténué #4F5664 5.76.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* ---- Couleurs brutes (palette GDD) ---- */
+  --c-ink: #11151c;
+  --c-paper: #e8e3d7;
+  --c-sage: #a8c7a0;
+  --c-amber: #e3a857;
+  --c-coral: #d66b5d;
+  --c-camera: #6d8fa8;
+
+  /* ---- Teintes dérivées (mesurées, voir en-tête) ---- */
+  --c-ink-sunken: #0b0e13;
+  --c-ink-elevated: #1a2029;
+  --c-ink-hover: #232b36;
+  --c-paper-muted: #b9b3a7;
+  --c-paper-subtle: #8e8a80;
+  --c-sage-hover: #b8d2b0;
+  --c-sage-active: #97b78f;
+  --c-coral-hover: #df8073;
+
+  /* ---- Sémantiques : surfaces ---- */
+  --bg: var(--c-ink);
+  --bg-elevated: var(--c-ink-elevated);
+  --bg-sunken: var(--c-ink-sunken);
+  --bg-hover: var(--c-ink-hover);
+
+  /* ---- Sémantiques : texte ---- */
+  --fg: var(--c-paper);
+  --fg-muted: var(--c-paper-muted);
+  --fg-subtle: var(--c-paper-subtle);
+
+  /* ---- Sémantiques : traits ---- */
+  --border: rgb(232 227 215 / 16%);
+  --border-strong: rgb(232 227 215 / 40%);
+
+  /* ---- Sémantiques : accents et états ---- */
+  --accent: var(--c-sage);
+  --accent-hover: var(--c-sage-hover);
+  --accent-active: var(--c-sage-active);
+  --accent-fg: var(--c-ink);
+  --danger: var(--c-coral);
+  --danger-hover: var(--c-coral-hover);
+  --danger-fg: var(--c-ink);
+  --success: var(--c-sage);
+  --success-fg: var(--c-ink);
+  --info: var(--c-camera);
+  --info-fg: var(--c-ink);
+  --warning: var(--c-amber);
+  --warning-fg: var(--c-ink);
+  --focus-ring: var(--c-amber);
+  --selection: rgb(168 199 160 / 35%);
+
+  /* ---- Typographie : piles système uniquement ---- */
+  --font-ui:
+    'Avenir Next Condensed', 'Roboto Condensed', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  --font-hand: 'Segoe Print', 'Bradley Hand', 'Comic Neue', 'Chalkboard SE', cursive;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --leading-tight: 1.2;
+  --leading-normal: 1.45;
+
+  /* ---- Espacement, base 4 px ---- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* ---- Rayons : le dossier reste anguleux ---- */
+  --radius-1: 2px;
+  --radius-2: 4px;
+  --radius-3: 8px;
+
+  /* ---- Ombres ---- */
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 40%), 0 0 0 1px rgb(0 0 0 / 25%);
+  --shadow-2: 0 6px 18px rgb(0 0 0 / 45%), 0 1px 3px rgb(0 0 0 / 40%);
+
+  /* ---- Plans d'empilement ---- */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 100;
+  --z-overlay: 1000;
+  --z-modal: 1100;
+  --z-toast: 1200;
+  --z-skip: 2000;
+
+  /* ---- Mouvement ---- */
+  --duration-fast: 120ms;
+  --duration-normal: 220ms;
+  --duration-slow: 420ms;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* ---- Cibles tactiles ---- */
+  --tap-min: 40px;
+  --tap-comfortable: 44px;
+}

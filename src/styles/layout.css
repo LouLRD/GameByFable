@@ -1,0 +1,333 @@
+/*
+ * LA VERSION ACCEPTABLE — bureau principal (GDD §12).
+ *
+ * Structure attendue :
+ *
+ *   <div class="workbench" data-focus="map|timeline|casefile|inspector"?>
+ *     <header class="topbar">…</header>
+ *     <section class="space" data-space="casefile"  data-active="true|false">…</section>
+ *     <section class="space" data-space="map"       data-active="…">…</section>
+ *     <section class="space" data-space="timeline"  data-active="…">…</section>
+ *     <section class="space" data-space="inspector" data-active="…">…</section>
+ *     <nav class="space-bar"><button class="space-bar-tab" aria-selected>…</button>×4</nav>
+ *   </div>
+ *
+ * ≥ 1024 px : grille bandeau / dossier | plan + frise | inspecteur, colonnes
+ *   redimensionnables via --casefile-width et --inspector-width (bornées),
+ *   mode focus qui n'affiche que le panneau ciblé.
+ * ≤ 1023 px : pile — une seule zone visible (.space[data-active="true"]) et
+ *   barre persistante à 4 onglets en bas, cibles ≥ 44 px, safe-area.
+ * À 390 px rien ne déborde : overflow-x masqué sur la racine, min-width: 0 sur
+ *   tous les enfants de grille.
+ */
+
+.workbench {
+  --casefile-width: 320px;
+  --inspector-width: 360px;
+  --casefile-min: 240px;
+  --casefile-max: 40vw;
+  --inspector-min: 280px;
+  --inspector-max: 45vw;
+  --topbar-height: 56px;
+  --timeline-height: 220px;
+  --space-bar-height: calc(56px + env(safe-area-inset-bottom, 0px));
+
+  position: relative;
+  display: grid;
+  width: 100%;
+  max-width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  gap: var(--space-1);
+  padding: 0 var(--space-1) var(--space-1);
+  overflow-x: hidden;
+  overflow-y: hidden;
+  background: var(--bg);
+}
+
+.workbench > * {
+  min-width: 0;
+  min-height: 0;
+}
+
+/* ---------------------------------------------------------------------------
+ * Bandeau supérieur
+ * ------------------------------------------------------------------------- */
+
+.topbar {
+  grid-area: topbar;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--topbar-height);
+  margin: 0 calc(-1 * var(--space-1));
+  padding: 0 var(--space-3);
+  padding-top: env(safe-area-inset-top, 0px);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elevated);
+}
+
+.topbar-title {
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--text-sm);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.topbar-clock {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.topbar-spacer {
+  flex: 1 1 auto;
+}
+
+/* ---------------------------------------------------------------------------
+ * Zones de travail
+ * ------------------------------------------------------------------------- */
+
+.space {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2);
+  background: var(--bg);
+}
+
+.space-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: var(--tap-comfortable);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px dashed var(--border-strong);
+  background: var(--bg-elevated);
+}
+
+.space-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.space > .panel-body {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Poignées de redimensionnement (desktop). */
+.resizer {
+  position: absolute;
+  z-index: var(--z-raised);
+  background: transparent;
+  touch-action: none;
+  transition: background-color var(--duration-fast) var(--ease);
+}
+
+.resizer:hover,
+.resizer:focus-visible {
+  background: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.space[data-space='casefile'] > .resizer {
+  top: 0;
+  right: -4px;
+  bottom: 0;
+  width: 8px;
+  cursor: col-resize;
+}
+
+.space[data-space='inspector'] > .resizer {
+  top: 0;
+  bottom: 0;
+  left: -4px;
+  width: 8px;
+  cursor: col-resize;
+}
+
+.space[data-space='timeline'] > .resizer {
+  top: -4px;
+  right: 0;
+  left: 0;
+  height: 8px;
+  cursor: row-resize;
+}
+
+/* ---------------------------------------------------------------------------
+ * Barre d'espaces (mobile / tablette) — masquée sur grand écran
+ * ------------------------------------------------------------------------- */
+
+.space-bar {
+  display: none;
+}
+
+.space-bar-tab {
+  display: inline-flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  min-height: var(--tap-comfortable);
+  padding: var(--space-1) var(--space-2);
+  border-top: 3px solid transparent;
+  color: var(--fg-muted);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.space-bar-tab:hover {
+  color: var(--fg);
+  background: var(--bg-hover);
+}
+
+/* Onglet actif : couleur + bordure épaisse + graisse (pas la couleur seule). */
+.space-bar-tab[aria-selected='true'],
+.space-bar-tab[aria-current='page'],
+.space-bar-tab[data-active='true'] {
+  border-top-color: var(--accent);
+  color: var(--accent);
+  font-weight: 800;
+}
+
+/* ---------------------------------------------------------------------------
+ * Grand écran ≥ 1024 px
+ * ------------------------------------------------------------------------- */
+
+@media (min-width: 1024px) {
+  .workbench {
+    grid-template-columns:
+      clamp(var(--casefile-min), var(--casefile-width), var(--casefile-max))
+      minmax(0, 1fr)
+      clamp(var(--inspector-min), var(--inspector-width), var(--inspector-max));
+    grid-template-rows: var(--topbar-height) minmax(0, 1fr) var(--timeline-height);
+    grid-template-areas:
+      'topbar topbar topbar'
+      'casefile map inspector'
+      'casefile timeline inspector';
+  }
+
+  .space[data-space='casefile'] {
+    grid-area: casefile;
+  }
+
+  .space[data-space='map'] {
+    grid-area: map;
+  }
+
+  .space[data-space='timeline'] {
+    grid-area: timeline;
+  }
+
+  .space[data-space='inspector'] {
+    grid-area: inspector;
+  }
+
+  /* Mode focus : seul le panneau ciblé occupe la zone de travail. */
+  .workbench[data-focus='map'],
+  .workbench[data-focus='timeline'],
+  .workbench[data-focus='casefile'],
+  .workbench[data-focus='inspector'] {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: var(--topbar-height) minmax(0, 1fr);
+    grid-template-areas:
+      'topbar'
+      'focus';
+  }
+
+  .workbench[data-focus='map'] > .space,
+  .workbench[data-focus='timeline'] > .space,
+  .workbench[data-focus='casefile'] > .space,
+  .workbench[data-focus='inspector'] > .space {
+    display: none;
+  }
+
+  .workbench[data-focus='map'] > .space[data-space='map'],
+  .workbench[data-focus='timeline'] > .space[data-space='timeline'],
+  .workbench[data-focus='casefile'] > .space[data-space='casefile'],
+  .workbench[data-focus='inspector'] > .space[data-space='inspector'] {
+    grid-area: focus;
+    display: flex;
+  }
+
+  .workbench[data-focus='map'] .resizer,
+  .workbench[data-focus='timeline'] .resizer,
+  .workbench[data-focus='casefile'] .resizer,
+  .workbench[data-focus='inspector'] .resizer {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Tablette et mobile ≤ 1023 px : pile à une zone + barre persistante
+ * ------------------------------------------------------------------------- */
+
+@media (max-width: 1023px) {
+  .workbench {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) var(--space-bar-height);
+    grid-template-areas:
+      'topbar'
+      'space'
+      'spacebar';
+    gap: 0;
+    padding: 0;
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+
+  .topbar {
+    margin: 0;
+    padding-right: var(--space-2);
+    padding-left: var(--space-2);
+  }
+
+  .workbench > .space {
+    display: none;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .workbench > .space[data-active='true'] {
+    grid-area: space;
+    display: flex;
+  }
+
+  .resizer {
+    display: none;
+  }
+
+  .space-bar {
+    grid-area: spacebar;
+    z-index: var(--z-sticky);
+    display: flex;
+    align-items: stretch;
+    min-width: 0;
+    min-height: var(--space-bar-height);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    border-top: 1px solid var(--border-strong);
+    background: var(--bg-elevated);
+  }
+}

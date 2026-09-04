@@ -1,0 +1,4 @@
+/** Composant en construction : remplacé par l'implémentation de la fonctionnalité. */
+export function MapPanel(): React.JSX.Element {
+  return <div data-stub="MapPanel" />;
+}

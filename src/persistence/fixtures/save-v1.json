@@ -1,0 +1,42 @@
+{
+  "formatVersion": 1,
+  "scenarioId": "la-veilleuse-300",
+  "scenarioVersion": 1,
+  "seed": "nuit-0042",
+  "cursor": 11,
+  "label": "Dossier du 14 mars",
+  "savedAt": "2026-03-14T21:12:00.000Z",
+  "actions": [
+    { "type": "dismissOnboarding", "step": "intro-map" },
+    {
+      "type": "setClaim",
+      "slot": "who",
+      "hypothesis": "h-manager-present",
+      "actor": "manager",
+      "zone": "back_office",
+      "from": 120,
+      "to": 360
+    },
+    { "type": "attachEvidence", "evidence": "receipt-21h07", "attached": false },
+    {
+      "type": "probe",
+      "character": "cashier",
+      "target": "st-cashier-01",
+      "approach": "empathetic"
+    },
+    {
+      "type": "confront",
+      "character": "manager",
+      "target": "st-manager-02",
+      "support": "receipt-21h07",
+      "approach": "direct"
+    },
+    { "type": "confront", "character": "guard", "target": "st-guard-01", "approach": "neutral" },
+    { "type": "clearClaim", "slot": "who" },
+    { "type": "setClaim", "slot": "when", "hypothesis": "h-after-closing" },
+    { "type": "attachEvidence", "evidence": "receipt-21h07", "attached": true },
+    { "type": "requestRoundTable" },
+    { "type": "leaveRoundTable" },
+    { "type": "seal" }
+  ]
+}

@@ -1,0 +1,11 @@
+/*
+ * LA VERSION ACCEPTABLE — point d'entrée des styles.
+ * L'ordre compte : jetons → base → degrés → mouvement → layout.
+ */
+
+@import './tokens.css';
+@import './base.css';
+@import './degrees.css';
+@import './motion.css';
+@import './dialog.css';
+@import './layout.css';

@@ -1,0 +1,402 @@
+{
+  "schemaVersion": 1,
+  "scenario": {
+    "id": "la-veilleuse-300",
+    "version": 1,
+    "title": "La Veilleuse",
+    "subtitle": "Vingt-trois minutes avant les comptes",
+    "locale": "fr-FR",
+    "seed": "veilleuse-2049",
+    "timeline": {
+      "startClock": "20:49:00",
+      "endClock": "21:15:00",
+      "durationSeconds": 1560,
+      "incidentClock": "21:12:00",
+      "currency": "EUR",
+      "discrepancy": 300
+    },
+    "publicPremise": "À 21 h 12, le comptage de fermeture de La Veilleuse présente un écart de 300 €. Une caméra a cessé d'enregistrer pendant quatre minutes. Six personnes étaient encore sur place.",
+    "themes": [
+      "responsabilité",
+      "loyauté",
+      "différence entre erreur et faute",
+      "vérité sociale"
+    ]
+  },
+  "zones": [
+    {
+      "id": "entrance",
+      "label": "Entrée",
+      "polygon": [[4, 66], [20, 66], [20, 96], [4, 96]],
+      "light": 0.8,
+      "acousticAbsorption": 0.1
+    },
+    {
+      "id": "checkout",
+      "label": "Caisses",
+      "polygon": [[20, 60], [42, 60], [42, 96], [20, 96]],
+      "light": 0.9,
+      "acousticAbsorption": 0.15
+    },
+    {
+      "id": "aisle_one",
+      "label": "Rayon 1",
+      "polygon": [[22, 30], [42, 30], [42, 58], [22, 58]],
+      "light": 0.8,
+      "acousticAbsorption": 0.25
+    },
+    {
+      "id": "aisle_two",
+      "label": "Rayon 2",
+      "polygon": [[44, 30], [64, 30], [64, 58], [44, 58]],
+      "light": 0.75,
+      "acousticAbsorption": 0.28
+    },
+    {
+      "id": "cold_aisle",
+      "label": "Allée froide",
+      "polygon": [[66, 30], [82, 30], [82, 76], [66, 76]],
+      "light": 0.65,
+      "acousticAbsorption": 0.35
+    },
+    {
+      "id": "stockroom",
+      "label": "Réserve",
+      "polygon": [[44, 2], [70, 2], [70, 28], [44, 28]],
+      "light": 0.55,
+      "acousticAbsorption": 0.4
+    },
+    {
+      "id": "loading",
+      "label": "Quai",
+      "polygon": [[72, 2], [96, 2], [96, 28], [72, 28]],
+      "light": 0.45,
+      "acousticAbsorption": 0.2
+    },
+    {
+      "id": "office",
+      "label": "Bureau",
+      "polygon": [[84, 48], [96, 48], [96, 76], [84, 76]],
+      "light": 0.85,
+      "acousticAbsorption": 0.55
+    },
+    {
+      "id": "staffroom",
+      "label": "Salle de pause",
+      "polygon": [[66, 78], [96, 78], [96, 96], [66, 96]],
+      "light": 0.6,
+      "acousticAbsorption": 0.5
+    }
+  ],
+  "passages": [
+    {"id": "p01", "from": "entrance", "to": "checkout", "travelSeconds": 5, "soundLoss": 0.08, "sight": "clear", "openWhen": {"type": "always"}},
+    {"id": "p02", "from": "checkout", "to": "aisle_one", "travelSeconds": 8, "soundLoss": 0.1, "sight": "clear", "openWhen": {"type": "always"}},
+    {"id": "p03", "from": "aisle_one", "to": "aisle_two", "travelSeconds": 7, "soundLoss": 0.1, "sight": "clear", "openWhen": {"type": "always"}},
+    {"id": "p04", "from": "aisle_two", "to": "cold_aisle", "travelSeconds": 8, "soundLoss": 0.12, "sight": "partial", "openWhen": {"type": "always"}},
+    {"id": "p05", "from": "cold_aisle", "to": "stockroom", "travelSeconds": 9, "soundLoss": 0.15, "sight": "partial", "openWhen": {"type": "always"}, "affectedByObstructionId": "pallet_obstruction"},
+    {"id": "p06", "from": "stockroom", "to": "loading", "travelSeconds": 7, "soundLoss": 0.08, "sight": "clear", "openWhen": {"type": "always"}},
+    {"id": "p07", "from": "cold_aisle", "to": "office", "travelSeconds": 8, "soundLoss": 0.22, "sight": "none", "openWhen": {"type": "always"}},
+    {"id": "p08", "from": "cold_aisle", "to": "staffroom", "travelSeconds": 7, "soundLoss": 0.18, "sight": "none", "openWhen": {"type": "always"}},
+    {"id": "p09", "from": "checkout", "to": "office", "travelSeconds": 18, "soundLoss": 0.38, "sight": "partial", "openWhen": {"type": "always"}},
+    {"id": "p10", "from": "checkout", "to": "staffroom", "travelSeconds": 22, "soundLoss": 0.42, "sight": "none", "openWhen": {"type": "always"}}
+  ],
+  "obstructions": [
+    {
+      "id": "pallet_obstruction",
+      "zoneId": "cold_aisle",
+      "interval": {"start": 420, "end": 850},
+      "travelMultiplier": 2.2,
+      "blocksSightBetween": [["checkout", "cold_aisle"], ["aisle_one", "stockroom"]],
+      "publicAfterEvidenceId": "e_pallet_scan"
+    }
+  ],
+  "characters": [
+    {
+      "id": "ana",
+      "name": "Ana Sorel",
+      "role": "Responsable de fermeture",
+      "pronouns": "elle",
+      "portraitSeed": 17,
+      "accentColor": "#E3A857",
+      "initialTrust": 1,
+      "values": ["protéger l'équipe", "garder le contrôle"],
+      "privateCosts": {"admitProcedureBreach": 3, "accuseEmployee": 2, "exposeRefund": 2}
+    },
+    {
+      "id": "malik",
+      "name": "Malik Bensaïd",
+      "role": "Caissier",
+      "pronouns": "il",
+      "portraitSeed": 29,
+      "accentColor": "#6D8FA8",
+      "initialTrust": 0,
+      "values": ["ne pas être le suspect facile", "paraître fiable"],
+      "privateCosts": {"admitNegligence": 3, "signAccusation": 4, "exposeRefund": 1}
+    },
+    {
+      "id": "ines",
+      "name": "Inès Vidal",
+      "role": "Apprentie",
+      "pronouns": "elle",
+      "portraitSeed": 41,
+      "accentColor": "#A8C7A0",
+      "initialTrust": 1,
+      "values": ["rester dans l'équipe", "éviter une faute électrique"],
+      "privateCosts": {"admitKettle": 2, "accuseAna": 3, "signAccusation": 2}
+    },
+    {
+      "id": "jo",
+      "name": "Jo Harel",
+      "role": "Employé de rayon",
+      "pronouns": "iel",
+      "portraitSeed": 53,
+      "accentColor": "#B48EAD",
+      "initialTrust": 0,
+      "values": ["cacher le retard de livraison", "éviter le conflit"],
+      "privateCosts": {"admitObstruction": 2, "accuseMalik": 1, "exposeRefund": 0}
+    },
+    {
+      "id": "mina",
+      "name": "Mina Koenig",
+      "role": "Agente d'entretien",
+      "pronouns": "elle",
+      "portraitSeed": 67,
+      "accentColor": "#D66B5D",
+      "initialTrust": 1,
+      "values": ["rendre les objets à leur place", "protéger Ana"],
+      "privateCosts": {"admitHiddenReceipt": 3, "accuseMalik": 3, "exposeRefund": 2}
+    },
+    {
+      "id": "noe",
+      "name": "Noé Rami",
+      "role": "Chauffeur-livreur",
+      "pronouns": "il",
+      "portraitSeed": 79,
+      "accentColor": "#8CB6A8",
+      "initialTrust": 0,
+      "values": ["finir sa tournée", "être pris au sérieux"],
+      "privateCosts": {"admitUncertainty": 2, "accuseEmployee": 0, "exposeRefund": 0}
+    }
+  ],
+  "movementTracks": [
+    {"characterId": "ana", "segments": [{"zoneId": "checkout", "start": 0, "end": 245}, {"zoneId": "office", "start": 263, "end": 585}, {"zoneId": "checkout", "start": 603, "end": 1560}]},
+    {"characterId": "malik", "segments": [{"zoneId": "checkout", "start": 0, "end": 318}, {"zoneId": "aisle_one", "start": 326, "end": 350}, {"zoneId": "aisle_two", "start": 357, "end": 628}, {"zoneId": "checkout", "start": 643, "end": 1560}]},
+    {"characterId": "ines", "segments": [{"zoneId": "cold_aisle", "start": 0, "end": 465}, {"zoneId": "staffroom", "start": 472, "end": 552}, {"zoneId": "cold_aisle", "start": 559, "end": 1560}]},
+    {"characterId": "jo", "segments": [{"zoneId": "loading", "start": 0, "end": 390}, {"zoneId": "stockroom", "start": 397, "end": 415}, {"zoneId": "cold_aisle", "start": 424, "end": 604}, {"zoneId": "stockroom", "start": 624, "end": 850}, {"zoneId": "office", "start": 867, "end": 882}, {"zoneId": "stockroom", "start": 899, "end": 1030}, {"zoneId": "checkout", "start": 1062, "end": 1560}]},
+    {"characterId": "mina", "segments": [{"zoneId": "aisle_one", "start": 0, "end": 366}, {"zoneId": "stockroom", "start": 390, "end": 640}, {"zoneId": "staffroom", "start": 667, "end": 748}, {"zoneId": "aisle_two", "start": 770, "end": 1560}]},
+    {"characterId": "noe", "segments": [{"zoneId": "loading", "start": 0, "end": 970}, {"zoneId": "entrance", "start": 1015, "end": 1080}]}
+  ],
+  "canonicalFacts": [
+    {"id": "f_customer_return", "interval": {"start": 92, "end": 205}, "zoneId": "checkout", "participants": ["ana", "malik"], "secrecy": "canonical-only", "tags": ["customer-return", "appliance", "refund-request"]},
+    {"id": "f_manual_drawer_open", "interval": {"start": 132, "end": 147}, "zoneId": "checkout", "participants": ["ana"], "secrecy": "discoverable", "tags": ["drawer-open", "manager-key", "cash"]},
+    {"id": "f_cash_refund", "interval": {"start": 147, "end": 178}, "zoneId": "checkout", "participants": ["ana"], "secrecy": "canonical-only", "tags": ["cash-leaves-store", "refund", "300-eur"], "variableSlotId": "cash_origin", "canonicalHypothesisId": "h_emergency_refund"},
+    {"id": "f_receipt_written", "interval": {"start": 160, "end": 205}, "zoneId": "checkout", "participants": ["ana"], "secrecy": "canonical-only", "tags": ["pink-receipt", "ana-signature", "300-eur"]},
+    {"id": "f_sleeve_handover", "interval": {"start": 238, "end": 255}, "zoneId": "checkout", "participants": ["ana", "malik"], "secrecy": "canonical-only", "tags": ["blue-sleeve", "paper-only", "handover"]},
+    {"id": "f_sleeve_on_trolley", "interval": {"start": 330, "end": 350}, "zoneId": "aisle_one", "participants": ["malik"], "secrecy": "canonical-only", "tags": ["blue-sleeve", "returns-trolley", "negligence"]},
+    {"id": "f_bottle_break", "interval": {"start": 342, "end": 346}, "zoneId": "aisle_two", "participants": [], "secrecy": "discoverable", "tags": ["glass", "sharp-sound", "cleanup"]},
+    {"id": "f_trolley_move", "interval": {"start": 370, "end": 405}, "zoneId": "aisle_one", "participants": ["mina"], "secrecy": "discoverable", "tags": ["returns-trolley", "to-stockroom"]},
+    {"id": "f_pallet_placed", "interval": {"start": 420, "end": 458}, "zoneId": "cold_aisle", "participants": ["jo", "noe"], "secrecy": "discoverable", "tags": ["pallet", "obstruction", "late-delivery"]},
+    {"id": "f_kettle_on", "interval": {"start": 487, "end": 545}, "zoneId": "staffroom", "participants": ["ines"], "secrecy": "canonical-only", "tags": ["kettle", "electrical-load", "staffroom"]},
+    {"id": "f_camera_trip", "interval": {"start": 500, "end": 760}, "zoneId": "office", "participants": [], "secrecy": "discoverable", "tags": ["camera-offline", "breaker-trip", "automatic-restart"], "variableSlotId": "video_outage", "canonicalHypothesisId": "h_circuit_overload"},
+    {"id": "f_trolley_bang", "interval": {"start": 532, "end": 535}, "zoneId": "stockroom", "participants": ["mina"], "secrecy": "canonical-only", "tags": ["metallic-bang", "trolley-threshold", "audio"]},
+    {"id": "f_receipt_falls", "interval": {"start": 545, "end": 552}, "zoneId": "stockroom", "participants": ["mina"], "secrecy": "canonical-only", "tags": ["pink-receipt", "falls-from-sleeve"]},
+    {"id": "f_receipt_hidden", "interval": {"start": 684, "end": 720}, "zoneId": "staffroom", "participants": ["mina"], "secrecy": "canonical-only", "tags": ["pink-receipt", "cleaning-log", "protect-ana"], "variableSlotId": "receipt_path", "canonicalHypothesisId": "h_mina_hidden_receipt"},
+    {"id": "f_empty_sleeve_found", "interval": {"start": 805, "end": 825}, "zoneId": "stockroom", "participants": ["jo"], "secrecy": "canonical-only", "tags": ["blue-sleeve", "empty"]},
+    {"id": "f_sleeve_in_drawer", "interval": {"start": 870, "end": 880}, "zoneId": "office", "participants": ["jo"], "secrecy": "canonical-only", "tags": ["blue-sleeve", "lost-found-drawer"]},
+    {"id": "f_count_complete", "interval": {"start": 1240, "end": 1380}, "zoneId": "checkout", "participants": ["ana", "malik"], "secrecy": "public", "tags": ["count", "300-eur-short"]},
+    {"id": "f_report_opened", "interval": {"start": 1380, "end": 1390}, "zoneId": "office", "participants": ["ana"], "secrecy": "public", "tags": ["investigation-start"]}
+  ],
+  "soundSignals": [
+    {"id": "sound_bottle", "factId": "f_bottle_break", "originZoneId": "aisle_two", "intensity": 0.8, "signatureTags": ["sharp", "glass", "brief"]},
+    {"id": "sound_trolley", "factId": "f_trolley_bang", "originZoneId": "stockroom", "intensity": 0.72, "signatureTags": ["metal", "door-like", "brief"]},
+    {"id": "sound_kettle", "factId": "f_kettle_on", "originZoneId": "staffroom", "intensity": 0.22, "signatureTags": ["hum", "appliance", "continuous"]}
+  ],
+  "perceptions": [
+    {"id": "p_ana_drawer", "observerId": "malik", "sourceFactId": "f_manual_drawer_open", "modality": "visual", "fidelity": "exact", "perceivedTags": ["ana", "drawer-open", "cash"]},
+    {"id": "p_jo_handover", "observerId": "jo", "sourceFactId": "f_sleeve_handover", "modality": "visual", "fidelity": "partial", "perceivedTags": ["malik", "blue-object", "handover"]},
+    {"id": "p_mina_sleeve", "observerId": "mina", "sourceFactId": "f_sleeve_on_trolley", "modality": "visual", "fidelity": "partial", "perceivedTags": ["blue-sleeve", "paperwork"]},
+    {"id": "p_noe_bang", "observerId": "noe", "sourceFactId": "f_trolley_bang", "modality": "audio", "fidelity": "ambiguous", "perceivedTags": ["metal", "door-like", "stockroom-direction"]},
+    {"id": "p_noe_silhouette", "observerId": "noe", "sourceFactId": "f_trolley_move", "modality": "visual", "fidelity": "ambiguous", "perceivedTags": ["short-silhouette", "warm-color", "toward-stockroom"]},
+    {"id": "p_mina_receipt", "observerId": "mina", "sourceFactId": "f_receipt_falls", "modality": "visual", "fidelity": "exact", "perceivedTags": ["pink-receipt", "ana-signature", "300-eur"]},
+    {"id": "p_jo_empty_sleeve", "observerId": "jo", "sourceFactId": "f_empty_sleeve_found", "modality": "visual", "fidelity": "exact", "perceivedTags": ["blue-sleeve", "empty"]}
+  ],
+  "initialBeliefs": [
+    {"id": "b_ana_refund", "characterId": "ana", "propositionId": "prop_refund_happened", "confidence": 1, "provenanceIds": ["f_cash_refund"]},
+    {"id": "b_ana_receipt_in_sleeve", "characterId": "ana", "propositionId": "prop_receipt_should_be_in_sleeve", "confidence": 0.95, "provenanceIds": ["f_receipt_written", "f_sleeve_handover"]},
+    {"id": "b_malik_sleeve_had_cash", "characterId": "malik", "propositionId": "prop_sleeve_contained_cash", "confidence": 0.72, "provenanceIds": ["p_ana_drawer", "f_sleeve_handover"]},
+    {"id": "b_ines_trip_was_kettle", "characterId": "ines", "propositionId": "prop_kettle_caused_trip", "confidence": 0.9, "provenanceIds": ["f_kettle_on", "f_camera_trip"]},
+    {"id": "b_jo_malik_carried_money", "characterId": "jo", "propositionId": "prop_malik_carried_money", "confidence": 0.62, "provenanceIds": ["p_jo_handover"]},
+    {"id": "b_mina_refund", "characterId": "mina", "propositionId": "prop_refund_happened", "confidence": 0.98, "provenanceIds": ["p_mina_receipt"]},
+    {"id": "b_noe_door", "characterId": "noe", "propositionId": "prop_stockroom_door_slammed", "confidence": 0.74, "provenanceIds": ["p_noe_bang"]},
+    {"id": "b_noe_ines", "characterId": "noe", "propositionId": "prop_ines_went_stockroom", "confidence": 0.48, "provenanceIds": ["p_noe_silhouette"]}
+  ],
+  "evidence": [
+    {"id": "e_till_report", "label": "Rapport de caisse", "status": "established", "availableAtStart": true, "supports": ["prop_300_left_till"], "excludes": [], "playerText": "Le tiroir contient 300 € de moins que le total attendu. L'écart apparaît entre 20 h 40 et la fermeture."},
+    {"id": "e_camera_gap", "label": "Journal vidéo", "status": "established", "availableAtStart": true, "supports": ["prop_camera_offline_4m20"], "excludes": [], "playerText": "Le flux des zones centrales est absent de 20 h 57 min 20 s à 21 h 01 min 40 s. Le fichier reprend sans coupure de session opérateur."},
+    {"id": "e_door_exit", "label": "Capteur de porte", "status": "established", "availableAtStart": true, "supports": ["prop_customer_left_2052"], "excludes": [], "playerText": "Une ouverture extérieure non salariée est enregistrée à 20 h 52. Aucune autre sortie avant 21 h 06."},
+    {"id": "e_drawer_log", "label": "Ouverture manuelle", "status": "established", "availableAtStart": false, "unlockBy": ["c_ana_drawer"], "supports": ["prop_ana_opened_drawer"], "excludes": ["prop_ana_unaware_all_evening"], "playerText": "La clé responsable a ouvert le tiroir à 20 h 51 min 12 s, hors transaction enregistrée."},
+    {"id": "e_pallet_scan", "label": "Scan de la palette", "status": "established", "availableAtStart": false, "unlockBy": ["c_jo_timing"], "supports": ["prop_pallet_present_2056"], "excludes": ["prop_pallet_arrived_2102"], "playerText": "Le terminal de Jo valide la palette à 20 h 56 min 54 s dans l'allée froide."},
+    {"id": "e_breaker_log", "label": "Diagnostic électrique", "status": "established", "availableAtStart": false, "unlockBy": ["c_ines_camera"], "supports": ["prop_local_overload"], "excludes": ["prop_camera_unplugged"], "playerText": "Le circuit commun salle de pause–enregistreur a déclenché sur surcharge puis s'est réarmé automatiquement."},
+    {"id": "e_warm_kettle", "label": "Bouilloire encore tiède", "status": "deduced", "availableAtStart": false, "unlockBy": ["c_ines_camera"], "supports": ["prop_kettle_used_recently"], "excludes": [], "playerText": "La bouilloire contient de l'eau chaude et son minuteur mécanique s'est arrêté autour de 20 h 58."},
+    {"id": "e_trolley_mark", "label": "Marque sur le seuil", "status": "deduced", "availableAtStart": false, "unlockBy": ["c_noe_noise", "c_mina_trolley"], "supports": ["prop_trolley_hit_threshold"], "excludes": [], "playerText": "Une roue du chariot de retours a laissé une trace métallique fraîche sur le seuil de la réserve."},
+    {"id": "e_blue_sleeve", "label": "Pochette bleue vide", "status": "established", "availableAtStart": false, "unlockBy": ["c_jo_sleeve"], "supports": ["prop_sleeve_was_empty_when_found"], "excludes": [], "playerText": "Une pochette de dépôt vide se trouvait dans le tiroir des objets trouvés du bureau."},
+    {"id": "e_pressure_imprint", "label": "Empreinte du duplicata", "status": "deduced", "availableAtStart": false, "unlockBy": ["c_ana_refund", "c_mina_receipt"], "supports": ["prop_refund_happened", "prop_receipt_existed"], "excludes": ["prop_no_receipt_created"], "playerText": "Sous une feuille vierge du carnet apparaît par pression : « Retour exceptionnel — 300 — A. Sorel » et une heure commençant par 20:5."},
+    {"id": "e_hidden_receipt", "label": "Justificatif rose", "status": "established", "availableAtStart": false, "unlockBy": ["c_mina_receipt"], "supports": ["prop_refund_happened", "prop_mina_hid_receipt"], "excludes": ["prop_receipt_destroyed", "prop_no_receipt_created"], "playerText": "Le justificatif signé est glissé derrière la fiche d'entretien de la salle de pause. Il décrit un remboursement manuel de 300 €."}
+  ],
+  "statements": [
+    {"id": "s_ana_initial", "speakerId": "ana", "propositionId": "prop_ana_no_unusual_drawer", "relationToBelief": "lie", "unlockConditionIds": [], "availableAtStart": true, "publicText": "Je n'ai rien fait d'inhabituel avec la caisse après 20 h 40. Je préparais simplement la fermeture."},
+    {"id": "s_malik_initial", "speakerId": "malik", "propositionId": "prop_sleeve_left_office", "relationToBelief": "lie", "unlockConditionIds": [], "availableAtStart": true, "publicText": "Ana m'a donné une pochette. Je l'ai posée directement sur son bureau, comme toujours."},
+    {"id": "s_ines_initial", "speakerId": "ines", "propositionId": "prop_ines_cold_aisle_continuous", "relationToBelief": "lie", "unlockConditionIds": [], "availableAtStart": true, "publicText": "Je suis restée dans l'allée froide tout le temps. Je n'ai touché ni aux caméras ni au bureau."},
+    {"id": "s_jo_initial", "speakerId": "jo", "propositionId": "prop_pallet_arrived_2102", "relationToBelief": "lie", "unlockConditionIds": [], "availableAtStart": true, "publicText": "La palette n'est entrée qu'après 21 h 02. Elle ne pouvait rien masquer pendant la coupure."},
+    {"id": "s_mina_initial", "speakerId": "mina", "propositionId": "prop_mina_saw_no_paperwork", "relationToBelief": "lie", "unlockConditionIds": [], "availableAtStart": true, "publicText": "J'ai poussé le chariot vers la réserve. Il n'y avait rien dessus qui ressemblait à de l'argent ou à un document."},
+    {"id": "s_noe_initial", "speakerId": "noe", "propositionId": "prop_ines_went_stockroom", "relationToBelief": "embellished", "unlockConditionIds": [], "availableAtStart": true, "publicText": "J'ai entendu la porte de la réserve claquer et j'ai vu Inès y entrer juste après."},
+    {"id": "s_malik_clarified", "speakerId": "malik", "propositionId": "prop_sleeve_left_trolley", "relationToBelief": "honest", "unlockConditionIds": ["c_malik_route"], "availableAtStart": false, "publicText": "Je l'ai posée sur le chariot quand la bouteille a cassé. Je comptais la reprendre. Je croyais qu'il y avait les 300 € dedans."},
+    {"id": "s_ines_clarified", "speakerId": "ines", "propositionId": "prop_kettle_caused_trip", "relationToBelief": "honest", "unlockConditionIds": ["c_ines_camera"], "availableAtStart": false, "publicText": "J'ai lancé la bouilloire. Les néons ont baissé et l'enregistreur s'est éteint. J'ai paniqué, mais je n'ai rien débranché."},
+    {"id": "s_jo_clarified", "speakerId": "jo", "propositionId": "prop_pallet_present_2056", "relationToBelief": "honest", "unlockConditionIds": ["c_jo_timing"], "availableAtStart": false, "publicText": "La palette était bien là avant 21 h. Je l'ai laissée dans le passage pour masquer mon retard sur la livraison."},
+    {"id": "s_mina_clarified", "speakerId": "mina", "propositionId": "prop_mina_hid_receipt", "relationToBelief": "honest", "unlockConditionIds": ["c_mina_receipt"], "availableAtStart": false, "publicText": "Le papier est tombé de la pochette. J'ai reconnu la signature d'Ana. Je l'ai caché parce qu'un remboursement hors procédure pouvait lui coûter sa place."},
+    {"id": "s_noe_clarified", "speakerId": "noe", "propositionId": "prop_trolley_maybe_door", "relationToBelief": "honest", "unlockConditionIds": ["c_noe_noise"], "availableAtStart": false, "publicText": "Je n'ai pas vu le visage. J'ai entendu du métal et aperçu une silhouette chaude à travers la palette. J'ai complété le reste."}
+  ],
+  "claimSlots": [
+    {"id": "cash_origin", "label": "Origine de l'écart", "required": true, "prompt": "Pourquoi manque-t-il 300 € dans le comptage ?"},
+    {"id": "video_outage", "label": "Interruption vidéo", "required": true, "prompt": "Pourquoi la caméra s'est-elle interrompue ?"},
+    {"id": "receipt_path", "label": "Parcours du justificatif", "required": true, "prompt": "Un justificatif existait-il, et où est-il allé ?"},
+    {"id": "noise_source", "label": "Bruit de la réserve", "required": true, "prompt": "Quelle était l'origine du bruit entendu par Noé ?"},
+    {"id": "manager_knowledge", "label": "Connaissance d'Ana", "required": true, "prompt": "Que savait ou voulait Ana ?"}
+  ],
+  "hypotheses": [
+    {"id": "h_emergency_refund", "slotId": "cash_origin", "label": "Remboursement manuel", "summary": "Ana a remis 300 € à une cliente sans enregistrer immédiatement l'opération.", "propositions": ["prop_refund_happened", "prop_300_left_till"], "defaultActorId": "ana", "defaultZoneId": "checkout", "defaultInterval": {"start": 120, "end": 210}, "unlockEvidenceIds": ["e_drawer_log", "e_pressure_imprint"]},
+    {"id": "h_malik_theft", "slotId": "cash_origin", "label": "Vol par Malik", "summary": "Malik a pris 300 € lors du transport de la pochette.", "propositions": ["prop_malik_took_300"], "defaultActorId": "malik", "defaultZoneId": "aisle_one", "defaultInterval": {"start": 320, "end": 370}, "availableAtStart": true},
+    {"id": "h_mina_theft", "slotId": "cash_origin", "label": "Vol par Mina", "summary": "Mina a pris 300 € sur le chariot.", "propositions": ["prop_mina_took_300"], "defaultActorId": "mina", "defaultZoneId": "stockroom", "defaultInterval": {"start": 390, "end": 560}, "availableAtStart": true},
+    {"id": "h_counting_error", "slotId": "cash_origin", "label": "Erreur de comptage", "summary": "L'écart vient d'un double comptage ou d'une saisie erronée.", "propositions": ["prop_counting_error"], "defaultZoneId": "checkout", "defaultInterval": {"start": 1240, "end": 1380}, "availableAtStart": true},
+    {"id": "h_safe_transfer", "slotId": "cash_origin", "label": "Transfert au coffre", "summary": "Les 300 € ont été déposés au bureau sans être déduits du fond attendu.", "propositions": ["prop_cash_in_safe"], "defaultZoneId": "office", "defaultInterval": {"start": 260, "end": 850}, "availableAtStart": true},
+
+    {"id": "h_circuit_overload", "slotId": "video_outage", "label": "Surcharge locale", "summary": "Un appareil de la salle de pause a fait déclencher le circuit partagé.", "propositions": ["prop_local_overload", "prop_camera_offline_4m20"], "defaultActorId": "ines", "defaultZoneId": "staffroom", "defaultInterval": {"start": 470, "end": 550}, "unlockEvidenceIds": ["e_breaker_log"]},
+    {"id": "h_deliberate_unplug", "slotId": "video_outage", "label": "Débranchement volontaire", "summary": "Quelqu'un a coupé l'enregistreur afin de créer un angle mort.", "propositions": ["prop_camera_unplugged"], "defaultZoneId": "office", "defaultInterval": {"start": 490, "end": 520}, "availableAtStart": true, "requiresActor": true},
+    {"id": "h_pallet_camera", "slotId": "video_outage", "label": "Palette devant la caméra", "summary": "La palette explique à elle seule la disparition des images.", "propositions": ["prop_pallet_blocked_camera"], "defaultActorId": "jo", "defaultZoneId": "cold_aisle", "defaultInterval": {"start": 420, "end": 850}, "availableAtStart": true},
+    {"id": "h_scheduled_reboot", "slotId": "video_outage", "label": "Redémarrage programmé", "summary": "L'enregistreur a exécuté une maintenance automatique.", "propositions": ["prop_scheduled_reboot"], "defaultZoneId": "office", "defaultInterval": {"start": 500, "end": 760}, "availableAtStart": true},
+
+    {"id": "h_mina_hidden_receipt", "slotId": "receipt_path", "label": "Justificatif caché", "summary": "Mina a caché le justificatif après l'avoir trouvé.", "propositions": ["prop_receipt_existed", "prop_mina_hid_receipt"], "defaultActorId": "mina", "defaultZoneId": "staffroom", "defaultInterval": {"start": 670, "end": 730}, "unlockEvidenceIds": ["e_hidden_receipt"]},
+    {"id": "h_ana_destroyed_receipt", "slotId": "receipt_path", "label": "Justificatif détruit", "summary": "Ana a détruit une preuve compromettante.", "propositions": ["prop_receipt_destroyed"], "defaultActorId": "ana", "defaultZoneId": "office", "defaultInterval": {"start": 260, "end": 585}, "availableAtStart": true},
+    {"id": "h_receipt_lost", "slotId": "receipt_path", "label": "Document perdu", "summary": "Un document a glissé du chariot sans être récupéré.", "propositions": ["prop_receipt_existed", "prop_receipt_lost"], "defaultZoneId": "stockroom", "defaultInterval": {"start": 500, "end": 700}, "availableAtStart": true},
+    {"id": "h_no_receipt", "slotId": "receipt_path", "label": "Aucun justificatif", "summary": "Aucun document relatif aux 300 € n'a été créé.", "propositions": ["prop_no_receipt_created"], "availableAtStart": true},
+
+    {"id": "h_trolley_threshold", "slotId": "noise_source", "label": "Chariot sur le seuil", "summary": "Une roue métallique a heurté le seuil de la réserve.", "propositions": ["prop_trolley_hit_threshold"], "defaultActorId": "mina", "defaultZoneId": "stockroom", "defaultInterval": {"start": 525, "end": 545}, "unlockEvidenceIds": ["e_trolley_mark"]},
+    {"id": "h_stockroom_door", "slotId": "noise_source", "label": "Porte de la réserve", "summary": "La porte de la réserve a claqué lors du passage d'une personne.", "propositions": ["prop_stockroom_door_slammed"], "defaultZoneId": "stockroom", "defaultInterval": {"start": 520, "end": 550}, "availableAtStart": true, "requiresActor": true},
+    {"id": "h_bottle_noise", "slotId": "noise_source", "label": "Bouteille cassée", "summary": "Noé a entendu la bouteille brisée au rayon 2.", "propositions": ["prop_bottle_was_reported_noise"], "defaultZoneId": "aisle_two", "defaultInterval": {"start": 338, "end": 350}, "availableAtStart": true},
+    {"id": "h_freezer_alarm", "slotId": "noise_source", "label": "Alarme froide", "summary": "Une alarme technique a été prise pour une porte.", "propositions": ["prop_freezer_alarm"], "defaultZoneId": "cold_aisle", "defaultInterval": {"start": 500, "end": 560}, "availableAtStart": true},
+
+    {"id": "h_ana_initiated_refund", "slotId": "manager_knowledge", "label": "Décision improvisée", "summary": "Ana savait que l'argent correspondait à un remboursement hors procédure.", "propositions": ["prop_ana_knew_refund", "prop_refund_happened"], "defaultActorId": "ana", "defaultZoneId": "checkout", "defaultInterval": {"start": 92, "end": 255}, "unlockEvidenceIds": ["e_drawer_log", "e_pressure_imprint"]},
+    {"id": "h_ana_unaware", "slotId": "manager_knowledge", "label": "Responsable dans l'ignorance", "summary": "Ana n'a appris l'écart qu'au comptage final.", "propositions": ["prop_ana_unaware_all_evening"], "availableAtStart": true},
+    {"id": "h_ana_deposit", "slotId": "manager_knowledge", "label": "Dépôt ordinaire", "summary": "Ana croyait confier une recette à déposer normalement.", "propositions": ["prop_ana_expected_deposit"], "defaultActorId": "ana", "availableAtStart": true},
+    {"id": "h_ana_staged", "slotId": "manager_knowledge", "label": "Mise en scène", "summary": "Ana a organisé la disparition et l'interruption vidéo.", "propositions": ["prop_ana_staged_theft"], "defaultActorId": "ana", "availableAtStart": true}
+  ],
+  "confrontations": [
+    {"id": "c_ana_drawer", "characterId": "ana", "targetIds": ["s_ana_initial"], "supportIds": ["e_till_report"], "pressureCost": 1, "approaches": {"neutral": {"trustDelta": 0, "unlockEvidenceIds": ["e_drawer_log"]}, "empathetic": {"trustDelta": 1, "unlockEvidenceIds": ["e_drawer_log"]}, "direct": {"trustDelta": -1, "unlockEvidenceIds": ["e_drawer_log"]}}, "responseText": "Ana reconnaît que sa clé a pu servir, mais refuse encore d'expliquer pourquoi."},
+    {"id": "c_malik_route", "characterId": "malik", "targetIds": ["s_malik_initial"], "supportIds": ["e_camera_gap", "s_jo_initial"], "pressureCost": 1, "approaches": {"neutral": {"trustDelta": 1, "unlockStatementIds": ["s_malik_clarified"]}, "empathetic": {"trustDelta": 2, "unlockStatementIds": ["s_malik_clarified"]}, "direct": {"trustDelta": -1, "unlockStatementIds": ["s_malik_clarified"]}}, "responseText": "Malik abandonne sa version du bureau et décrit le chariot de retours."},
+    {"id": "c_jo_timing", "characterId": "jo", "targetIds": ["s_jo_initial"], "supportIds": ["e_camera_gap"], "pressureCost": 1, "approaches": {"neutral": {"trustDelta": 1, "unlockEvidenceIds": ["e_pallet_scan"], "unlockStatementIds": ["s_jo_clarified"]}, "empathetic": {"trustDelta": 1, "unlockEvidenceIds": ["e_pallet_scan"], "unlockStatementIds": ["s_jo_clarified"]}, "direct": {"trustDelta": -1, "unlockEvidenceIds": ["e_pallet_scan"]}}, "responseText": "Jo accepte que l'heure de la palette soit vérifiée."},
+    {"id": "c_ines_camera", "characterId": "ines", "targetIds": ["s_ines_initial"], "supportIds": ["e_camera_gap", "e_pallet_scan"], "pressureCost": 1, "approaches": {"neutral": {"trustDelta": 0, "unlockEvidenceIds": ["e_breaker_log", "e_warm_kettle"], "unlockStatementIds": ["s_ines_clarified"]}, "empathetic": {"trustDelta": 2, "unlockEvidenceIds": ["e_breaker_log", "e_warm_kettle"], "unlockStatementIds": ["s_ines_clarified"]}, "direct": {"trustDelta": -2, "unlockEvidenceIds": ["e_breaker_log"]}}, "responseText": "Inès regarde la salle de pause avant de répondre. Le diagnostic du circuit devient accessible."},
+    {"id": "c_noe_noise", "characterId": "noe", "targetIds": ["s_noe_initial"], "supportIds": ["e_pallet_scan"], "pressureCost": 1, "approaches": {"neutral": {"trustDelta": 1, "unlockEvidenceIds": ["e_trolley_mark"], "unlockStatementIds": ["s_noe_clarified"]}, "empathetic": {"trustDelta": 2, "unlockStatementIds": ["s_noe_clarified"]}, "direct": {"trustDelta": -1, "unlockStatementIds": ["s_noe_clarified"]}}, "responseText": "Noé distingue enfin ce qu'il a perçu de ce qu'il a conclu."},
+    {"id": "c_mina_trolley", "characterId": "mina", "targetIds": ["s_mina_initial"], "supportIds": ["s_malik_clarified"], "pressureCost": 1, "approaches": {"neutral": {"trustDelta": 0, "unlockEvidenceIds": ["e_trolley_mark"]}, "empathetic": {"trustDelta": 1, "unlockEvidenceIds": ["e_trolley_mark"]}, "direct": {"trustDelta": -1, "unlockEvidenceIds": ["e_trolley_mark"]}}, "responseText": "Mina confirme le trajet du chariot, mais reste catégorique au sujet du document."},
+    {"id": "c_jo_sleeve", "characterId": "jo", "targetIds": ["s_malik_clarified"], "supportIds": ["e_pallet_scan"], "pressureCost": 1, "approaches": {"neutral": {"trustDelta": 0, "unlockEvidenceIds": ["e_blue_sleeve"]}, "empathetic": {"trustDelta": 1, "unlockEvidenceIds": ["e_blue_sleeve"]}, "direct": {"trustDelta": -1, "unlockEvidenceIds": ["e_blue_sleeve"]}}, "responseText": "Jo indique avoir placé une pochette vide dans les objets trouvés."},
+    {"id": "c_ana_refund", "characterId": "ana", "targetIds": ["s_ana_initial"], "supportIds": ["e_drawer_log", "e_door_exit"], "pressureCost": 2, "requiresTrustAtLeast": 1, "approaches": {"neutral": {"trustDelta": 0, "unlockEvidenceIds": ["e_pressure_imprint"]}, "empathetic": {"trustDelta": 1, "unlockEvidenceIds": ["e_pressure_imprint"]}, "direct": {"trustDelta": -2, "unlockEvidenceIds": ["e_pressure_imprint"]}}, "responseText": "Ana admet avoir reçu une cliente après l'heure habituelle des retours, sans encore prononcer le mot remboursement."},
+    {"id": "c_mina_receipt", "characterId": "mina", "targetIds": ["s_mina_initial"], "supportIds": ["e_pressure_imprint", "e_trolley_mark"], "pressureCost": 2, "requiresTrustAtLeast": 1, "approaches": {"neutral": {"trustDelta": 0, "unlockEvidenceIds": ["e_hidden_receipt"], "unlockStatementIds": ["s_mina_clarified"]}, "empathetic": {"trustDelta": 2, "unlockEvidenceIds": ["e_hidden_receipt"], "unlockStatementIds": ["s_mina_clarified"]}, "direct": {"trustDelta": -3}}, "responseText": "Mina révèle enfin où elle a placé le papier et pourquoi."}
+  ],
+  "genericRules": [
+    {"id": "r_drawer_value", "kind": "material", "ifEvidenceId": "e_till_report", "requireAnyProposition": ["prop_300_left_till", "prop_counting_error", "prop_cash_in_safe", "prop_malik_took_300", "prop_mina_took_300"]},
+    {"id": "r_refund_receipt", "kind": "material", "ifProposition": "prop_refund_happened", "requireAnyProposition": ["prop_receipt_existed", "prop_no_receipt_created"]},
+    {"id": "r_breaker_excludes_unplug", "kind": "material", "ifEvidenceId": "e_breaker_log", "excludeProposition": "prop_camera_unplugged"},
+    {"id": "r_camera_pallet_not_signal", "kind": "material", "ifProposition": "prop_pallet_blocked_camera", "conflictsWithEvidenceId": "e_camera_gap", "explanation": "Une obstruction peut masquer une image, mais n'explique pas l'absence de fichier et le redémarrage de session."},
+    {"id": "r_noe_visual_occlusion", "kind": "sensory", "statementId": "s_noe_initial", "evaluateLineOfSight": true},
+    {"id": "r_actor_reachability", "kind": "physical", "applyToAllParameterizedClaims": true, "evaluateTravel": true},
+    {"id": "r_actor_overlap", "kind": "temporal", "applyToAllParameterizedClaims": true, "evaluateOverlap": true},
+    {"id": "r_knowledge_provenance", "kind": "epistemic", "applyToAllStatements": true, "requireKnowledgePath": true},
+    {"id": "r_statement_conflict", "kind": "discursive", "applyToUnlockedStatements": true, "comparePropositions": true}
+  ],
+  "initialPressure": 4,
+  "maximumPressure": 6,
+  "pressureRewards": [
+    {"id": "pr_pallet_verified", "amount": 1, "once": true, "condition": {"type": "evidence-unlocked", "all": ["e_pallet_scan"]}},
+    {"id": "pr_circuit_explained", "amount": 1, "once": true, "condition": {"type": "evidence-unlocked", "all": ["e_breaker_log"]}},
+    {"id": "pr_refund_trace", "amount": 1, "once": true, "condition": {"type": "evidence-unlocked", "all": ["e_pressure_imprint"]}},
+    {"id": "pr_noise_grounded", "amount": 1, "once": true, "condition": {"type": "evidence-unlocked", "all": ["e_trolley_mark"]}},
+    {"id": "pr_first_physical_resolution", "amount": 1, "once": true, "condition": {"type": "resolved-kind", "kind": "physical"}},
+    {"id": "pr_first_epistemic_resolution", "amount": 1, "once": true, "condition": {"type": "resolved-kind", "kind": "epistemic"}},
+    {"id": "pr_truth_pair", "amount": 1, "once": true, "condition": {"type": "evidence-unlocked", "all": ["e_breaker_log", "e_pressure_imprint"]}}
+  ],
+  "endings": [
+    {
+      "id": "ending_transparent",
+      "family": "truth",
+      "title": "Tout écrire",
+      "priority": 100,
+      "requiresHypotheses": ["h_emergency_refund", "h_circuit_overload", "h_mina_hidden_receipt", "h_trolley_threshold", "h_ana_initiated_refund"],
+      "requiresEvidence": ["e_hidden_receipt", "e_breaker_log"],
+      "maxBlockingContradictions": 0,
+      "minimumSignatures": 4,
+      "epilogue": "Le rapport nomme le remboursement, la négligence et les mensonges sans inventer de voleur. Ana assume la procédure contournée. L'équipe ne ressort pas indemne, mais personne ne porte une faute qui n'est pas la sienne."
+    },
+    {
+      "id": "ending_protective",
+      "family": "consensus",
+      "title": "Réparer sans exposer",
+      "priority": 80,
+      "requiresHypotheses": ["h_emergency_refund", "h_circuit_overload", "h_receipt_lost", "h_trolley_threshold", "h_ana_initiated_refund"],
+      "requiresEvidence": ["e_pressure_imprint", "e_breaker_log"],
+      "forbidsEvidenceInReport": ["e_hidden_receipt"],
+      "maxBlockingContradictions": 0,
+      "minimumSignatures": 5,
+      "epilogue": "Le rapport régularise un remboursement manuel et traite le justificatif comme égaré. Mina signe parce que personne ne lui demande où il a réellement fini. La caisse est réparée ; une part de la soirée reste volontairement silencieuse."
+    },
+    {
+      "id": "ending_scapegoat",
+      "family": "accusation",
+      "title": "Une histoire simple",
+      "priority": 40,
+      "requiresHypotheses": ["h_malik_theft"],
+      "forbidsEvidenceUnlocked": ["e_hidden_receipt"],
+      "maxBlockingContradictions": 1,
+      "minimumSignatures": 3,
+      "specialSignatureRule": "malik-never-signs",
+      "epilogue": "La version est courte, familière et assez commode pour circuler. Malik refuse de signer. L'écart sera peut-être remboursé, mais l'enquête a fabriqué un responsable plus vite qu'elle n'a établi un fait."
+    },
+    {
+      "id": "ending_procedural",
+      "family": "incomplete",
+      "title": "Classer l'écart",
+      "priority": 20,
+      "requiresHypotheses": ["h_counting_error", "h_scheduled_reboot"],
+      "maxBlockingContradictions": 2,
+      "minimumSignatures": 2,
+      "epilogue": "Le dossier conclut à une anomalie comptable et technique. Il est archivé, faute de mieux. Chacun repart avec sa propre version et la certitude que le papier signé n'était pas la vérité entière."
+    },
+    {
+      "id": "ending_impossible",
+      "family": "rejected",
+      "title": "Personne ne signe",
+      "priority": 0,
+      "fallback": true,
+      "epilogue": "Les contradictions restent trop nombreuses. La table ronde se défait avant même que le rapport puisse circuler."
+    }
+  ],
+  "signatureRules": [
+    {"characterId": "ana", "rejectsPropositions": ["prop_ana_staged_theft"], "acceptsTruthIfTrustAtLeast": 1},
+    {"characterId": "malik", "rejectsPropositions": ["prop_malik_took_300"], "acceptsTruthIfTrustAtLeast": 0},
+    {"characterId": "ines", "rejectsPropositions": ["prop_ana_staged_theft"], "acceptsTruthIfTrustAtLeast": 1},
+    {"characterId": "jo", "rejectsPropositions": [], "acceptsTruthIfTrustAtLeast": 0},
+    {"characterId": "mina", "rejectsPropositions": ["prop_mina_took_300"], "acceptsTruthIfTrustAtLeast": 1},
+    {"characterId": "noe", "rejectsPropositions": [], "acceptsTruthIfTrustAtLeast": 0}
+  ],
+  "onboarding": [
+    {"id": "o1", "trigger": "new-game", "focus": "casefile", "text": "Commence par distinguer ce qui est établi de ce qui est seulement rapporté."},
+    {"id": "o2", "trigger": "evidence-selected:e_camera_gap", "focus": "timeline", "text": "Place le curseur sur la coupure. Le plan montre qui pouvait réellement se trouver à proximité."},
+    {"id": "o3", "trigger": "first-claim-available", "focus": "version-board", "text": "Une hypothèse n'est pas une réponse : le moteur va vérifier ce qu'elle implique."},
+    {"id": "o4", "trigger": "first-contradiction", "focus": "contradiction-inspector", "text": "Ouvre la contradiction pour suivre son raisonnement étape par étape."},
+    {"id": "o5", "trigger": "first-confrontation-ready", "focus": "confrontation", "text": "Une bonne contradiction peut faire parler. L'approche choisie influence surtout la confiance et la précision."}
+  ],
+  "revealPolicy": {
+    "canonicalFactsBeforeEnding": "only-if-evidence-unlocked",
+    "canonicalAlignmentBeforeEnding": false,
+    "showOtherEndingTitlesAfterEnding": true,
+    "showOtherEndingRequirementsAfterEnding": false
+  }
+}

@@ -1,0 +1,142 @@
+/*
+ * LA VERSION ACCEPTABLE — mouvement (GDD §12.3, §15).
+ *
+ * - propagate : onde brève émise par une hypothèse nouvellement placée.
+ * - crack     : vibration / fissure du fil causal touché par une contradiction.
+ * - fade-in, slide-up : apparitions discrètes.
+ *
+ * Toutes les animations et transitions sont neutralisées (durée 0.01 ms, pas
+ * de transform) sous `prefers-reduced-motion: reduce` ET sous
+ * `html[data-reduced-motion="true"]` (réglage in-game). On conserve une durée
+ * non nulle plutôt que `animation: none` afin que `animationend` continue de
+ * se déclencher pour le code qui retire la classe ensuite.
+ *
+ * La couleur de l'onde et de la fissure est surchargeable via --anim-color.
+ */
+
+@keyframes propagate {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--anim-color, var(--accent)) 75%, transparent);
+  }
+
+  100% {
+    box-shadow: 0 0 0 16px color-mix(in srgb, var(--anim-color, var(--accent)) 0%, transparent);
+  }
+}
+
+@keyframes crack {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    box-shadow: inset 0 0 0 0 transparent;
+  }
+
+  15% {
+    transform: translate3d(-2px, 0, 0) rotate(-0.4deg);
+    box-shadow: inset 0 0 0 2px var(--anim-color, var(--danger));
+  }
+
+  30% {
+    transform: translate3d(3px, 0, 0) rotate(0.4deg);
+  }
+
+  45% {
+    transform: translate3d(-3px, 1px, 0) rotate(-0.3deg);
+    box-shadow: inset 0 0 0 2px var(--anim-color, var(--danger));
+  }
+
+  60% {
+    transform: translate3d(2px, -1px, 0) rotate(0.3deg);
+  }
+
+  75% {
+    transform: translate3d(-1px, 0, 0) rotate(0deg);
+    box-shadow: inset 0 0 0 1px var(--anim-color, var(--danger));
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.anim-propagate {
+  animation: propagate var(--duration-slow) var(--ease) 1 both;
+}
+
+.anim-crack {
+  animation: crack var(--duration-slow) var(--ease) 1 both;
+}
+
+.anim-fade-in {
+  animation: fade-in var(--duration-normal) var(--ease) 1 both;
+}
+
+.anim-slide-up {
+  animation: slide-up var(--duration-normal) var(--ease) 1 both;
+}
+
+/* ---------------------------------------------------------------------------
+ * Mouvement réduit — préférence système
+ * ------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .anim-propagate,
+  .anim-crack,
+  .anim-fade-in,
+  .anim-slide-up {
+    animation-duration: 0.01ms !important;
+    transform: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Mouvement réduit — réglage in-game
+ * ------------------------------------------------------------------------- */
+
+html[data-reduced-motion='true'] *,
+html[data-reduced-motion='true'] *::before,
+html[data-reduced-motion='true'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  animation-delay: 0ms !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0ms !important;
+  scroll-behavior: auto !important;
+}
+
+html[data-reduced-motion='true'] .anim-propagate,
+html[data-reduced-motion='true'] .anim-crack,
+html[data-reduced-motion='true'] .anim-fade-in,
+html[data-reduced-motion='true'] .anim-slide-up {
+  animation-duration: 0.01ms !important;
+  transform: none !important;
+}

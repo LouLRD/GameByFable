@@ -1,0 +1,58 @@
+/* Boîtes de dialogue modales (composant partagé src/components/ui/Dialog.tsx) */
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3);
+  background: rgb(0 0 0 / 0.55);
+}
+.dialog-panel {
+  width: 100%;
+  max-height: calc(100dvh - 2 * var(--space-3));
+  overflow: auto;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-2);
+  background: var(--bg-elevated);
+  color: var(--fg);
+  box-shadow: var(--shadow-2);
+  outline: none;
+}
+.dialog-header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px dashed var(--border);
+  background: var(--bg-elevated);
+}
+.dialog-title {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.dialog-close {
+  font-size: var(--text-xl);
+  line-height: 1;
+  min-width: var(--tap-min);
+}
+.dialog-body {
+  padding: var(--space-4);
+}
+@media (max-width: 767px) {
+  .dialog-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .dialog-panel {
+    max-width: none !important;
+    max-height: 92dvh;
+    border-radius: var(--radius-3) var(--radius-3) 0 0;
+  }
+}
