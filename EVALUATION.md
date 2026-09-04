@@ -112,6 +112,35 @@ Preuve : `src/styles/layout.css` (pile d'espaces + barre persistante à quatre o
 [OK] Contraste, mouvement réduit, son non obligatoire.
 Preuve : `src/styles/tokens.test.ts` (ratios ≥ 4,5), `src/styles/motion.css`, son opt-in uniquement par bouton (`src/app/AmbienceProvider.tsx`), sous-titres toujours publiés (`src/audio/ambience.test.ts` « playCue publie un sous-titre même désactivé »).
 
+## Adaptation mobile (passe finale)
+
+[OK] Coquille mobile dédiée, quatre espaces au pouce, sélection partagée.
+Preuve : `src/app/mobile/MobileShell.tsx` (en-tête compact, navigation `Espaces de travail`, bandeau temporel du Plan, segments Version | Contradictions, menu en feuille) ; `src/app/mobile/MobileShell.dom.test.tsx` (7 tests : un seul espace monté, navigation + annonce + sélection conservée, horloge → Temps, bandeau ±1/±10 s et lecture, menu → sauvegardes/aide avec verrou de défilement et restitution du focus, guide « Y aller / Compris / Tout passer », segments au clavier avec badge, bureau intact ≥ 1024 px) ; `src/app/App.dom.test.tsx` (« la coquille mobile remplace le bureau… »).
+
+[OK] Plan tactile : pincer, glisser, double-toucher, boutons et clavier ; fiche et légende en feuilles.
+Preuve : `src/features/map/gestureMath.test.ts` (18 tests purs : bornes d'échelle 1×–4×, zoom autour d'un point, translation bornée), `src/features/map/MapPanel.compact.dom.test.tsx` (tap sélectionne / pan de 20 px ne sélectionne pas ; boutons « Zoom avant / arrière / Recadrer » annoncés ; touches + − 0 ; fiche en feuille avec « Fermer la fenêtre » et Échap ; légende en feuille ; desktop inchangé), `src/features/map/MapPanel.dom.test.tsx` (12 tests desktop inchangés). E2E : `e2e/mobile-terminal.spec.ts` (tap sur « Zone Caisses » → feuille « Caisses », Échap ; chip « Jo Harel » → feuille).
+
+[OK] Frise compacte au pouce : heure en grand, lecture, vitesse, zoom, rangée −10/−1/+1/+10 avec appui long, événements, raccourcis, range à pouce 28 px.
+Preuve : `src/features/timeline/TimelinePanel.compact.dom.test.tsx` (9 tests : une seule rangée haute, select vitesse → store, appui long répète (fake timers), pan horizontal sur la piste n'agit pas mais un tap oui, prénoms courts, légende en feuille), `useHoldRepeat.ts`. E2E : « Aller à la coupure », « Avancer de 10 secondes » depuis le bandeau du Plan et depuis Temps, curseur unique vérifié via l'horloge de l'en-tête et le nom du groupe « Plan du magasin à HH:MM:SS ».
+
+[OK] Dossier compact : filtres défilants, recherche dépliable, prémisse repliée, épinglage, groupes repliables, fiche avec barre d'actions collante.
+Preuve : `src/features/casefile/CasefilePanel.compact.dom.test.tsx` (10 tests), `src/features/casefile/pins.dom.test.ts` (4 tests, `localStorage` stub). E2E : ouverture de « Journal vidéo », « Retour à la liste » atteignable, fiche de Malik → « Confronter » atteignable.
+
+[OK] Version et contradictions compacts : cartes d'emplacement, axes et pièces repliés, table ronde en barre collante, détail de contradiction en progression numérotée (éléments incompatibles, données, raisonnement, instant, conséquences).
+Preuve : `src/features/version-board/VersionBoard.compact.dom.test.tsx` (7), `ContradictionInspector.compact.dom.test.tsx` (6), `ClaimFormDialog.compact.dom.test.tsx` (3 : boutons ±1/±10 s). E2E : hypothèse placée puis remplacée, contradiction lue (Rayon 2, caméra), disparition du badge « bloquante ».
+
+[OK] Feuilles et modales : verrou de défilement d'arrière-plan, fermeture visible et Échap, décisions collantes (Placer dans la version, Confronter, Sceller), safe-area.
+Preuve : `src/accessibility/scrollLock.test.ts`, `src/components/ui/Dialog.tsx` (verrou + piège de focus + restitution), CSS `.claim-form-actions`, `.confrontation-actions`, `.rt-footer` (≤ 767 px). E2E : `expectReachable` (dans l'écran, non recouvert) sur « Compris », « Retour à la liste », « Avancer de 10 secondes », « Placer dans la version », « Confronter », « Fermer la fenêtre », « Demander la table ronde », « Sceller le rapport ».
+
+[OK] Contrôles automatisés : débordement horizontal, éléments recouverts, cibles tactiles, modales fermables, régression desktop.
+Preuve : `e2e/mobile-terminal.spec.ts` (`expectNoHorizontalOverflow` en début et fin de parcours, `expectReachable` = visible + dans le viewport + `elementFromPoint` non recouvert, `expectTapTarget` ≥ 44 px sur les quatre onglets et le menu, fermeture des feuilles par bouton et Échap avec `toHaveCount(0)` sur les dialogues) ; projets Playwright `mobile` (390 × 844), `mobile-small` (320 × 568), `mobile-landscape` (844 × 390), `tablet` (768 × 1024) exécutent le même parcours ; le projet `desktop` rejoue tous les parcours d'origine (aucune régression).
+
+[OK] Secrets absents du DOM mobile et parcours clavier seul.
+Preuve : `e2e/mobile-terminal.spec.ts` « aucun secret dans le DOM mobile avant révélation » (quatre espaces visités, chaînes interdites dérivées du scénario) et « les fonctions essentielles au clavier seul (mobile) » (touches 1/4, ←/Maj+→, Tab/Entrée dans le formulaire, ? et Échap).
+
+[OK] E2E exécutés en CI sur le build destiné à Pages.
+Preuve : `.github/workflows/pages.yml` — job `check` (typecheck, lint, format, validation du scénario, tests, build → artefact `dist`), job `e2e` (cache `~/.cache/ms-playwright` par version de Playwright, `npx playwright install --with-deps chromium`, `PLAYWRIGHT_SKIP_BUILD=true` sert l'artefact), job `deploy` conditionné aux deux précédents.
+
 ## Invariants automatisables (§4)
 
 | #   | Invariant                                                            | Test                                                               |

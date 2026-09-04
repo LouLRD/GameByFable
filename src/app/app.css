@@ -511,7 +511,9 @@
 }
 
 @media (max-width: 1023px) {
+  /* Coquille mobile : les sous-titres se posent sous l'en-tête, jamais sur les barres d'actions du bas. */
   .subtitles {
-    bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 72px);
+    top: calc(48px + env(safe-area-inset-top, 0px) + var(--space-2));
+    bottom: auto;
   }
 }

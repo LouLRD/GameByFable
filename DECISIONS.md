@@ -45,7 +45,8 @@ Ordre de priorité appliqué en cas de tension : prompt de mission > spécificat
 31. **Gestes = raccourcis, jamais des obligations.** Pincer, glisser et double-toucher sur le plan ont des équivalents boutons et clavier ; la discrimination toucher / glisser (8 px, 400 ms) évite les sélections accidentelles pendant un pan ou un scroll.
 32. **Onboarding en bande ancrée.** Sur mobile, les repères ne sont plus des popovers : une bande au-dessus de la navigation montre une étape à la fois, avec « Y aller » vers l'espace visé ; elle ne recouvre jamais sa cible et ne bloque rien. Les déclencheurs de données du scénario restent inchangés.
 33. **Épinglage** : préférence d'interface stockée en `localStorage` (`lva:pins:v1`), hors journal d'actions et hors sauvegarde, car sans effet sur la partie.
-34. **Verrou de défilement** partagé (`src/accessibility/scrollLock.ts`) pour toutes les modales et feuilles, avec compteur de références et compensation de la barre de défilement.
+34. **Décisions toujours visibles dans les feuilles.** Sur mobile, les boutons décisifs des feuilles longues (« Placer dans la version », « Confronter », « Sceller le rapport ») sont collés en bas de la feuille ; les feuilles du plan (fiche, légende) s'arrêtent à mi-hauteur pour laisser le plan visible ; les sous-titres des sons se posent sous l'en-tête pour ne jamais recouvrir une barre d'actions. Les tests E2E vérifient que ces boutons sont dans l'écran et non recouverts.
+35. **Verrou de défilement** partagé (`src/accessibility/scrollLock.ts`) pour toutes les modales et feuilles, avec compteur de références et compensation de la barre de défilement.
 
 ## Technique
 

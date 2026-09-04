@@ -35,13 +35,13 @@ test.describe('Parcours 5 — mobile 390 × 844 et clavier', () => {
     });
     await page.getByRole('tab', { name: 'Contradictions' }).click();
     await page
-      .locator('.space[data-space="inspector"]')
+      .locator('[data-space="inspector"]')
       .getByRole('button', { name: /Malik Bensaïd ne peut pas être à deux endroits/ })
       .first()
       .click();
     await expect(
       page
-        .locator('.space[data-space="inspector"]')
+        .locator('[data-space="inspector"]')
         .getByText(/Rayon 2/)
         .first(),
     ).toBeVisible();
@@ -56,8 +56,15 @@ test.describe('Parcours 5 — mobile 390 × 844 et clavier', () => {
     );
 
     // Sauvegarder
-    if (mobile) await page.getByRole('button', { name: 'Menu' }).click();
-    await page.getByRole('button', { name: 'Sauvegardes' }).click();
+    if (mobile) {
+      await page.getByRole('button', { name: /^Menu/ }).click();
+      await page
+        .getByRole('dialog', { name: 'La Version Acceptable' })
+        .getByRole('button', { name: /^Sauvegardes/ })
+        .click();
+    } else {
+      await page.getByRole('button', { name: 'Sauvegardes', exact: true }).click();
+    }
     const saves = page.getByRole('dialog', { name: 'Sauvegardes' });
     await saves.getByRole('button', { name: 'Sauvegarder ici (Emplacement 2)' }).click();
     await expect(saves.getByText(/Emplacement 2/).first()).toBeVisible();

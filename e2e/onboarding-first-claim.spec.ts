@@ -36,25 +36,25 @@ test.describe('Parcours 1 — onboarding au clavier et première contradiction',
     await page.getByRole('tab', { name: 'Contradictions' }).click();
     await expect(
       page
-        .locator('.space[data-space="inspector"]')
+        .locator('[data-space="inspector"]')
         .getByText(/Malik Bensaïd ne peut pas être à deux endroits/)
         .first(),
     ).toBeVisible();
     await page
-      .locator('.space[data-space="inspector"]')
+      .locator('[data-space="inspector"]')
       .getByRole('button', { name: /Malik Bensaïd ne peut pas être à deux endroits/ })
       .first()
       .click();
     // L'explication cite la position établie par la caméra et le chevauchement.
     await expect(
       page
-        .locator('.space[data-space="inspector"]')
+        .locator('[data-space="inspector"]')
         .getByText(/Rayon 2/)
         .first(),
     ).toBeVisible();
     await expect(
       page
-        .locator('.space[data-space="inspector"]')
+        .locator('[data-space="inspector"]')
         .getByText(/caméra/)
         .first(),
     ).toBeVisible();
@@ -65,13 +65,13 @@ test.describe('Parcours 1 — onboarding au clavier et première contradiction',
     });
     await page.getByRole('tab', { name: 'Contradictions' }).click();
     await expect(
-      page.locator('.space[data-space="inspector"]').getByRole('button', {
+      page.locator('[data-space="inspector"]').getByRole('button', {
         name: /critique.*Malik Bensaïd ne peut pas être à deux endroits|Malik Bensaïd ne peut pas être à deux endroits.*critique/,
       }),
     ).toHaveCount(0);
     await page.getByRole('tab', { name: 'Version' }).click();
     await expect(
-      page.locator('.space[data-space="inspector"] [data-status="unknown"]').first(),
+      page.locator('[data-space="inspector"] [data-status="unknown"]').first(),
     ).toBeVisible();
   });
 });

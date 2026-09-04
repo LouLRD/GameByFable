@@ -26,7 +26,7 @@ test.describe('Parcours 3 — persistance', () => {
 
     await page.reload();
     await expect(page.getByRole('heading', { name: 'Version proposée' })).toBeVisible();
-    const inspector = page.locator('.space[data-space="inspector"]');
+    const inspector = page.locator('[data-space="inspector"]');
     await expect(inspector.getByText('Erreur de comptage').first()).toBeVisible();
     await expect(inspector.getByText('Redémarrage programmé').first()).toBeVisible();
     await expect(inspector.getByText('Bouteille cassée').first()).toBeVisible();
@@ -87,7 +87,7 @@ test.describe('Parcours 3 — persistance', () => {
         .first(),
     ).toBeVisible();
     await expect(
-      page.locator('.space[data-space="inspector"]').getByText('Erreur de comptage').first(),
+      page.locator('[data-space="inspector"]').getByText('Erreur de comptage').first(),
     ).toBeVisible();
     await expect(page.getByText(/3\/5 emplacements remplis/)).toBeVisible();
     expect(await pressure(page)).toBe(pressureBefore);

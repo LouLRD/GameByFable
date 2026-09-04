@@ -99,10 +99,12 @@ export async function confront(
   await expect(dialog.getByRole('heading', { name: /Réponse de/ })).toBeVisible();
   await dialog.getByRole('button', { name: 'Fermer', exact: true }).click();
   await expect(dialog).toBeHidden();
-  await page
+  // En mode compact, la fiche remplace la liste : revenir à la liste avant de réinitialiser le filtre.
+  await backToList(page);
+  const all = page
     .getByRole('toolbar', { name: 'Filtrer le dossier' })
-    .getByRole('button', { name: /^Tout/ })
-    .click();
+    .getByRole('button', { name: /^Tout/ });
+  if (await all.isVisible().catch(() => false)) await all.click();
 }
 
 /** En mode compact, une fiche ouverte remplace la liste : revenir à la liste si nécessaire. */

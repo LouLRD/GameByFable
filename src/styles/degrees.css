@@ -452,3 +452,19 @@
   content: '!!';
   content: '!!' / '';
 }
+
+/* Badge compact de sévérité : le glyphe (i / ! / !!) est en ligne, pas en superposition. */
+.badge.severity-notice,
+.badge.severity-major,
+.badge.severity-critical {
+  padding-left: var(--space-2);
+}
+
+.badge.severity-notice::before,
+.badge.severity-major::before,
+.badge.severity-critical::before {
+  position: static;
+  display: inline-block;
+  margin-right: 0.45em;
+  vertical-align: baseline;
+}

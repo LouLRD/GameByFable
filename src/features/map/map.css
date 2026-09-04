@@ -1150,3 +1150,11 @@ html[data-reduced-motion='true'] .map-token[data-pulse='true'] .map-token-ring {
   animation-duration: 0.01ms !important;
   animation-iteration-count: 1 !important;
 }
+
+/* Feuilles du plan (fiche, légende) : mi-hauteur sur mobile, le plan reste visible au-dessus. */
+@media (max-width: 1023px) {
+  .dialog-panel.map-sheet-dialog,
+  .dialog-panel.map-legend-dialog {
+    max-height: 58dvh;
+  }
+}

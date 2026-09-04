@@ -655,21 +655,21 @@ function ConfrontationBody({ seenImpasses }: BodyProps): React.JSX.Element {
             </span>
           </div>
         ) : null}
-        <div className="confrontation-actions">
-          <button type="button" className="btn btn-ghost" onClick={closeDialog}>
-            Annuler
-          </button>
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={!canSubmit}
-            aria-describedby={verdictId}
-            title={canSubmit ? undefined : verdict.message}
-          >
-            {probeMode ? 'Sonder' : 'Confronter'}
-          </button>
-        </div>
       </section>
+      <div className="confrontation-actions">
+        <button type="button" className="btn btn-ghost" onClick={closeDialog}>
+          Annuler
+        </button>
+        <button
+          type="submit"
+          className="btn btn-primary"
+          disabled={!canSubmit}
+          aria-describedby={verdictId}
+          title={canSubmit ? undefined : verdict.message}
+        >
+          {probeMode ? 'Sonder' : 'Confronter'}
+        </button>
+      </div>
     </form>
   );
 }

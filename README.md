@@ -47,7 +47,6 @@ Le fichier `.npmrc` active `legacy-peer-deps` : sans lui, npm 9/10 échoue sur u
 
 Raccourcis : `1`–`4` espaces, `Espace` lecture/pause, `←`/`→` curseur (±1 s, `Maj` ±10 s), `Début`/`Fin`, `?` aide, `Échap` fermer.
 
-
 ## Sur téléphone et tablette étroite (≤ 1023 px)
 
 Sous 1024 px, le jeu bascule sur une coquille mobile dédiée (`src/app/mobile/`) qui partage le même store, les mêmes actions et les mêmes sélecteurs que le bureau : rien n'est dupliqué, seule la présentation change.

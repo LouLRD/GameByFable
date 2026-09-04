@@ -15,7 +15,9 @@ export default defineConfig({
   },
   webServer: {
     // En CI, le build de production est fourni par le job `check` (artefact dist) : on sert seulement.
-    command: process.env.PLAYWRIGHT_SKIP_BUILD ? 'npm run preview' : 'npm run build && npm run preview',
+    command: process.env.PLAYWRIGHT_SKIP_BUILD
+      ? 'npm run preview'
+      : 'npm run build && npm run preview',
     url: 'http://localhost:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
